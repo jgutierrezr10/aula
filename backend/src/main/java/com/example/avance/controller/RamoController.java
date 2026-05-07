@@ -1,6 +1,6 @@
 package com.example.avance.controller;
 
-import com.example.avance.model.Ramo;
+import com.example.avance.dto.RamoDTO;
 import com.example.avance.service.RamoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,21 +19,21 @@ public class RamoController {
     private final RamoService ramoService;
 
     @GetMapping
-    public ResponseEntity<List<Ramo>> getRamos(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<RamoDTO>> getRamos(@AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(ramoService.getRamosByUsuario(userDetails.getUsername()));
     }
 
     @PostMapping
-    public ResponseEntity<Ramo> crearRamo(@RequestBody Ramo ramo,
-                                          @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(ramoService.crearRamo(ramo, userDetails.getUsername()));
+    public ResponseEntity<RamoDTO> crearRamo(@RequestBody RamoDTO dto,
+                                             @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ramoService.crearRamo(dto, userDetails.getUsername()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Ramo> actualizarRamo(@PathVariable Long id,
-                                               @RequestBody Ramo ramo,
-                                               @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(ramoService.actualizarRamo(id, ramo, userDetails.getUsername()));
+    public ResponseEntity<RamoDTO> actualizarRamo(@PathVariable Long id,
+                                                  @RequestBody RamoDTO dto,
+                                                  @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ramoService.actualizarRamo(id, dto, userDetails.getUsername()));
     }
 
     @DeleteMapping("/{id}")
