@@ -1,0 +1,57 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { AuthResponse, LoginRequest, RegisterRequest } from '../models/usuario.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+
+  private apiUrl = 'http://localhost:8080/api/auth';
+  private usuarioSubject = new BehaviorSubject<AuthResponse | null>(null);
+  usuario$ = this.usuarioSubject.asObservable();
+
+  constructor(private http: HttpClient, private router: Router) {
+    const stored = localStorage.getItem('usuario');
+    if (stored) {
+      this.usuarioSubject.next(JSON.parse(stored));
+    }
+  }
+
+  register(data: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
+      tap(res => this.guardarSesion(res))
+    );
+  }
+
+  login(data: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
+      tap(res => this.guardarSesion(res))
+    );
+  }
+
+  logout() {
+    localStorage.removeItem('usuario');
+    this.usuarioSubject.next(null);
+    this.router.navigate(['/login']);
+  }
+
+  getToken(): string | null {
+    return this.usuarioSubject.value?.token ?? null;
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.usuarioSubject.value;
+  }
+
+  getUsuario(): AuthResponse | null {
+    return this.usuarioSubject.value;
+  }
+
+  private guardarSesion(res: AuthResponse) {
+    localStorage.setItem('usuario', JSON.stringify(res));
+    this.usuarioSubject.next(res);
+  }
+}

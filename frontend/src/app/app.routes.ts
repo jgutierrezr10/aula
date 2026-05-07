@@ -1,3 +1,23 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  { path: '', redirectTo: 'malla', pathMatch: 'full' },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./components/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./components/register/register.component').then(m => m.RegisterComponent)
+  },
+  {
+    path: 'malla',
+    loadComponent: () =>
+      import('./components/malla/malla.component').then(m => m.MallaComponent),
+    canActivate: [authGuard]
+  },
+  { path: '**', redirectTo: 'login' }
+];

@@ -1,0 +1,93 @@
+<div class="layout">
+
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <h1>🎓 Avance Curricular</h1>
+      <span class="saludo">Hola, {{ nombreUsuario }}</span>
+    </div>
+    <div class="header-right">
+      <button class="btn-agregar" (click)="abrirFormulario()">+ Agregar Ramo</button>
+      <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Barra de progreso -->
+  <div class="progreso-card">
+    <div class="progreso-info">
+      <span>Progreso de la carrera</span>
+      <strong>{{ porcentaje }}%</strong>
+    </div>
+    <div class="barra">
+      <div class="barra-fill" [style.width.%]="porcentaje"></div>
+    </div>
+  </div>
+
+  <!-- Malla vacía -->
+  <div class="vacio" *ngIf="ramos.length === 0">
+    <p>📚 Aún no tienes ramos. ¡Agrega el primero!</p>
+  </div>
+
+  <!-- Semestres -->
+  <div class="semestres">
+    <div class="semestre" *ngFor="let sem of semestres">
+      <h3>Semestre {{ sem }}</h3>
+      <div class="ramos-grid">
+        <div
+          class="ramo-card"
+          *ngFor="let ramo of getRamosPorSemestre(sem)"
+          [class.aprobado]="ramo.aprobado"
+          [class.pendiente]="!ramo.aprobado">
+
+          <div class="ramo-header">
+            <span class="estado">{{ ramo.aprobado ? '✅' : '⏳' }}</span>
+            <div class="ramo-acciones">
+              <button class="btn-icon" (click)="editarRamo(ramo)" title="Editar">✏️</button>
+              <button class="btn-icon" (click)="eliminarRamo(ramo.id!)" title="Eliminar">🗑️</button>
+            </div>
+          </div>
+
+          <p class="ramo-nombre">{{ ramo.nombre }}</p>
+          <p class="ramo-nota" *ngIf="ramo.nota">Nota: {{ ramo.nota }}</p>
+
+          <button class="btn-toggle" (click)="toggleAprobado(ramo)">
+            {{ ramo.aprobado ? 'Marcar pendiente' : 'Marcar aprobado' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal formulario -->
+  <div class="overlay" *ngIf="mostrarFormulario" (click)="mostrarFormulario = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>{{ editando ? 'Editar Ramo' : 'Nuevo Ramo' }}</h3>
+
+      <div class="form-group">
+        <label>Nombre del ramo</label>
+        <input type="text" [(ngModel)]="ramoActual.nombre" placeholder="Ej: Cálculo I" />
+      </div>
+
+      <div class="form-group">
+        <label>Semestre</label>
+        <input type="number" [(ngModel)]="ramoActual.semestre" min="1" max="12" />
+      </div>
+
+      <div class="form-group">
+        <label>Nota (opcional)</label>
+        <input type="number" [(ngModel)]="ramoActual.nota" min="1" max="7" step="0.1" />
+      </div>
+
+      <div class="form-group check">
+        <input type="checkbox" [(ngModel)]="ramoActual.aprobado" id="aprobado" />
+        <label for="aprobado">Aprobado</label>
+      </div>
+
+      <div class="modal-acciones">
+        <button class="btn-cancelar" (click)="mostrarFormulario = false">Cancelar</button>
+        <button class="btn-guardar" (click)="guardarRamo()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

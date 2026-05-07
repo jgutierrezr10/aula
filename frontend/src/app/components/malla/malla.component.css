@@ -1,0 +1,262 @@
+.layout {
+  min-height: 100vh;
+  background: #f0f2f5;
+  padding-bottom: 2rem;
+}
+
+header {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.saludo {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.header-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-agregar {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-agregar:hover { background: #4338ca; }
+
+.btn-logout {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.4);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-logout:hover { background: rgba(255,255,255,0.1); }
+
+.progreso-card {
+  margin: 1.5rem 2rem;
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.progreso-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.barra {
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barra-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.vacio {
+  text-align: center;
+  padding: 3rem;
+  color: #888;
+  font-size: 1.1rem;
+}
+
+.semestres {
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.semestre h3 {
+  color: #1a1a2e;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ramos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.ramo-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border-left: 4px solid #e5e7eb;
+  transition: transform 0.2s;
+}
+
+.ramo-card:hover { transform: translateY(-2px); }
+.ramo-card.aprobado { border-left-color: #22c55e; }
+.ramo-card.pendiente { border-left-color: #f59e0b; }
+
+.ramo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.ramo-acciones { display: flex; gap: 0.25rem; }
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.2rem;
+  border-radius: 4px;
+}
+
+.btn-icon:hover { background: #f3f4f6; }
+
+.ramo-nombre {
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.ramo-nota {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.25rem 0;
+}
+
+.btn-toggle {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  background: #f3f4f6;
+  color: #444;
+  transition: background 0.2s;
+}
+
+.btn-toggle:hover { background: #e5e7eb; }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #1a1a2e;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+  color: #444;
+  font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4f46e5;
+}
+
+.form-group.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-group.check label { margin: 0; }
+
+.modal-acciones {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-cancelar {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.btn-guardar {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.btn-guardar:hover { background: #4338ca; }
