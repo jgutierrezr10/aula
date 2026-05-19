@@ -69,6 +69,13 @@ export class MallaComponent implements OnInit {
     return this.ramos.filter(r => r.semestre === semestre);
   }
 
+  getSemestreColorClass(semestre: number): string {
+    if (semestre >= 1 && semestre <= 10) {
+      return `sem-color-${semestre}`;
+    }
+    return 'sem-color-default';
+  }
+
   // ─── Modal individual ───────────────────────────────
   abrirFormulario(semestre?: number) {
     this.ramoActual = { nombre: '', semestre: semestre ?? 1, aprobado: false };

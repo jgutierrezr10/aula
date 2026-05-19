@@ -3,59 +3,115 @@
   <!-- Header -->
   <header>
     <div class="header-left">
-      <h1>🎓 Avance Curricular</h1>
-      <span class="saludo">Hola, {{ nombreUsuario }}</span>
+      <div class="header-brand">
+        <div class="header-brand-icon">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <div>
+          <h1>Avance Curricular</h1>
+          <span class="saludo">Hola, {{ nombreUsuario }}</span>
+        </div>
+      </div>
     </div>
     <div class="header-right">
-      <button class="btn-secondary" (click)="abrirModalMultiple()">📋 Agregar varios</button>
-      <button class="btn-secondary" (click)="abrirModalImportar()">📂 Importar archivo</button>
-      <button class="btn-primary" (click)="abrirFormulario()">+ Agregar ramo</button>
-      <button class="btn-logout" (click)="logout()">Salir</button>
+      <button class="btn-secondary" (click)="abrirModalMultiple()">
+        <i class="bi bi-list-check"></i> Agregar varios
+      </button>
+      <button class="btn-secondary" (click)="abrirModalImportar()">
+        <i class="bi bi-file-earmark-arrow-up"></i> Importar
+      </button>
+      <button class="btn-primary" (click)="abrirFormulario()">
+        <i class="bi bi-plus-lg"></i> Agregar ramo
+      </button>
+      <button class="btn-logout" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i> Salir
+      </button>
     </div>
   </header>
 
   <!-- Barra de progreso -->
   <div class="progreso-card">
     <div class="progreso-info">
-      <span>📊 Progreso de la carrera</span>
+      <i class="bi bi-pie-chart-fill progreso-icon"></i>
+      <span>Progreso de la carrera</span>
       <strong>{{ porcentaje }}%</strong>
     </div>
     <div class="barra">
       <div class="barra-fill" [style.width.%]="porcentaje"></div>
     </div>
     <div class="progreso-stats">
-      <span>✅ {{ ramos | aprobados }} aprobados</span>
-      <span>⏳ {{ ramos.length - (ramos | aprobados) }} pendientes</span>
-      <span>📚 {{ ramos.length }} total</span>
+      <span class="stat-item stat-aprobado">
+        <i class="bi bi-check-circle-fill"></i> {{ ramos | aprobados }} aprobados
+      </span>
+      <span class="stat-item stat-pendiente">
+        <i class="bi bi-clock-fill"></i> {{ ramos.length - (ramos | aprobados) }} pendientes
+      </span>
+      <span class="stat-item stat-total">
+        <i class="bi bi-book-fill"></i> {{ ramos.length }} total
+      </span>
+    </div>
+  </div>
+
+  <!-- Leyenda -->
+  <div class="leyenda" *ngIf="ramos.length > 0">
+    <span class="leyenda-title">
+      <i class="bi bi-info-circle"></i> Leyenda:
+    </span>
+    <div class="leyenda-item">
+      <div class="leyenda-dot aprobado-dot"></div>
+      <span>Aprobado</span>
+    </div>
+    <div class="leyenda-item">
+      <div class="leyenda-dot pendiente-dot"></div>
+      <span>Pendiente</span>
+    </div>
+    <div class="leyenda-tip">
+      <i class="bi bi-hand-index-thumb"></i> Click en un ramo para cambiar estado
     </div>
   </div>
 
   <!-- Malla vacía -->
   <div class="vacio" *ngIf="ramos.length === 0">
     <div class="vacio-inner">
-      <p>📚 Tu malla está vacía</p>
+      <div class="vacio-icon">
+        <i class="bi bi-journal-bookmark"></i>
+      </div>
+      <p>Tu malla está vacía</p>
       <p class="vacio-sub">Agrega ramos uno por uno, varios a la vez, o importa un archivo</p>
       <div class="vacio-acciones">
-        <button class="btn-primary" (click)="abrirFormulario()">+ Agregar ramo</button>
-        <button class="btn-secondary" (click)="abrirModalMultiple()">📋 Agregar varios</button>
-        <button class="btn-secondary" (click)="abrirModalImportar()">📂 Importar</button>
+        <button class="btn-primary" (click)="abrirFormulario()">
+          <i class="bi bi-plus-lg"></i> Agregar ramo
+        </button>
+        <button class="btn-secondary-dark" (click)="abrirModalMultiple()">
+          <i class="bi bi-list-check"></i> Agregar varios
+        </button>
+        <button class="btn-secondary-dark" (click)="abrirModalImportar()">
+          <i class="bi bi-file-earmark-arrow-up"></i> Importar
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Malla horizontal por semestres -->
+  <!-- Malla: Diagrama de flujo por semestres -->
   <div class="malla-scroll" *ngIf="ramos.length > 0">
     <div class="malla-grid">
+
       <div class="semestre-col" *ngFor="let sem of semestres">
 
-        <div class="semestre-header">
+        <!-- Header con color por semestre -->
+        <div class="semestre-header" [ngClass]="getSemestreColorClass(sem)">
           <span>Semestre {{ sem }}</span>
           <div class="semestre-acciones">
-            <button class="btn-sem" (click)="abrirFormulario(sem)" title="Agregar ramo">+</button>
-            <button class="btn-sem" (click)="abrirModalMultiple(sem)" title="Agregar varios">📋</button>
+            <button class="btn-sem" (click)="abrirFormulario(sem)" title="Agregar ramo">
+              <i class="bi bi-plus"></i>
+            </button>
+            <button class="btn-sem" (click)="abrirModalMultiple(sem)" title="Agregar varios">
+              <i class="bi bi-list-check"></i>
+            </button>
           </div>
         </div>
 
+        <!-- Nodos de materias -->
         <div class="ramos-lista">
           <div
             class="ramo-card"
@@ -65,20 +121,29 @@
             (click)="toggleAprobado(ramo)">
 
             <div class="ramo-top">
-              <span class="estado-icon">{{ ramo.aprobado ? '✅' : '⏳' }}</span>
+              <span class="estado-icon">
+                <i class="bi" [ngClass]="ramo.aprobado ? 'bi-check-circle-fill' : 'bi-clock'"></i>
+              </span>
               <div class="ramo-btns" (click)="$event.stopPropagation()">
-                <button (click)="editarRamo(ramo)" title="Editar">✏️</button>
-                <button (click)="eliminarRamo(ramo.id!)" title="Eliminar">🗑️</button>
+                <button (click)="editarRamo(ramo)" title="Editar">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+                <button (click)="eliminarRamo(ramo.id!)" title="Eliminar">
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
               </div>
             </div>
 
             <p class="ramo-nombre">{{ ramo.nombre }}</p>
-            <p class="ramo-nota" *ngIf="ramo.nota">Nota: {{ ramo.nota }}</p>
+            <p class="ramo-nota" *ngIf="ramo.nota">
+              <i class="bi bi-star-fill"></i> {{ ramo.nota }}
+            </p>
           </div>
         </div>
 
         <div class="sem-footer">
-          {{ getRamosPorSemestre(sem).length }} ramos •
+          {{ getRamosPorSemestre(sem).length }} ramos
+          <span class="sem-footer-sep">·</span>
           {{ getRamosPorSemestre(sem) | aprobados }} aprobados
         </div>
 
@@ -87,7 +152,8 @@
       <!-- Botón agregar semestre nuevo -->
       <div class="semestre-col nuevo-sem">
         <button class="btn-nuevo-sem" (click)="abrirModalMultiple(semestres.length + 1)">
-          + Nuevo semestre
+          <i class="bi bi-plus-circle-dotted"></i>
+          <span>Nuevo semestre</span>
         </button>
       </div>
 
@@ -97,32 +163,46 @@
   <!-- ── Modal: agregar ramo individual ── -->
   <div class="overlay" *ngIf="mostrarFormulario" (click)="mostrarFormulario = false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h3>{{ editando ? '✏️ Editar Ramo' : '➕ Nuevo Ramo' }}</h3>
+      <div class="modal-header">
+        <h3>
+          <i class="bi" [ngClass]="editando ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+          {{ editando ? 'Editar Ramo' : 'Nuevo Ramo' }}
+        </h3>
+        <button class="modal-close" (click)="mostrarFormulario = false">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
 
       <div class="form-group">
-        <label>Nombre del ramo</label>
+        <label><i class="bi bi-book"></i> Nombre del ramo</label>
         <input type="text" [(ngModel)]="ramoActual.nombre" placeholder="Ej: Cálculo I" autofocus />
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label>Semestre</label>
+          <label><i class="bi bi-calendar3"></i> Semestre</label>
           <input type="number" [(ngModel)]="ramoActual.semestre" min="1" max="12" />
         </div>
         <div class="form-group">
-          <label>Nota (opcional)</label>
+          <label><i class="bi bi-star"></i> Nota (opcional)</label>
           <input type="number" [(ngModel)]="ramoActual.nota" min="1" max="7" step="0.1" />
         </div>
       </div>
 
       <div class="form-check">
         <input type="checkbox" [(ngModel)]="ramoActual.aprobado" id="aprobado" />
-        <label for="aprobado">Marcar como aprobado</label>
+        <label for="aprobado">
+          <i class="bi bi-check-circle"></i> Marcar como aprobado
+        </label>
       </div>
 
       <div class="modal-acciones">
-        <button class="btn-cancelar" (click)="mostrarFormulario = false">Cancelar</button>
-        <button class="btn-guardar" (click)="guardarRamo()">Guardar</button>
+        <button class="btn-cancelar" (click)="mostrarFormulario = false">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <button class="btn-guardar" (click)="guardarRamo()">
+          <i class="bi bi-check-lg"></i> Guardar
+        </button>
       </div>
     </div>
   </div>
@@ -130,15 +210,20 @@
   <!-- ── Modal: agregar varios ── -->
   <div class="overlay" *ngIf="mostrarModalMultiple" (click)="mostrarModalMultiple = false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h3>📋 Agregar varios ramos</h3>
+      <div class="modal-header">
+        <h3><i class="bi bi-list-check"></i> Agregar varios ramos</h3>
+        <button class="modal-close" (click)="mostrarModalMultiple = false">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
 
       <div class="form-group">
-        <label>Semestre</label>
+        <label><i class="bi bi-calendar3"></i> Semestre</label>
         <input type="number" [(ngModel)]="semestreSeleccionado" min="1" max="12" />
       </div>
 
       <div class="form-group">
-        <label>Ramos (uno por línea)</label>
+        <label><i class="bi bi-list-ul"></i> Ramos (uno por línea)</label>
         <textarea
           [(ngModel)]="ramosTexto"
           rows="8"
@@ -147,8 +232,12 @@
       </div>
 
       <div class="modal-acciones">
-        <button class="btn-cancelar" (click)="mostrarModalMultiple = false">Cancelar</button>
-        <button class="btn-guardar" (click)="guardarMultiples()">Agregar todos</button>
+        <button class="btn-cancelar" (click)="mostrarModalMultiple = false">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <button class="btn-guardar" (click)="guardarMultiples()">
+          <i class="bi bi-check-all"></i> Agregar todos
+        </button>
       </div>
     </div>
   </div>
@@ -156,10 +245,15 @@
   <!-- ── Modal: importar archivo ── -->
   <div class="overlay" *ngIf="mostrarModalImportar" (click)="mostrarModalImportar = false">
     <div class="modal modal-grande" (click)="$event.stopPropagation()">
-      <h3>📂 Importar malla desde archivo</h3>
+      <div class="modal-header">
+        <h3><i class="bi bi-file-earmark-arrow-up"></i> Importar malla</h3>
+        <button class="modal-close" (click)="mostrarModalImportar = false">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
 
       <div class="import-info">
-        <p>Sube un archivo <strong>.csv</strong> o <strong>.txt</strong> con este formato:</p>
+        <p><i class="bi bi-info-circle"></i> Sube un archivo <strong>.csv</strong> o <strong>.txt</strong> con este formato:</p>
         <code>Nombre del ramo, Semestre</code>
         <p class="ejemplo">Ejemplo:<br>
           Cálculo I, 1<br>
@@ -170,29 +264,38 @@
 
       <div class="drop-zone" (click)="fileInput.click()">
         <input #fileInput type="file" accept=".csv,.txt" (change)="onArchivoSeleccionado($event)" hidden />
-        <span *ngIf="!archivoSeleccionado">📁 Haz clic para seleccionar archivo</span>
-        <span *ngIf="archivoSeleccionado">✅ {{ archivoSeleccionado.name }}</span>
+        <i class="bi bi-cloud-arrow-up drop-icon" *ngIf="!archivoSeleccionado"></i>
+        <i class="bi bi-file-earmark-check drop-icon success" *ngIf="archivoSeleccionado"></i>
+        <span *ngIf="!archivoSeleccionado">Haz clic para seleccionar archivo</span>
+        <span *ngIf="archivoSeleccionado" class="file-selected">{{ archivoSeleccionado.name }}</span>
       </div>
 
       <button class="btn-procesar" (click)="procesarArchivo()" *ngIf="archivoSeleccionado && !mostrarPreview">
+        <i class="bi bi-gear" *ngIf="!importando"></i>
+        <i class="bi bi-arrow-repeat spin" *ngIf="importando"></i>
         {{ importando ? 'Procesando...' : 'Procesar archivo' }}
       </button>
 
       <!-- Preview -->
       <div class="preview" *ngIf="mostrarPreview">
-        <p><strong>{{ ramosImportados.length }} ramos detectados:</strong></p>
+        <p>
+          <i class="bi bi-eye"></i>
+          <strong>{{ ramosImportados.length }} ramos detectados:</strong>
+        </p>
         <div class="preview-lista">
           <div class="preview-item" *ngFor="let r of ramosImportados">
-            <span>{{ r.nombre }}</span>
+            <span><i class="bi bi-book"></i> {{ r.nombre }}</span>
             <span class="preview-sem">Sem {{ r.semestre }}</span>
           </div>
         </div>
       </div>
 
       <div class="modal-acciones">
-        <button class="btn-cancelar" (click)="mostrarModalImportar = false">Cancelar</button>
+        <button class="btn-cancelar" (click)="mostrarModalImportar = false">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
         <button class="btn-guardar" *ngIf="mostrarPreview" (click)="confirmarImportacion()">
-          Importar {{ ramosImportados.length }} ramos
+          <i class="bi bi-download"></i> Importar {{ ramosImportados.length }} ramos
         </button>
       </div>
     </div>
