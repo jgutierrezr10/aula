@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -17,7 +17,11 @@ export class LoginComponent {
   error = '';
   cargando = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   login() {
     // Validaciones
@@ -33,10 +37,17 @@ export class LoginComponent {
     this.error = '';
     this.cargando = true;
     this.authService.login({ email: this.email.trim(), password: this.password }).subscribe({
-      next: () => this.router.navigate(['/malla']),
+      next: () => {
+        this.router.navigate(['/malla']);
+      },
       error: (err) => {
-        this.error = err.error?.message || 'Email o contraseña incorrectos';
+        if (err && err.error && err.error.message) {
+          this.error = err.error.message;
+        } else {
+          this.error = 'Email o contraseña incorrectos';
+        }
         this.cargando = false;
+        this.cdr.detectChanges(); // Forzar actualización de la UI
       }
     });
   }
