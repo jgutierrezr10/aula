@@ -42,7 +42,9 @@ export class RegisterComponent {
       email: this.email.trim(),
       password: this.password
     }).subscribe({
-      next: () => this.router.navigate(['/malla']),
+      next: () => {
+        this.router.navigate(['/dashboard']);
+      },
       error: (err) => {
         this.error = err.error?.message || 'Error al registrarse';
         this.cargando = false;

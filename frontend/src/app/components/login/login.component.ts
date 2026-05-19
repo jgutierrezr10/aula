@@ -38,7 +38,7 @@ export class LoginComponent {
     this.cargando = true;
     this.authService.login({ email: this.email.trim(), password: this.password }).subscribe({
       next: () => {
-        this.router.navigate(['/malla']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         if (err && err.error && err.error.message) {

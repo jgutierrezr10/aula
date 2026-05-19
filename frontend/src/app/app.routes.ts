@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'malla', pathMatch: 'full' },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   {
     path: 'login',
     loadComponent: () =>
@@ -14,9 +14,21 @@ export const routes: Routes = [
       import('./components/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./components/dashboard/dashboard').then(m => m.Dashboard),
+    canActivate: [authGuard]
+  },
+  {
     path: 'malla',
     loadComponent: () =>
       import('./components/malla/malla.component').then(m => m.MallaComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'horario',
+    loadComponent: () =>
+      import('./components/horario/horario').then(m => m.Horario),
     canActivate: [authGuard]
   },
   { path: '**', redirectTo: 'login' }
