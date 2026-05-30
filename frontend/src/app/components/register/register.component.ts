@@ -58,22 +58,19 @@ export class RegisterComponent {
     });
   }
 
-  verTerminos() {
+  mostrarTerminos() {
     Swal.fire({
       title: 'Términos y Condiciones',
       html: `
-        <div style="text-align: left; font-size: 0.95rem; line-height: 1.6;">
-          <p><strong>1. Aceptación de los Términos:</strong> Al registrarte en AULA, aceptas regirte por estos términos y condiciones. Si no estás de acuerdo, por favor no utilices la plataforma.</p>
-          <p><strong>2. Uso de Datos:</strong> Los datos académicos que ingreses (notas, ramos, horarios) se almacenan de forma segura y se utilizarán únicamente para proporcionarte métricas y herramientas de gestión personal. No venderemos tu información a terceros.</p>
-          <p><strong>3. Responsabilidad Académica:</strong> AULA es una herramienta de apoyo no oficial. Siempre debes verificar tu información oficial directamente con el portal de tu universidad. No nos hacemos responsables por discrepancias en tu malla real.</p>
-          <p><strong>4. Conducta del Usuario:</strong> Te comprometes a usar la plataforma de manera legal y ética, sin intentar vulnerar la seguridad del sistema ni afectar a otros usuarios.</p>
-          <p><strong>5. Modificaciones:</strong> Nos reservamos el derecho de modificar estos términos en cualquier momento. Te notificaremos sobre cambios importantes.</p>
+        <div style="text-align: left; font-size: 0.9rem; line-height: 1.5;">
+          <p><strong>1. Uso del Servicio:</strong> AulaProject es una herramienta para la gestión de avances curriculares y horarios. El uso indebido de la plataforma está prohibido.</p>
+          <p><strong>2. Privacidad de Datos:</strong> Tus datos personales y académicos están encriptados y se almacenan de forma segura (las contraseñas se guardan hasheadas con BCrypt). No los compartiremos con terceros.</p>
+          <p><strong>3. Responsabilidad:</strong> No nos hacemos responsables de problemas derivados del mal uso de la plataforma o caídas del servicio por mantenimiento.</p>
         </div>
       `,
       icon: 'info',
       confirmButtonText: 'Entendido',
-      confirmButtonColor: '#6C63FF',
-      width: '600px'
+      confirmButtonColor: '#4f46e5'
     });
   }
 }

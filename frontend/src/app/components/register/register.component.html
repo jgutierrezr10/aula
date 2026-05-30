@@ -82,11 +82,13 @@
         {{ error }}
       </div>
 
-      <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-        <input type="checkbox" id="reg-terminos" [(ngModel)]="terminosAceptados" style="width: auto;" />
-        <label for="reg-terminos" style="margin: 0; font-size: 0.9rem; font-weight: normal; cursor: pointer;">
-          Acepto los <a href="javascript:void(0)" (click)="verTerminos()" style="color: var(--primary-color);">términos y condiciones</a>
-        </label>
+      <div class="form-group checkbox-group" style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" id="terminos" [(ngModel)]="terminosAceptados" name="terminos" required />
+          <label for="terminos" style="margin: 0; font-size: 0.85rem; color: #4b5563;">
+            Acepto los <a href="javascript:void(0)" (click)="mostrarTerminos()" style="color: #4f46e5; text-decoration: none;">Términos y Condiciones</a>
+          </label>
+        </div>
       </div>
 
       <button class="btn-submit" (click)="register()" [disabled]="cargando || !terminosAceptados">
