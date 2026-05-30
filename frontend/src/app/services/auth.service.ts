@@ -3,13 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthResponse, LoginRequest, RegisterRequest, UpdateUserRequest } from '../models/usuario.model';
+import { environment } from '../../environment/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private apiUrl = environment.apiUrl + '/api/auth';
   private usuarioSubject = new BehaviorSubject<AuthResponse | null>(null);
   usuario$ = this.usuarioSubject.asObservable();
 
@@ -33,7 +34,7 @@ export class AuthService {
   }
 
   actualizarCuenta(data: UpdateUserRequest): Observable<AuthResponse> {
-    return this.http.put<AuthResponse>(`http://localhost:8080/api/usuarios/cuenta`, data).pipe(
+    return this.http.put<AuthResponse>(`${this.apiUrl}/usuarios/cuenta`, data).pipe(
       tap(res => this.guardarSesion(res))
     );
   }
