@@ -52,6 +52,14 @@
         </div>
       </div>
 
+      <div class="form-group checkbox-group" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="login-recordar" [(ngModel)]="recordarme" style="width: auto;" />
+          <label for="login-recordar" style="margin: 0; font-size: 0.9rem; font-weight: normal; cursor: pointer;">Guardar sesión</label>
+        </div>
+        <a href="javascript:void(0)" (click)="olvidePassword()" style="font-size: 0.85rem; color: var(--primary-color); text-decoration: none;">¿Olvidaste tu contraseña?</a>
+      </div>
+
       <div class="error-msg" *ngIf="error">
         <i class="bi bi-exclamation-triangle-fill"></i>
         {{ error }}

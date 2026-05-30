@@ -15,7 +15,7 @@ export class AuthService {
   usuario$ = this.usuarioSubject.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {
-    const stored = localStorage.getItem('usuario');
+    const stored = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
     if (stored) {
       this.usuarioSubject.next(JSON.parse(stored));
     }
@@ -27,20 +27,33 @@ export class AuthService {
     );
   }
 
-  login(data: LoginRequest): Observable<AuthResponse> {
+  login(data: LoginRequest, recordarme: boolean = false): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
-      tap(res => this.guardarSesion(res))
+      tap(res => this.guardarSesion(res, recordarme))
     );
   }
 
   actualizarCuenta(data: UpdateUserRequest): Observable<AuthResponse> {
     return this.http.put<AuthResponse>(`${this.apiUrl}/usuarios/cuenta`, data).pipe(
-      tap(res => this.guardarSesion(res))
+      tap(res => {
+        // Maintain the same storage type that was previously used
+        const useLocalStorage = !!localStorage.getItem('usuario');
+        this.guardarSesion(res, useLocalStorage);
+      })
     );
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, { token, newPassword });
   }
 
   logout() {
     localStorage.removeItem('usuario');
+    sessionStorage.removeItem('usuario');
     this.usuarioSubject.next(null);
     this.router.navigate(['/login']);
   }
@@ -57,8 +70,15 @@ export class AuthService {
     return this.usuarioSubject.value;
   }
 
-  private guardarSesion(res: AuthResponse) {
-    localStorage.setItem('usuario', JSON.stringify(res));
+  private guardarSesion(res: AuthResponse, persistir: boolean = true) {
+    const dataStr = JSON.stringify(res);
+    if (persistir) {
+      localStorage.setItem('usuario', dataStr);
+      sessionStorage.removeItem('usuario');
+    } else {
+      sessionStorage.setItem('usuario', dataStr);
+      localStorage.removeItem('usuario');
+    }
     this.usuarioSubject.next(res);
   }
 }

@@ -15,6 +15,7 @@ export class RegisterComponent {
   nombre = '';
   email = '';
   password = '';
+  terminosAceptados = false;
   error = '';
   cargando = false;
 
@@ -32,6 +33,10 @@ export class RegisterComponent {
     }
     if (!this.password || this.password.length < 6) {
       this.error = 'La contraseña debe tener al menos 6 caracteres';
+      return;
+    }
+    if (!this.terminosAceptados) {
+      this.error = 'Debes aceptar los términos y condiciones para continuar';
       return;
     }
 

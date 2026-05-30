@@ -82,7 +82,14 @@
         {{ error }}
       </div>
 
-      <button class="btn-submit" (click)="register()" [disabled]="cargando">
+      <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <input type="checkbox" id="reg-terminos" [(ngModel)]="terminosAceptados" style="width: auto;" />
+        <label for="reg-terminos" style="margin: 0; font-size: 0.9rem; font-weight: normal; cursor: pointer;">
+          Acepto los <a href="#" style="color: var(--primary-color);">términos y condiciones</a>
+        </label>
+      </div>
+
+      <button class="btn-submit" (click)="register()" [disabled]="cargando || !terminosAceptados">
         <i class="bi bi-person-plus-fill" *ngIf="!cargando"></i>
         <i class="bi bi-arrow-repeat spin" *ngIf="cargando"></i>
         {{ cargando ? 'Registrando...' : 'Crear cuenta' }}

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { forkJoin } from 'rxjs';
 import { RamoService } from '../../services/ramo.service';
 import { HorarioService, BloqueHorarioDTO } from '../../services/horario.service';
 import { Ramo } from '../../models/ramo.model';
@@ -53,8 +54,37 @@ export class Horario implements OnInit {
   ngOnInit() {
     this.cargarEtiquetasGuardadas();
     this.inicializarGrilla();
-    this.cargarRamosCursando();
-    this.cargarHorarioDesdeAPI();
+    this.cargarDatos();
+  }
+
+  cargarDatos() {
+    this.cargandoHorario = true;
+    forkJoin({
+      ramos: this.ramoService.getRamos(),
+      bloques: this.horarioService.obtenerHorario()
+    }).subscribe({
+      next: (result) => {
+        this.ramosCursando = result.ramos.filter(r => r.cursando);
+        
+        this.grilla = this.grilla.map(b => {
+          const dbBloque = result.bloques.find(db => db.dia === b.dia && db.hora === b.hora);
+          if (dbBloque) {
+            b.ramoId = dbBloque.ramoId;
+            b.ramo2Id = dbBloque.ramo2Id;
+            b.detalle1 = dbBloque.detalle1 || '';
+            b.detalle2 = dbBloque.detalle2 || '';
+          }
+          return b;
+        });
+
+        this.cargandoHorario = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar datos del horario:', err);
+        this.cargandoHorario = false;
+        Swal.fire('Atención', 'Hubo un problema al cargar tu horario', 'error');
+      }
+    });
   }
 
   cargarEtiquetasGuardadas() {
@@ -92,11 +122,7 @@ export class Horario implements OnInit {
     }
   }
 
-  cargarRamosCursando() {
-    this.ramoService.getRamos().subscribe((ramos: Ramo[]) => {
-      this.ramosCursando = ramos.filter(r => r.cursando);
-    });
-  }
+  // Se eliminó cargarRamosCursando porque ahora está en cargarDatos
 
   getBloque(dia: string, hora: string): BloqueHorarioDTO {
     return this.grilla.find(b => b.dia === dia && b.hora === hora) || 
@@ -122,26 +148,7 @@ export class Horario implements OnInit {
     return ramo ? ramo.nombre : '';
   }
 
-  cargarHorarioDesdeAPI() {
-    this.horarioService.obtenerHorario().subscribe({
-      next: (bloques) => {
-        this.grilla = this.grilla.map(b => {
-          const dbBloque = bloques.find(db => db.dia === b.dia && db.hora === b.hora);
-          if (dbBloque) {
-            b.ramoId = dbBloque.ramoId;
-            b.ramo2Id = dbBloque.ramo2Id;
-            b.detalle1 = dbBloque.detalle1 || '';
-            b.detalle2 = dbBloque.detalle2 || '';
-          }
-          return b;
-        });
-        this.cargandoHorario = false;
-      },
-      error: () => {
-        this.cargandoHorario = false;
-      }
-    });
-  }
+  // Se eliminó cargarHorarioDesdeAPI porque ahora está en cargarDatos
 
   guardarHorarioEnAPI() {
     this.guardando = true;
