@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "https://stu-io.vercel.app", allowedHeaders = "*", allowCredentials = "true")
 @RequiredArgsConstructor
 public class AuthController {
 
