@@ -4,8 +4,8 @@ WORKDIR /app
 COPY . .
 RUN sh mvnw clean package -DskipTests
 
-# Paso 2: Ejecutar la aplicación con un entorno ligero de Java 17
-FROM openjdk:17-jdk-slim
+# Paso 2: Ejecutar la aplicación con la imagen oficial de Eclipse Temurin (Java 17)
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
