@@ -55,11 +55,26 @@ public class RamoService {
         if (!ramo.getUsuario().getEmail().equals(email)) {
             throw new RuntimeException("No autorizado");
         }
-        ramo.setNombre(dto.getNombre());
-        ramo.setSemestre(dto.getSemestre());
+        if (dto.getNombre() != null) {
+            ramo.setNombre(dto.getNombre());
+        }
+        if (dto.getSemestre() != null) {
+            ramo.setSemestre(dto.getSemestre());
+        }
         ramo.setAprobado(dto.getAprobado() != null ? dto.getAprobado() : false);
         ramo.setCursando(dto.getCursando() != null ? dto.getCursando() : false);
         ramo.setNota(dto.getNota());
+        return toDTO(ramoRepository.save(ramo));
+    }
+
+    public RamoDTO cambiarEstado(Long id, Boolean aprobado, Boolean cursando, String email) {
+        Ramo ramo = ramoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ramo no encontrado"));
+        if (!ramo.getUsuario().getEmail().equals(email)) {
+            throw new RuntimeException("No autorizado");
+        }
+        ramo.setAprobado(aprobado != null ? aprobado : false);
+        ramo.setCursando(cursando != null ? cursando : false);
         return toDTO(ramoRepository.save(ramo));
     }
 

@@ -40,4 +40,8 @@ export class RamoService {
   getAvance(): Observable<{ porcentaje: number }> {
     return this.http.get<{ porcentaje: number }>(`${this.apiUrl}/avance`);
   }
+
+  cambiarEstado(id: number, aprobado: boolean, cursando: boolean): Observable<Ramo> {
+    return this.http.patch<Ramo>(`${this.apiUrl}/${id}/estado`, { aprobado, cursando });
+  }
 }

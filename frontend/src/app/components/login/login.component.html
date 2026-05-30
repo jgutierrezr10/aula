@@ -4,7 +4,7 @@
       <div class="brand-icon">
         <i class="bi bi-mortarboard-fill"></i>
       </div>
-      <h1>Avance Curricular</h1>
+      <h1>AULA</h1>
       <p>Visualiza y gestiona tu progreso académico de forma inteligente</p>
     </div>
     <div class="auth-features">
@@ -36,13 +36,8 @@
         </label>
         <div class="input-wrapper">
           <i class="bi bi-person input-icon"></i>
-          <input
-            id="login-email"
-            type="text"
-            [(ngModel)]="email"
-            placeholder="tu@email.com o tu nombre"
-            autocomplete="username"
-            autofocus />
+          <input id="login-email" type="text" [(ngModel)]="email" placeholder="tu@email.com o tu nombre"
+            autocomplete="username" autofocus />
         </div>
       </div>
 
@@ -52,13 +47,8 @@
         </label>
         <div class="input-wrapper">
           <i class="bi bi-lock input-icon"></i>
-          <input
-            id="login-password"
-            type="password"
-            [(ngModel)]="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
-            (keyup.enter)="login()" />
+          <input id="login-password" type="password" [(ngModel)]="password" placeholder="••••••••"
+            autocomplete="current-password" (keyup.enter)="login()" />
         </div>
       </div>
 

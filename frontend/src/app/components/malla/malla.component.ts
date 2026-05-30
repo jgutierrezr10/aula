@@ -207,10 +207,26 @@ export class MallaComponent implements OnInit {
       nuevoCursando = false;
     }
 
-    const actualizado = { ...ramo, aprobado: nuevoAprobado, cursando: nuevoCursando };
-    this.ramoService.actualizarRamo(ramo.id!, actualizado).subscribe({
-      next: () => this.cargarRamos(),
-      error: () => alert('Error al actualizar el estado')
+    // Guardar estado anterior por si falla
+    const prevAprobado = ramo.aprobado;
+    const prevCursando = ramo.cursando;
+
+    // Update optimístico inmediato en la UI
+    ramo.aprobado = nuevoAprobado;
+    ramo.cursando = nuevoCursando;
+    this.cdr.detectChanges();
+
+    this.ramoService.cambiarEstado(ramo.id!, nuevoAprobado, nuevoCursando).subscribe({
+      next: () => {
+        this.calcularAvance();
+      },
+      error: () => {
+        // Revertir si falla
+        ramo.aprobado = prevAprobado;
+        ramo.cursando = prevCursando;
+        this.cdr.detectChanges();
+        alert('Error al actualizar el estado');
+      }
     });
   }
 

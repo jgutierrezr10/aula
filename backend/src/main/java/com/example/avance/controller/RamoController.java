@@ -36,6 +36,17 @@ public class RamoController {
         return ResponseEntity.ok(ramoService.actualizarRamo(id, dto, userDetails.getUsername()));
     }
 
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<RamoDTO> cambiarEstado(@PathVariable Long id,
+                                                  @RequestBody Map<String, Boolean> estado,
+                                                  @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ramoService.cambiarEstado(
+                id,
+                estado.getOrDefault("aprobado", false),
+                estado.getOrDefault("cursando", false),
+                userDetails.getUsername()));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarRamo(@PathVariable Long id,
                                              @AuthenticationPrincipal UserDetails userDetails) {

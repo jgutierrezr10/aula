@@ -102,17 +102,11 @@ export class Horario implements OnInit {
       { id: '', dia, hora, ramoId: null, ramo2Id: null, detalle1: '', detalle2: '' };
   }
 
-  asignarRamo(bloque: BloqueHorarioDTO, event: Event, isSegundoRamo: boolean = false) {
-    const select = event.target as HTMLSelectElement;
-    const value = select.value;
-    const id = value && value !== 'null' ? Number(value) : null;
-    
+  asignarRamo(bloque: BloqueHorarioDTO, value: number | null, isSegundoRamo: boolean = false) {
     if (isSegundoRamo) {
-      bloque.ramo2Id = id;
+      bloque.ramo2Id = value;
     } else {
-      bloque.ramoId = id;
-      // Si elimina el primer ramo, y hay un segundo, los subimos? 
-      // Por simplicidad, si quita el primero, se queda null y el segundo sigue.
+      bloque.ramoId = value;
     }
     this.guardarHorarioEnAPI();
   }
@@ -167,7 +161,12 @@ export class Horario implements OnInit {
       this.guardando = true;
       this.horarioService.limpiarHorario().subscribe({
         next: () => {
-          this.grilla.forEach(b => b.ramoId = null);
+          this.grilla.forEach(b => {
+            b.ramoId = null;
+            b.ramo2Id = null;
+            b.detalle1 = '';
+            b.detalle2 = '';
+          });
           this.guardando = false;
         },
         error: (err) => {

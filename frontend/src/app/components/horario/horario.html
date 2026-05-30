@@ -68,10 +68,10 @@
                 <div class="ramo-slot" [class.filled]="getBloque(dia, bloqueKey).ramoId">
                   <select class="ramo-select-visible" 
                           [ngModel]="getBloque(dia, bloqueKey).ramoId" 
-                          (change)="asignarRamo(getBloque(dia, bloqueKey), $event, false)"
+                          (ngModelChange)="asignarRamo(getBloque(dia, bloqueKey), $event, false)"
                           [class.empty-select]="!getBloque(dia, bloqueKey).ramoId">
                     <option [ngValue]="null">---</option>
-                    <option *ngFor="let ramo of ramosCursando" [value]="ramo.id">
+                    <option *ngFor="let ramo of ramosCursando" [ngValue]="ramo.id">
                       {{ ramo.nombre }}
                     </option>
                   </select>
@@ -92,10 +92,10 @@
                   
                   <select class="ramo-select-visible" 
                           [ngModel]="getBloque(dia, bloqueKey).ramo2Id" 
-                          (change)="asignarRamo(getBloque(dia, bloqueKey), $event, true)"
+                          (ngModelChange)="asignarRamo(getBloque(dia, bloqueKey), $event, true)"
                           [class.empty-select]="!getBloque(dia, bloqueKey).ramo2Id">
                     <option [ngValue]="null">+ Añadir tope horario</option>
-                    <option *ngFor="let ramo of ramosCursando" [value]="ramo.id">
+                    <option *ngFor="let ramo of ramosCursando" [ngValue]="ramo.id">
                       {{ ramo.nombre }}
                     </option>
                   </select>
