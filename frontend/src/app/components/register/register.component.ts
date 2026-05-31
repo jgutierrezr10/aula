@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,7 +20,11 @@ export class RegisterComponent {
   error = '';
   cargando = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   register() {
     // Validaciones
@@ -52,8 +56,17 @@ export class RegisterComponent {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.error = err.error?.message || 'Error al registrarse';
+        const mensajeError = err.error?.message || 'Error al conectar con el servidor. Intenta nuevamente.';
+        this.error = mensajeError;
         this.cargando = false;
+        this.cdr.detectChanges();
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: mensajeError,
+          confirmButtonColor: '#6C63FF'
+        });
       }
     });
   }
