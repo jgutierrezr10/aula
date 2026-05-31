@@ -184,6 +184,7 @@ export class NotasComponent implements OnInit {
           },
           error: (err) => {
             this.errorMsg[ramoId] = 'Error al eliminar la evaluación.';
+            this.cdr.detectChanges();
             console.error(err);
           }
         });

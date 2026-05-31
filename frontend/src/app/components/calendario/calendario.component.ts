@@ -270,7 +270,10 @@ export class CalendarioComponent implements OnInit {
       if (result.isConfirmed) {
         this.evaluacionService.eliminarEvaluacion(evId).subscribe({
           next: () => { this.cargarEvaluaciones(); },
-          error: () => { this.errorMsg = 'Error al eliminar.'; }
+          error: () => { 
+            this.errorMsg = 'Error al eliminar.'; 
+            this.cdr.detectChanges();
+          }
         });
       }
     });

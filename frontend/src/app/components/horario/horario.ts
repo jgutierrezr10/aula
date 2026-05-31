@@ -210,12 +210,14 @@ export class Horario implements OnInit {
         } else {
           this.guardando = false;
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al guardar horario:', err);
         this.saveInFlight = false;
         this.savePending = false;
         this.guardando = false;
+        this.cdr.detectChanges();
         Swal.fire('Error', 'Ocurrió un error al guardar tu horario.', 'error');
       }
     });
@@ -235,6 +237,7 @@ export class Horario implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.guardando = true;
+        this.cdr.detectChanges();
         this.horarioService.limpiarHorario().subscribe({
           next: () => {
             this.grilla.forEach(b => {
@@ -244,10 +247,12 @@ export class Horario implements OnInit {
               b.detalle2 = '';
             });
             this.guardando = false;
+            this.cdr.detectChanges();
           },
           error: (err) => {
             console.error('Error al limpiar horario:', err);
             this.guardando = false;
+            this.cdr.detectChanges();
             Swal.fire('Error', 'Ocurrió un error al limpiar tu horario.', 'error');
           }
         });
