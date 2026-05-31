@@ -550,28 +550,33 @@
 
 .btn-nuevo-sem {
   width: 136px;
-/* Header removido, ahora usa app-navbar y malla-top-bar */
-  color: #9ca3af;
+  height: 100px;
+  background: transparent;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  color: #94a3b8;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
   font-family: inherit;
   text-align: center;
 }
 
 .btn-nuevo-sem i {
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .btn-nuevo-sem:hover {
   border-color: #6C63FF;
   color: #6C63FF;
   background: rgba(108, 99, 255, 0.04);
+  transform: translateY(-2px);
 }
 
 /* ══════════════════════════════════════
