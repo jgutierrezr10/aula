@@ -82,7 +82,7 @@
             <!-- Existing Evaluations -->
             <div *ngFor="let ev of evaluacionesPorRamo[ramo.id!]" class="eval-row">
               <span class="col-name val-name">{{ ev.nombre }}</span>
-              <span class="col-date val-date">{{ ev.fecha ? (ev.fecha + 'T00:00:00' | date:'dd/MM/yyyy') : 'Sin fecha' }}</span>
+              <span class="col-date val-date">{{ formatFecha(ev.fecha) }}</span>
               <span class="col-weight val-weight">{{ ev.ponderacion }}%</span>
               <span class="col-grade val-grade">
                 <input 

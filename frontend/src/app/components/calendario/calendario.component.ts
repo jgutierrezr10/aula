@@ -83,7 +83,15 @@ export class CalendarioComponent implements OnInit {
   cargarEvaluaciones() {
     this.evaluacionService.getEvaluaciones().subscribe({
       next: (evs) => {
-        this.evaluaciones = evs;
+        // Normalize fecha from backend in case it's an array [YYYY, MM, DD]
+        this.evaluaciones = evs.map(ev => {
+          if (Array.isArray(ev.fecha)) {
+            const [y, m, d] = ev.fecha;
+            ev.fecha = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          }
+          return ev;
+        });
+        
         this.buildCalendar();
         // Refresh modal if open
         if (this.selectedDay) {

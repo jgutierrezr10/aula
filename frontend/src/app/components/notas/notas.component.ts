@@ -213,4 +213,21 @@ export class NotasComponent implements OnInit {
       });
     }
   }
+
+  formatFecha(fecha: any): string {
+    if (!fecha) return 'Sin fecha';
+    if (Array.isArray(fecha)) {
+      // Si viene como arreglo [YYYY, MM, DD] desde el backend
+      const [year, month, day] = fecha;
+      return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+    }
+    if (typeof fecha === 'string') {
+      // Si viene como string YYYY-MM-DD
+      const parts = fecha.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+    }
+    return 'Fecha inválida';
+  }
 }
