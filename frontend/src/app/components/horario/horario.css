@@ -1,8 +1,8 @@
 .horario-page {
   min-height: 100vh;
-  background: #f8fafc;
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #1e293b;
+  background: var(--bg-main);
+  font-family: inherit;
+  color: var(--text-main);
 }
 
 .top-bar {
@@ -76,14 +76,14 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
+  background: rgba(108, 99, 255, 0.1);
+  border: 1px solid rgba(108, 99, 255, 0.2);
+  color: var(--primary-dark);
   padding: 1rem 1.5rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   margin-bottom: 2rem;
   font-weight: 500;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .info-banner i {
@@ -91,10 +91,10 @@
 }
 
 .grid-wrapper {
-  background: white;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
   overflow-x: auto;
 }
 

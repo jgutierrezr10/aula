@@ -1,8 +1,8 @@
 .notas-page {
   min-height: 100vh;
-  background: #f8fafc;
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #1e293b;
+  background: var(--bg-main);
+  font-family: inherit;
+  color: var(--text-main);
 }
 
 .notas-container {
@@ -46,11 +46,11 @@
 
 /* Filter Bar */
 .filter-bar {
-  background: white;
+  background: var(--bg-card);
   padding: 1.25rem 2rem;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -214,10 +214,10 @@ input:checked + .switch-slider:before {
 }
 
 .ramo-card {
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -655,11 +655,11 @@ input:checked + .switch-slider:before {
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   padding: 1.5rem;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   gap: 1.25rem;

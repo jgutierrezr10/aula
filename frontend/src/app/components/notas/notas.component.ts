@@ -473,7 +473,7 @@ export class NotasComponent implements OnInit {
     if (remainingWeight <= 0) {
       if (sumGradedWeights === 0) return 'Sin notas ingresadas';
       const finalGrade = sumGradedScore / sumGradedWeights;
-      return finalGrade >= 4.0 ? '¡Ramo aprobado! 🎉' : 'Ramo reprobado 😢';
+      return finalGrade >= 4.0 ? '¡Ramo aprobado!' : 'Ramo reprobado';
     }
 
     // Required grade on the remaining weight to reach an average of 4.0
@@ -483,7 +483,7 @@ export class NotasComponent implements OnInit {
     if (requiredGrade <= 1.0) {
       return '¡Aprobado! (Suficiente con nota 1.0)';
     } else if (requiredGrade > 7.0) {
-      return 'No alcanza (Requiere > 7.0) 😢';
+      return 'No alcanza (Requiere > 7.0)';
     } else {
       const rounded = Math.ceil(requiredGrade * 10) / 10;
       return `Falta nota ${rounded.toFixed(1)} prom. para pasar`;
