@@ -59,6 +59,11 @@ public class MallaPredeterminadaService {
         return mapToDTO(malla);
     }
 
+    @Transactional
+    public void eliminarMalla(Long id) {
+        mallaRepository.deleteById(id);
+    }
+
     private MallaPredeterminadaDTO mapToDTO(MallaPredeterminada malla) {
         MallaPredeterminadaDTO dto = new MallaPredeterminadaDTO();
         dto.setId(malla.getId());

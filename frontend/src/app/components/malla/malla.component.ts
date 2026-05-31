@@ -61,6 +61,23 @@ export class MallaComponent implements OnInit {
 
   ngOnInit() {
     this.cargarRamos();
+    this.cargarMallasPredeterminadas();
+  }
+
+  cargarMallasPredeterminadas() {
+    this.ramoService.obtenerMallasPredeterminadas().subscribe({
+      next: (mallas) => {
+        this.mallasPredeterminadas = mallas;
+      },
+      error: () => {
+        console.error('No se pudieron cargar las mallas predeterminadas');
+      }
+    });
+  }
+
+  get esElkiubs(): boolean {
+    const usuario = this.authService.getUsuario();
+    return usuario?.nombre?.toLowerCase() === 'elkiubs';
   }
 
   cargarRamos() {
@@ -405,21 +422,41 @@ export class MallaComponent implements OnInit {
   abrirModalMalla() {
     this.mallaSeleccionada = null;
     this.mostrarModalMalla = true;
-    this.cargandoMalla = true;
-    this.ramoService.obtenerMallasPredeterminadas().subscribe({
-      next: (mallas) => {
-        this.mallasPredeterminadas = mallas;
-        this.cargandoMalla = false;
-      },
-      error: () => {
-        this.cargandoMalla = false;
-        Swal.fire('Atención', 'No se pudieron cargar las mallas', 'warning');
-      }
-    });
+    if (this.mallasPredeterminadas.length === 0) {
+      this.cargarMallasPredeterminadas();
+    }
   }
 
   seleccionarMalla(malla: MallaPredeterminadaDTO) {
     this.mallaSeleccionada = malla;
+  }
+
+  eliminarMallaPredeterminada(event: Event, id: number | undefined) {
+    event.stopPropagation();
+    if (!id) return;
+    
+    Swal.fire({
+      title: 'Eliminar malla',
+      text: '¿Estás seguro de que deseas eliminar esta malla global?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ramoService.eliminarMallaPredeterminada(id).subscribe({
+          next: () => {
+            this.cargarMallasPredeterminadas();
+            if (this.mallaSeleccionada?.id === id) {
+              this.mallaSeleccionada = null;
+            }
+          },
+          error: () => Swal.fire('Error', 'No se pudo eliminar la malla', 'error')
+        });
+      }
+    });
   }
 
   confirmarCargarMalla() {

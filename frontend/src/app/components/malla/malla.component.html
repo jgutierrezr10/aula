@@ -368,9 +368,13 @@
               <span><i class="bi bi-calendar3"></i> {{ malla.semestres }} semestres</span>
             </div>
           </div>
-          <div class="preset-check" *ngIf="mallaSeleccionada?.id === malla.id">
-            <i class="bi bi-check-circle-fill"></i>
+            <div class="preset-check" *ngIf="mallaSeleccionada?.id === malla.id">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
           </div>
+          <button class="btn-delete-malla" *ngIf="esElkiubs" (click)="eliminarMallaPredeterminada($event, malla.id)" title="Eliminar Malla">
+            <i class="bi bi-trash-fill"></i>
+          </button>
         </div>
       </div>
 

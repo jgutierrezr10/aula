@@ -27,4 +27,10 @@ public class MallaPredeterminadaController {
             Principal principal) {
         return ResponseEntity.ok(service.publicarMalla(dto, principal.getName()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarMalla(@PathVariable Long id) {
+        service.eliminarMalla(id);
+        return ResponseEntity.noContent().build();
+    }
 }

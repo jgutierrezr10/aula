@@ -54,4 +54,8 @@ export class RamoService {
   publicarMallaPredeterminada(malla: MallaPredeterminadaDTO): Observable<MallaPredeterminadaDTO> {
     return this.http.post<MallaPredeterminadaDTO>(this.apiUrlMallas, malla);
   }
+
+  eliminarMallaPredeterminada(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrlMallas}/${id}`);
+  }
 }
