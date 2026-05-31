@@ -1,5 +1,6 @@
 package com.example.avance.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ public class Evaluacion {
     @Column(nullable = false)
     private Double ponderacion;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fecha;
 
     @ManyToOne(fetch = FetchType.LAZY)

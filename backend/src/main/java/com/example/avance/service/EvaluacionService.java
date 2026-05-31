@@ -31,11 +31,13 @@ public class EvaluacionService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
     public List<EvaluacionDTO> getEvaluacionesByUsuario(String email) {
         return evaluacionRepository.findByRamoUsuarioEmailOrderByFechaAsc(email)
                 .stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<EvaluacionDTO> getEvaluacionesByRamo(Long ramoId, String email) {
         Ramo ramo = ramoRepository.findById(ramoId)
                 .orElseThrow(() -> new RuntimeException("Ramo no encontrado"));
