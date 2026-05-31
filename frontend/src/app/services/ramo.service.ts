@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Ramo } from '../models/ramo.model';
 import { environment } from '../../environtment/environtment.prod';
+import { MallaPredeterminadaDTO } from '../models/malla-predeterminada.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ import { environment } from '../../environtment/environtment.prod';
 export class RamoService {
 
   private apiUrl = `${environment.apiUrl}/api/ramos`;
+  private apiUrlMallas = `${environment.apiUrl}/api/mallas-predeterminadas`;
 
   constructor(private http: HttpClient) {}
 
@@ -43,5 +45,13 @@ export class RamoService {
 
   cambiarEstado(id: number, aprobado: boolean, cursando: boolean): Observable<Ramo> {
     return this.http.patch<Ramo>(`${this.apiUrl}/${id}/estado`, { aprobado, cursando });
+  }
+
+  obtenerMallasPredeterminadas(): Observable<MallaPredeterminadaDTO[]> {
+    return this.http.get<MallaPredeterminadaDTO[]>(this.apiUrlMallas);
+  }
+
+  publicarMallaPredeterminada(malla: MallaPredeterminadaDTO): Observable<MallaPredeterminadaDTO> {
+    return this.http.post<MallaPredeterminadaDTO>(this.apiUrlMallas, malla);
   }
 }

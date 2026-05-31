@@ -7,7 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { RamoService } from '../../services/ramo.service';
 import { Ramo } from '../../models/ramo.model';
 import { AprobadosPipe } from '../../pipes/aprobados.pipe';
-import { MALLAS_PREDETERMINADAS, MallaPredeterminada } from '../../data/mallas-predeterminadas';
+import { MallaPredeterminadaDTO } from '../../models/malla-predeterminada.model';
 import { forkJoin } from 'rxjs';
 import { Navbar } from '../shared/navbar/navbar';
 
@@ -43,8 +43,8 @@ export class MallaComponent implements OnInit {
 
   // Modal malla predeterminada
   mostrarModalMalla = false;
-  mallasPredeterminadas = MALLAS_PREDETERMINADAS;
-  mallaSeleccionada: MallaPredeterminada | null = null;
+  mallasPredeterminadas: MallaPredeterminadaDTO[] = [];
+  mallaSeleccionada: MallaPredeterminadaDTO | null = null;
   cargandoMalla = false;
 
   // Modal confirmación
@@ -405,17 +405,36 @@ export class MallaComponent implements OnInit {
   abrirModalMalla() {
     this.mallaSeleccionada = null;
     this.mostrarModalMalla = true;
+    this.cargandoMalla = true;
+    this.ramoService.obtenerMallasPredeterminadas().subscribe({
+      next: (mallas) => {
+        this.mallasPredeterminadas = mallas;
+        this.cargandoMalla = false;
+      },
+      error: () => {
+        this.cargandoMalla = false;
+        Swal.fire('Atención', 'No se pudieron cargar las mallas', 'warning');
+      }
+    });
   }
 
-  seleccionarMalla(malla: MallaPredeterminada) {
+  seleccionarMalla(malla: MallaPredeterminadaDTO) {
     this.mallaSeleccionada = malla;
   }
 
   confirmarCargarMalla() {
     if (!this.mallaSeleccionada) return;
     this.cargandoMalla = true;
+    
+    // Transformar a formato Ramo que espera el backend para bulk
+    const ramosPayload: Ramo[] = this.mallaSeleccionada.ramos.map(r => ({
+      nombre: r.nombre,
+      semestre: r.semestre,
+      aprobado: false,
+      cursando: false
+    }));
 
-    this.ramoService.cargarMallaPredeterminada(this.mallaSeleccionada.ramos).subscribe({
+    this.ramoService.cargarMallaPredeterminada(ramosPayload).subscribe({
       next: () => {
         this.cargandoMalla = false;
         this.mostrarModalMalla = false;
@@ -426,6 +445,56 @@ export class MallaComponent implements OnInit {
         Swal.fire('Atención', 'Error al cargar la malla predeterminada', 'warning');
       }
     });
+  }
+
+  async compartirMalla() {
+    if (this.ramos.length === 0) {
+      Swal.fire('Atención', 'No tienes ramos para compartir', 'warning');
+      return;
+    }
+
+    const { value: formValues } = await Swal.fire({
+      title: 'Compartir mi Malla',
+      html:
+        '<input id="swal-input-nombre" class="swal2-input" placeholder="Nombre (Ej: Ing. Informática)" required>' +
+        '<input id="swal-input-univ" class="swal2-input" placeholder="Universidad" required>' +
+        '<textarea id="swal-input-desc" class="swal2-textarea" placeholder="Descripción breve" required></textarea>',
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Publicar Malla',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#6C63FF',
+      preConfirm: () => {
+        const nombre = (document.getElementById('swal-input-nombre') as HTMLInputElement).value;
+        const univ = (document.getElementById('swal-input-univ') as HTMLInputElement).value;
+        const desc = (document.getElementById('swal-input-desc') as HTMLTextAreaElement).value;
+        if (!nombre || !univ || !desc) {
+          Swal.showValidationMessage('Por favor completa todos los campos');
+        }
+        return { nombre, univ, desc };
+      }
+    });
+
+    if (formValues) {
+      const payload: MallaPredeterminadaDTO = {
+        nombre: formValues.nombre,
+        universidad: formValues.univ,
+        descripcion: formValues.desc,
+        icono: 'bi-grid-3x3-gap-fill',
+        totalRamos: this.ramos.length,
+        semestres: Math.max(...this.ramos.map(r => r.semestre)),
+        ramos: this.ramos.map(r => ({ nombre: r.nombre, semestre: r.semestre }))
+      };
+
+      this.ramoService.publicarMallaPredeterminada(payload).subscribe({
+        next: () => {
+          Swal.fire('¡Éxito!', 'Tu malla ha sido compartida con todos', 'success');
+        },
+        error: () => {
+          Swal.fire('Error', 'No se pudo publicar la malla', 'error');
+        }
+      });
+    }
   }
 
 }

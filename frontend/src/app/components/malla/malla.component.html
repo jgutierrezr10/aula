@@ -19,6 +19,9 @@
       <button class="btn-highlight" (click)="abrirModalMalla()">
         <i class="bi bi-grid-3x3-gap-fill"></i> Malla predeterminada
       </button>
+      <button class="btn-highlight" (click)="compartirMalla()" *ngIf="ramos.length > 0">
+        <i class="bi bi-share-fill"></i> Compartir mi malla
+      </button>
       <button class="btn-secondary" (click)="abrirModalMultiple()">
         <i class="bi bi-list-check"></i> Agregar varios
       </button>
