@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -35,7 +35,8 @@ export class NotasComponent implements OnInit {
 
   constructor(
     private ramoService: RamoService,
-    private evaluacionService: EvaluacionService
+    private evaluacionService: EvaluacionService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -53,6 +54,7 @@ export class NotasComponent implements OnInit {
       error: (err) => {
         console.error('Error al cargar ramos', err);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -63,10 +65,12 @@ export class NotasComponent implements OnInit {
         this.evaluaciones = evs;
         this.agruparEvaluaciones();
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar evaluaciones', err);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

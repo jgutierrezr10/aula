@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -53,7 +53,8 @@ export class CalendarioComponent implements OnInit {
 
   constructor(
     private ramoService: RamoService,
-    private evaluacionService: EvaluacionService
+    private evaluacionService: EvaluacionService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -77,6 +78,7 @@ export class CalendarioComponent implements OnInit {
       error: (err) => {
         console.error('Error al cargar ramos', err);
         // Calendar already showing, just ignore
+        this.cdr.detectChanges();
       }
     });
   }
@@ -100,10 +102,12 @@ export class CalendarioComponent implements OnInit {
           const refreshed = this.calendarDays.find(d => this.toDateStr(d.date) === dateStr);
           if (refreshed) this.selectedDay = refreshed;
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar evaluaciones', err);
         // Calendar already showing, just no events loaded
+        this.cdr.detectChanges();
       }
     });
   }

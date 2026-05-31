@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -52,7 +52,8 @@ export class Horario implements OnInit {
 
   constructor(
     private ramoService: RamoService,
-    private horarioService: HorarioService
+    private horarioService: HorarioService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -101,11 +102,13 @@ export class Horario implements OnInit {
           console.warn('No se pudieron obtener datos. El servidor puede estar iniciándose.');
         }
         this.cargandoHorario = false;
+        this.cdr.detectChanges(); // Forzar actualización visual
       },
       error: (err) => {
         console.error('Error al cargar datos del horario:', err);
         Swal.fire('Atención', 'Hubo un problema al cargar tu horario. El servidor puede estar iniciándose, intenta recargar en unos segundos.', 'error');
         this.cargandoHorario = false;
+        this.cdr.detectChanges();
       }
     });
   }
