@@ -34,6 +34,10 @@ export class NotasComponent implements OnInit {
 
   loading = true;
 
+  // Edición en línea de evaluaciones
+  editandoEvId: number | null = null;
+  evEditando: Partial<Evaluacion> = {};
+
   constructor(
     private ramoService: RamoService,
     private evaluacionService: EvaluacionService,
@@ -101,6 +105,13 @@ export class NotasComponent implements OnInit {
     this.evaluaciones.forEach(ev => {
       if (ev.ramoId && this.evaluacionesPorRamo[ev.ramoId]) {
         this.evaluacionesPorRamo[ev.ramoId].push(ev);
+      }
+    });
+
+    // Ordenar cada grupo
+    this.ramos.forEach(ramo => {
+      if (ramo.id && this.evaluacionesPorRamo[ramo.id]) {
+        this.evaluacionesPorRamo[ramo.id] = this.ordenarEvaluaciones(this.evaluacionesPorRamo[ramo.id]);
       }
     });
   }
@@ -428,5 +439,110 @@ export class NotasComponent implements OnInit {
     } else {
       return 'bi-calculator';
     }
+  }
+
+  iniciarEdicion(ev: Evaluacion) {
+    this.editandoEvId = ev.id || null;
+    this.evEditando = { ...ev };
+    
+    // Normalizar formato de fecha para el input HTML5
+    if (this.evEditando.fecha) {
+      if (Array.isArray(this.evEditando.fecha)) {
+        const [y, m, d] = this.evEditando.fecha;
+        this.evEditando.fecha = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      } else if (typeof this.evEditando.fecha === 'string') {
+        if (this.evEditando.fecha.includes('T')) {
+          this.evEditando.fecha = this.evEditando.fecha.split('T')[0];
+        }
+      }
+    }
+  }
+
+  cancelarEdicion() {
+    this.editandoEvId = null;
+    this.evEditando = {};
+  }
+
+  guardarEdicion(ramoId: number) {
+    if (!this.evEditando.nombre || this.evEditando.nombre.trim() === '') {
+      this.errorMsg[ramoId] = 'Debes ingresar un nombre para la evaluación.';
+      return;
+    }
+
+    if (this.evEditando.ponderacion === undefined || this.evEditando.ponderacion <= 0 || this.evEditando.ponderacion > 100) {
+      this.errorMsg[ramoId] = 'La ponderación debe ser entre 1% y 100%.';
+      return;
+    }
+
+    // Validar suma total de ponderaciones excluyendo la evaluación actual
+    const evs = this.evaluacionesPorRamo[ramoId] || [];
+    const sumaExcluyendoActual = evs
+      .filter(ev => ev.id !== this.editandoEvId)
+      .reduce((sum, ev) => sum + ev.ponderacion, 0);
+
+    if (sumaExcluyendoActual + this.evEditando.ponderacion > 100) {
+      this.errorMsg[ramoId] = `La suma de ponderaciones no puede superar el 100% (actual: ${sumaExcluyendoActual + this.evEditando.ponderacion}%).`;
+      return;
+    }
+
+    const updatedEv = { ...this.evEditando } as Evaluacion;
+
+    if (this.editandoEvId) {
+      this.evaluacionService.actualizarEvaluacion(this.editandoEvId, updatedEv).subscribe({
+        next: () => {
+          this.editandoEvId = null;
+          this.evEditando = {};
+          this.cargarDatos();
+        },
+        error: (err) => {
+          this.errorMsg[ramoId] = 'Error al actualizar la evaluación.';
+          this.cdr.detectChanges();
+          console.error(err);
+        }
+      });
+    }
+  }
+
+  ordenarEvaluaciones(evs: Evaluacion[]): Evaluacion[] {
+    return evs.sort((a, b) => {
+      // 1. Comparar fechas (si existen)
+      const fechaA = a.fecha ? (Array.isArray(a.fecha) ? this.arrayToDateString(a.fecha) : a.fecha) : null;
+      const fechaB = b.fecha ? (Array.isArray(b.fecha) ? this.arrayToDateString(b.fecha) : b.fecha) : null;
+
+      if (fechaA && fechaB) {
+        if (fechaA !== fechaB) {
+          return fechaA.localeCompare(fechaB);
+        }
+      } else if (fechaA && !fechaB) {
+        return -1; // Con fecha va primero
+      } else if (!fechaA && fechaB) {
+        return 1;
+      }
+
+      // 2. Comparar pesos lógicos por nombre si no tienen fecha o tienen la misma fecha
+      const pesoA = this.getLogicalWeight(a.nombre);
+      const pesoB = this.getLogicalWeight(b.nombre);
+
+      if (pesoA !== pesoB) {
+        return pesoA - pesoB;
+      }
+
+      // 3. Fallback a ID
+      return (a.id || 0) - (b.id || 0);
+    });
+  }
+
+  private getLogicalWeight(nombre: string): number {
+    const nom = nombre.toLowerCase();
+    if (nom.includes('certamen 1')) return 1;
+    if (nom.includes('certamen 2')) return 2;
+    if (nom.includes('certamen 3')) return 3;
+    if (nom.includes('taller')) return 4;
+    return 100;
+  }
+
+  private arrayToDateString(fechaArr: number[]): string {
+    const [y, m, d] = fechaArr;
+    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   }
 }

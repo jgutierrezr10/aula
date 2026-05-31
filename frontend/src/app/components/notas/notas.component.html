@@ -111,27 +111,82 @@
             </div>
 
             <!-- Existing Evaluations -->
-            <div *ngFor="let ev of evaluacionesPorRamo[ramo.id!]" class="eval-row">
-              <span class="col-name val-name">{{ ev.nombre }}</span>
-              <span class="col-date val-date">{{ formatFecha(ev.fecha) }}</span>
-              <span class="col-weight val-weight">{{ ev.ponderacion }}%</span>
-              <span class="col-grade val-grade">
-                <input 
-                  type="number" 
-                  step="0.1" 
-                  min="1.0" 
-                  max="7.0" 
-                  [ngModel]="ev.nota" 
-                  (ngModelChange)="actualizarNota(ev, $event, ramo.id!)"
-                  placeholder="--"
-                  class="grade-input"
-                >
-              </span>
-              <span class="col-actions val-actions">
-                <button (click)="eliminarEvaluacion(ev.id!, ramo.id!)" class="btn-delete-ev" title="Eliminar evaluación">
-                  <i class="bi bi-trash-fill"></i>
-                </button>
-              </span>
+            <div *ngFor="let ev of evaluacionesPorRamo[ramo.id!]" class="eval-row" [class.editing-row]="editandoEvId === ev.id">
+              
+              <!-- Vista Normal -->
+              <ng-container *ngIf="editandoEvId !== ev.id">
+                <span class="col-name val-name">{{ ev.nombre }}</span>
+                <span class="col-date val-date">{{ formatFecha(ev.fecha) }}</span>
+                <span class="col-weight val-weight">{{ ev.ponderacion }}%</span>
+                <span class="col-grade val-grade">
+                  <input 
+                    type="number" 
+                    step="0.1" 
+                    min="1.0" 
+                    max="7.0" 
+                    [ngModel]="ev.nota" 
+                    (ngModelChange)="actualizarNota(ev, $event, ramo.id!)"
+                    placeholder="--"
+                    class="grade-input"
+                  >
+                </span>
+                <span class="col-actions val-actions">
+                  <button (click)="iniciarEdicion(ev)" class="btn-edit-ev" title="Editar evaluación">
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  <button (click)="eliminarEvaluacion(ev.id!, ramo.id!)" class="btn-delete-ev" title="Eliminar evaluación">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </span>
+              </ng-container>
+
+              <!-- Modo Edición -->
+              <ng-container *ngIf="editandoEvId === ev.id">
+                <span class="col-name val-name">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="evEditando.nombre" 
+                    class="form-control-sm"
+                    placeholder="Nombre"
+                  >
+                </span>
+                <span class="col-date val-date">
+                  <input 
+                    type="date" 
+                    [(ngModel)]="evEditando.fecha" 
+                    class="form-control-sm"
+                  >
+                </span>
+                <span class="col-weight val-weight edit-weight-col">
+                  <input 
+                    type="number" 
+                    [(ngModel)]="evEditando.ponderacion" 
+                    class="compact-weight-input form-control-sm"
+                    min="1"
+                    max="100"
+                  ><span class="pct">%</span>
+                </span>
+                <span class="col-grade val-grade">
+                  <input 
+                    type="number" 
+                    step="0.1" 
+                    min="1.0" 
+                    max="7.0" 
+                    [(ngModel)]="evEditando.nota"
+                    placeholder="--"
+                    class="grade-input"
+                  >
+                </span>
+                <span class="col-actions val-actions edit-actions-col">
+                  <button (click)="guardarEdicion(ramo.id!)" class="btn-save-ev" title="Guardar cambios">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                  <button (click)="cancelarEdicion()" class="btn-cancel-ev" title="Cancelar">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </span>
+              </ng-container>
+
             </div>
 
             <!-- No evaluations msg -->

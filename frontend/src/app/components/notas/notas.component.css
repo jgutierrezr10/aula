@@ -313,7 +313,7 @@ input:checked + .switch-slider:before {
 
 .eval-header-row {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 60px 70px 40px;
+  grid-template-columns: 1.5fr 1fr 60px 70px 75px;
   gap: 0.5rem;
   padding: 0.5rem;
   font-size: 0.75rem;
@@ -326,7 +326,7 @@ input:checked + .switch-slider:before {
 
 .eval-row {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 60px 70px 40px;
+  grid-template-columns: 1.5fr 1fr 60px 70px 75px;
   gap: 0.5rem;
   align-items: center;
   padding: 0.6rem 0.5rem;
@@ -641,7 +641,7 @@ input:checked + .switch-slider:before {
     height: 40px;
   }
   .eval-header-row, .eval-row {
-    grid-template-columns: 1.2fr 0.8fr 50px 60px 30px;
+    grid-template-columns: 1.2fr 0.8fr 50px 60px 60px;
     font-size: 0.8rem;
   }
 }
@@ -723,4 +723,102 @@ input:checked + .switch-slider:before {
     gap: 1rem;
     margin-bottom: 2rem;
   }
+}
+
+/* Inline Edit Mode Styles */
+.eval-row.editing-row {
+  background-color: #f1f5f9;
+  border-radius: 8px;
+}
+
+.form-control-sm {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.85rem !important;
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+  width: 100% !important;
+  height: 30px !important;
+}
+
+.edit-weight-col {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.15rem !important;
+}
+
+.compact-weight-input {
+  width: 45px !important;
+  text-align: center !important;
+  padding: 0.25rem 0.35rem !important;
+}
+
+.pct {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.edit-actions-col {
+  display: flex !important;
+  gap: 0.25rem !important;
+}
+
+.btn-edit-ev {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  padding: 0.35rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eval-row:hover .btn-edit-ev {
+  color: #4f46e5;
+}
+
+.btn-edit-ev:hover {
+  background-color: #e0e7ff;
+  color: #4338ca !important;
+}
+
+.btn-save-ev {
+  border: none;
+  background: #10b981;
+  color: white;
+  padding: 0.35rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+}
+
+.btn-save-ev:hover {
+  background: #059669;
+}
+
+.btn-cancel-ev {
+  border: none;
+  background: #64748b;
+  color: white;
+  padding: 0.35rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+}
+
+.btn-cancel-ev:hover {
+  background: #475569;
 }
