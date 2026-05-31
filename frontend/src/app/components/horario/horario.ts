@@ -19,6 +19,10 @@ import { Navbar } from '../shared/navbar/navbar';
 export class Horario implements OnInit {
   ramosCursando: Ramo[] = [];
   guardando = false;
+  private saveTimer: any = null;
+  private savePending = false;
+  private saveInFlight = false;
+
   cargandoHorario = true;
 
   dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -171,18 +175,50 @@ export class Horario implements OnInit {
   // Se eliminó cargarHorarioDesdeAPI porque ahora está en cargarDatos
 
   guardarHorarioEnAPI() {
+    // Debounce: esperar 500ms antes de guardar para agrupar cambios rápidos
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+    }
     this.guardando = true;
-    this.horarioService.guardarHorario(this.grilla).subscribe({
+    this.saveTimer = setTimeout(() => {
+      this.ejecutarGuardado();
+    }, 500);
+  }
+
+  private ejecutarGuardado() {
+    // Si ya hay un guardado en curso, marcar como pendiente y esperar
+    if (this.saveInFlight) {
+      this.savePending = true;
+      return;
+    }
+
+    this.saveInFlight = true;
+    this.guardando = true;
+    
+    // Copiar el estado actual de la grilla para enviar
+    const grillaSnapshot = this.grilla.map(b => ({ ...b }));
+    
+    this.horarioService.guardarHorario(grillaSnapshot).subscribe({
       next: () => {
-        this.guardando = false;
+        this.saveInFlight = false;
+        // Si hay un guardado pendiente, ejecutarlo ahora con el estado más reciente
+        if (this.savePending) {
+          this.savePending = false;
+          this.ejecutarGuardado();
+        } else {
+          this.guardando = false;
+        }
       },
       error: (err) => {
         console.error('Error al guardar horario:', err);
+        this.saveInFlight = false;
+        this.savePending = false;
         this.guardando = false;
         Swal.fire('Error', 'Ocurrió un error al guardar tu horario.', 'error');
       }
     });
   }
+
 
   limpiarHorario() {
     Swal.fire({

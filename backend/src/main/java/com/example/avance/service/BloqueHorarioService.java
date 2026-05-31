@@ -21,6 +21,7 @@ public class BloqueHorarioService {
     private final RamoRepository ramoRepository;
     private final com.example.avance.repository.UsuarioRepository usuarioRepository;
 
+    @Transactional(readOnly = true)
     public List<BloqueHorarioDTO> obtenerHorario(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
