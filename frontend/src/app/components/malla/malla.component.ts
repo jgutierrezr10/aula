@@ -422,9 +422,7 @@ export class MallaComponent implements OnInit {
   abrirModalMalla() {
     this.mallaSeleccionada = null;
     this.mostrarModalMalla = true;
-    if (this.mallasPredeterminadas.length === 0) {
-      this.cargarMallasPredeterminadas();
-    }
+    this.cargarMallasPredeterminadas();
   }
 
   seleccionarMalla(malla: MallaPredeterminadaDTO) {
@@ -524,7 +522,8 @@ export class MallaComponent implements OnInit {
       };
 
       this.ramoService.publicarMallaPredeterminada(payload).subscribe({
-        next: () => {
+        next: (nuevaMalla) => {
+          this.mallasPredeterminadas.push(nuevaMalla);
           Swal.fire('¡Éxito!', 'Tu malla ha sido compartida con todos', 'success');
         },
         error: () => {
