@@ -48,7 +48,7 @@ export class RamoService {
   }
 
   cambiarEstadoBulk(estados: { id: number, aprobado: boolean, cursando: boolean }[]): Observable<Ramo[]> {
-    return this.http.patch<Ramo[]>(`${this.apiUrl}/bulk/estado`, estados);
+    return this.http.put<Ramo[]>(`${this.apiUrl}/bulk/estado`, estados);
   }
 
   obtenerMallasPredeterminadas(): Observable<MallaPredeterminadaDTO[]> {
