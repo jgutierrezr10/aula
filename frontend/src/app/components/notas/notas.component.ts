@@ -210,10 +210,17 @@ export class NotasComponent implements OnInit {
     // Solo permitir números y un punto decimal
     val = val.replace(/[^0-9.]/g, '');
 
-    // Evitar múltiples puntos
+    // Evitar múltiples puntos y limitar a 1 decimal
     const parts = val.split('.');
     if (parts.length > 2) {
       val = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Si ya hay un punto, asegurar que solo haya 1 decimal máximo
+    const partsAfterDot = val.split('.');
+    if (partsAfterDot.length === 2 && partsAfterDot[1].length > 1) {
+      // Reemplazar el viejo decimal con el nuevo que tipeó (ej: 2.0 -> tipean 5 al final -> 2.05 -> se cambia a 2.5)
+      val = partsAfterDot[0] + '.' + partsAfterDot[1].slice(-1);
     }
 
     // Poner el punto automáticamente si escriben dos dígitos seguidos sin él (ej: "55" -> "5.5")
@@ -267,6 +274,11 @@ export class NotasComponent implements OnInit {
     const parts = val.split('.');
     if (parts.length > 2) {
       val = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    const partsAfterDot = val.split('.');
+    if (partsAfterDot.length === 2 && partsAfterDot[1].length > 1) {
+      val = partsAfterDot[0] + '.' + partsAfterDot[1].slice(-1);
     }
 
     if (/^[0-9]{2}$/.test(val)) {

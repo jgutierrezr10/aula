@@ -343,6 +343,11 @@ export class CalendarioComponent implements OnInit {
       val = parts[0] + '.' + parts.slice(1).join('');
     }
 
+    const partsAfterDot = val.split('.');
+    if (partsAfterDot.length === 2 && partsAfterDot[1].length > 1) {
+      val = partsAfterDot[0] + '.' + partsAfterDot[1].slice(-1);
+    }
+
     if (/^[0-9]{2}$/.test(val)) {
       val = val[0] + '.' + val[1];
     }
