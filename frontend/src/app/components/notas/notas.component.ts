@@ -52,32 +52,19 @@ export class NotasComponent implements OnInit {
     if (!silent) {
       this.loading = true;
     }
-    this.ramoService.getRamos().subscribe({
-      next: (ramos) => {
-        this.ramos = ramos;
+    forkJoin({
+      ramos: this.ramoService.getRamos(),
+      evaluaciones: this.evaluacionService.getEvaluaciones()
+    }).subscribe({
+      next: (res) => {
+        this.ramos = res.ramos;
+        this.evaluaciones = res.evaluaciones;
         this.inicializarNuevasEvs();
-        this.cargarEvaluaciones(silent);
-      },
-      error: (err) => {
-        console.error('Error al cargar ramos', err);
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  cargarEvaluaciones(silent = false) {
-    if (!silent) {
-      this.loading = true;
-    }
-    this.evaluacionService.getEvaluaciones().subscribe({
-      next: (evs) => {
-        this.evaluaciones = evs;
         this.agruparEvaluaciones();
         this.crearEvaluacionesPorDefecto(silent);
       },
       error: (err) => {
-        console.error('Error al cargar evaluaciones', err);
+        console.error('Error al cargar datos', err);
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -707,5 +694,13 @@ export class NotasComponent implements OnInit {
   private arrayToDateString(fechaArr: number[]): string {
     const [y, m, d] = fechaArr;
     return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+
+  trackByRamo(index: number, ramo: Ramo): number {
+    return ramo.id!;
+  }
+
+  trackByEv(index: number, ev: Evaluacion): number {
+    return ev.id!;
   }
 }

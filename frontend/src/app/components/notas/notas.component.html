@@ -83,7 +83,7 @@
 
     <!-- Ramos Grid -->
     <div *ngIf="!loading && getRamosFiltrados().length > 0" class="ramos-grid">
-      <div *ngFor="let ramo of getRamosFiltrados()" class="ramo-card">
+      <div *ngFor="let ramo of getRamosFiltrados(); trackBy: trackByRamo" class="ramo-card">
         <!-- Ramo Card Header -->
         <div class="ramo-header">
           <div class="ramo-info">
@@ -120,7 +120,7 @@
             </div>
 
             <!-- Existing Evaluations -->
-            <div *ngFor="let ev of evaluacionesPorRamo[ramo.id!]" class="eval-row" [class.editing-row]="editandoEvId === ev.id">
+            <div *ngFor="let ev of evaluacionesPorRamo[ramo.id!]; trackBy: trackByEv" class="eval-row" [class.editing-row]="editandoEvId === ev.id">
               
               <!-- Vista Normal -->
               <ng-container *ngIf="editandoEvId !== ev.id">

@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { Navbar } from '../shared/navbar/navbar';
 import { RamoService } from '../../services/ramo.service';
 import { EvaluacionService } from '../../services/evaluacion.service';
@@ -67,20 +68,35 @@ export class CalendarioComponent implements OnInit {
   }
 
   cargarDatos() {
-    this.ramoService.getRamos().subscribe({
-      next: (ramos) => {
-        this.ramos = ramos
+    this.loading = true;
+    forkJoin({
+      ramos: this.ramoService.getRamos(),
+      evaluaciones: this.evaluacionService.getEvaluaciones()
+    }).subscribe({
+      next: (res) => {
+        this.ramos = res.ramos
           .filter(r => r.cursando)
           .sort((a, b) => a.nombre.localeCompare(b.nombre));
-        // Pre-select first ramo in form
+        
         if (this.ramos.length > 0) {
           this.nuevaEv.ramoId = this.ramos[0].id;
         }
-        this.cargarEvaluaciones();
+
+        this.evaluaciones = res.evaluaciones.map(ev => {
+          if (Array.isArray(ev.fecha)) {
+            const [y, m, d] = ev.fecha;
+            ev.fecha = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          }
+          return ev;
+        });
+        
+        this.buildCalendar();
+        this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error al cargar ramos', err);
-        // Calendar already showing, just ignore
+        console.error('Error al cargar datos', err);
+        this.loading = false;
         this.cdr.detectChanges();
       }
     });
