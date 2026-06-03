@@ -17,18 +17,12 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // Buscar si ya están completas
-        boolean iciCompleta = repository.findAll().stream()
-                .anyMatch(m -> "Ingeniería Civil Informática".equals(m.getNombre()) && m.getRamos().size() > 10);
+        // Forzar la eliminación y recreación para que tome tus nuevos cambios
+        repository.findAll().stream()
+                .filter(m -> "Ingeniería Civil Informática".equals(m.getNombre()) || "Nutrición y Dietética".equals(m.getNombre()))
+                .forEach(repository::delete);
 
-        if (!iciCompleta) {
-            // Eliminar las mallas de prueba antiguas e incompletas
-            repository.findAll().stream()
-                    .filter(m -> "Ingeniería Civil Informática".equals(m.getNombre())
-                            || "Nutrición y Dietética".equals(m.getNombre()))
-                    .forEach(repository::delete);
-
-            repository.flush();
+        repository.flush();
 
             // Malla 1: Ing. Civil Informática (approx 58 ramos)
             MallaPredeterminada ici = new MallaPredeterminada();
@@ -186,7 +180,6 @@ public class DataInitializer implements CommandLineRunner {
 
             nut.setTotalRamos(nut.getRamos().size());
             repository.save(nut);
-        }
     }
 
     private void agregarRamo(MallaPredeterminada malla, String nombre, int semestre) {
