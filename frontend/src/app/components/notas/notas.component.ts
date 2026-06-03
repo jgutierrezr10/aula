@@ -108,7 +108,7 @@ export class NotasComponent implements OnInit {
 
     // Agrupar
     this.evaluaciones.forEach(ev => {
-      if (ev.ramoId && this.evaluacionesPorRamo[ev.ramoId]) {
+      if (ev.ramoId && this.evaluacionesPorRamo[ev.ramoId] && ev.ponderacion > 0) {
         this.evaluacionesPorRamo[ev.ramoId].push(ev);
       }
     });
@@ -213,7 +213,7 @@ export class NotasComponent implements OnInit {
 
   formatNotaDisplay(nota?: number): string {
     if (nota === undefined || nota === null) return '';
-    return nota.toFixed(1);
+    return nota.toFixed(2);
   }
 
   onNotaInput(event: Event, ev: Evaluacion, ramoId: number) {
@@ -266,8 +266,8 @@ export class NotasComponent implements OnInit {
       num = 7.0;
     }
 
-    num = Math.round(num * 10) / 10;
-    input.value = num.toFixed(1);
+    num = Math.round(num * 100) / 100;
+    input.value = num.toFixed(2);
     this.actualizarNotaSilenciosa(ev, num, ramoId);
   }
 
@@ -316,8 +316,8 @@ export class NotasComponent implements OnInit {
       num = 7.0;
     }
 
-    num = Math.round(num * 10) / 10;
-    input.value = num.toFixed(1);
+    num = Math.round(num * 100) / 100;
+    input.value = num.toFixed(2);
     this.evEditando.nota = num;
   }
 
@@ -486,7 +486,7 @@ export class NotasComponent implements OnInit {
       return 'No alcanza (Requiere > 7.0)';
     } else {
       const rounded = Math.ceil(requiredGrade * 10) / 10;
-      return `Falta nota ${rounded.toFixed(1)} prom. para pasar`;
+      return `Falta nota ${rounded.toFixed(2)} prom. para pasar`;
     }
   }
 
@@ -640,7 +640,7 @@ export class NotasComponent implements OnInit {
 
     if (sumPonderacionesConNota > 0) {
       let finalNota = sumNotasPonderadas / sumPonderacionesConNota;
-      finalNota = Math.round(finalNota * 10.0) / 10.0;
+      finalNota = Math.round(finalNota * 100.0) / 100.0;
       ramo.nota = finalNota;
     } else {
       ramo.nota = undefined;

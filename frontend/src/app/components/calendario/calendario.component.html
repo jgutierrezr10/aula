@@ -112,7 +112,7 @@
             <span *ngIf="ev.ponderacion === 0" class="ev-actividad-lbl"><i class="bi bi-bookmark-fill"></i> Tarea / Actividad</span>
             
             <span *ngIf="ev.ponderacion > 0 && ev.nota" class="ev-nota" [ngClass]="ev.nota >= 4.0 ? 'aprobado' : 'reprobado'">
-              Nota: {{ ev.nota.toFixed(1) }}
+              Nota: {{ ev.nota.toFixed(2) }}
             </span>
             <span *ngIf="ev.ponderacion > 0 && !ev.nota" class="ev-pendiente">Pendiente</span>
           </div>

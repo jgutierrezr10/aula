@@ -313,7 +313,7 @@ export class CalendarioComponent implements OnInit {
 
   formatNotaDisplay(nota?: number): string {
     if (nota === undefined || nota === null) return '';
-    return nota.toFixed(1);
+    return nota.toFixed(2);
   }
 
   onNotaInput(event: Event) {
@@ -361,8 +361,8 @@ export class CalendarioComponent implements OnInit {
       num = 7.0;
     }
 
-    num = Math.round(num * 10) / 10;
-    input.value = num.toFixed(1);
+    num = Math.round(num * 100) / 100;
+    input.value = num.toFixed(2);
     this.nuevaEv.nota = num;
   }
 }
