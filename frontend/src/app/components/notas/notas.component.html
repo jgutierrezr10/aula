@@ -92,11 +92,14 @@
           </div>
           <!-- Average Badge -->
           <div class="promedio-badge" [ngClass]="{
-            'aprobado': ramo.nota && ramo.nota >= 4.0,
-            'reprobado': ramo.nota && ramo.nota < 4.0,
+            'aprobado': isAprobado(ramo.nota),
+            'reprobado': ramo.nota && !isAprobado(ramo.nota),
             'sin-nota': !ramo.nota
           }">
-            <span class="lbl">Promedio</span>
+            <span class="lbl">
+              Promedio
+              <i class="bi bi-exclamation-triangle-fill" *ngIf="isAprobadoPorAproximacion(ramo.nota)" title="Aprobado por aproximación" style="margin-left: 3px;"></i>
+            </span>
             <span class="val">
               {{ ramo.nota ? ramo.nota.toFixed(2) : '--' }}
               <span *ngIf="ramo.nota" style="font-size: 0.6em; opacity: 0.8; margin-left: 2px;">(~{{ getAproximado(ramo.nota) }})</span>

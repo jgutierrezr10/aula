@@ -334,7 +334,8 @@ export class NotasComponent implements OnInit {
     if (ev.id) {
       this.evaluacionService.actualizarEvaluacion(ev.id, updatedEv).subscribe({
         next: () => {
-          this.cargarDatos(true);
+          // No recargar los datos enteros para evitar saltos en la pantalla
+          // La nota ya se actualizó de forma optimista
         },
         error: (err) => {
           this.errorMsg[ramoId] = 'Error al actualizar la nota.';
@@ -437,6 +438,16 @@ export class NotasComponent implements OnInit {
     return (Math.round(nota * 10) / 10).toFixed(1);
   }
 
+  isAprobado(nota: number | null | undefined): boolean {
+    if (nota === null || nota === undefined) return false;
+    return (Math.round(nota * 10) / 10) >= 4.0;
+  }
+
+  isAprobadoPorAproximacion(nota: number | null | undefined): boolean {
+    if (nota === null || nota === undefined) return false;
+    return nota < 4.0 && this.isAprobado(nota);
+  }
+
   getPonderacionPromedio(): number {
     const filtrados = this.getRamosFiltrados();
     if (filtrados.length === 0) return 0;
@@ -478,7 +489,8 @@ export class NotasComponent implements OnInit {
     if (remainingWeight <= 0) {
       if (sumGradedWeights === 0) return 'Sin notas ingresadas';
       const finalGrade = sumGradedScore / sumGradedWeights;
-      return finalGrade >= 4.0 ? '¡Ramo aprobado!' : 'Ramo reprobado';
+      if (this.isAprobadoPorAproximacion(finalGrade)) return 'Aprobado por aproximación';
+      return this.isAprobado(finalGrade) ? '¡Ramo aprobado!' : 'Ramo reprobado';
     }
 
     // Required grade on the remaining weight to reach an average of 4.0
@@ -515,7 +527,8 @@ export class NotasComponent implements OnInit {
     if (remainingWeight <= 0) {
       if (sumGradedWeights === 0) return 'status-pending';
       const finalGrade = sumGradedScore / sumGradedWeights;
-      return finalGrade >= 4.0 ? 'status-passed' : 'status-failed';
+      if (this.isAprobadoPorAproximacion(finalGrade)) return 'status-passed status-warning';
+      return this.isAprobado(finalGrade) ? 'status-passed' : 'status-failed';
     }
 
     const requiredGrade = (4.0 * T - sumGradedScore) / remainingWeight;
@@ -549,7 +562,8 @@ export class NotasComponent implements OnInit {
     if (remainingWeight <= 0) {
       if (sumGradedWeights === 0) return 'bi-info-circle-fill';
       const finalGrade = sumGradedScore / sumGradedWeights;
-      return finalGrade >= 4.0 ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
+      if (this.isAprobadoPorAproximacion(finalGrade)) return 'bi-exclamation-triangle-fill';
+      return this.isAprobado(finalGrade) ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
     }
 
     const requiredGrade = (4.0 * T - sumGradedScore) / remainingWeight;
