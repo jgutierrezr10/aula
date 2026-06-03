@@ -297,17 +297,19 @@ export class MallaComponent implements OnInit {
     });
     this.cdr.detectChanges();
 
-    const obs$ = ramosSemestre.map(ramo => 
-      this.ramoService.cambiarEstado(ramo.id!, nuevoAprobado, nuevoCursando)
-    );
+    const estadosBulk = ramosSemestre.map(ramo => ({
+      id: ramo.id!,
+      aprobado: nuevoAprobado,
+      cursando: nuevoCursando
+    }));
 
-    forkJoin(obs$).subscribe({
+    this.ramoService.cambiarEstadoBulk(estadosBulk).subscribe({
       next: () => {
         this.calcularAvance();
       },
       error: () => {
         Swal.fire('Atención', 'Hubo un error al actualizar los estados del semestre. Se recargarán los datos.', 'warning');
-        this.cargarRamos(); // Revertir a la verdad del servidor si falla el batch
+        this.cargarRamos();
       }
     });
   }

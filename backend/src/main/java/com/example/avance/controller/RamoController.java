@@ -47,6 +47,12 @@ public class RamoController {
                 userDetails.getUsername()));
     }
 
+    @PatchMapping("/bulk/estado")
+    public ResponseEntity<List<RamoDTO>> cambiarEstadoBulk(@RequestBody List<Map<String, Object>> estados,
+                                                           @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ramoService.cambiarEstadoBulk(estados, userDetails.getUsername()));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarRamo(@PathVariable Long id,
                                              @AuthenticationPrincipal UserDetails userDetails) {

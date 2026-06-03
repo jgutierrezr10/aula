@@ -87,6 +87,27 @@ public class RamoService {
     }
 
     @Transactional
+    public List<RamoDTO> cambiarEstadoBulk(List<Map<String, Object>> estados, String email) {
+        List<Ramo> actualizados = new java.util.ArrayList<>();
+        for (Map<String, Object> estadoReq : estados) {
+            Long id = Long.valueOf(estadoReq.get("id").toString());
+            Boolean aprobado = (Boolean) estadoReq.get("aprobado");
+            Boolean cursando = (Boolean) estadoReq.get("cursando");
+            
+            Ramo ramo = ramoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Ramo no encontrado"));
+            if (!ramo.getUsuario().getEmail().equals(email)) {
+                throw new RuntimeException("No autorizado");
+            }
+            ramo.setAprobado(aprobado != null ? aprobado : false);
+            ramo.setCursando(cursando != null ? cursando : false);
+            actualizados.add(ramo);
+        }
+        return ramoRepository.saveAll(actualizados)
+                .stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
     public void eliminarRamo(Long id, String email) {
         Ramo ramo = ramoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ramo no encontrado"));
