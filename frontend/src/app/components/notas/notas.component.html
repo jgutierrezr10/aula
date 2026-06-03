@@ -41,8 +41,8 @@
         <div class="stat-content">
           <span class="stat-label">Promedio General</span>
           <span class="stat-value">
-            {{ getPromedioGeneral() ? getPromedioGeneral()!.toFixed(2) : '--' }}
-            <span *ngIf="getPromedioGeneral()" style="font-size: 0.5em; opacity: 0.8; margin-left: 4px;"> (~{{ getAproximado(getPromedioGeneral()) }})</span>
+            {{ getPromedioGeneral() ? getAproximado(getPromedioGeneral()) : '--' }}
+            <span *ngIf="getPromedioGeneral()" style="font-size: 0.5em; opacity: 0.8; margin-left: 4px;" title="Promedio exacto">({{ getPromedioGeneral()!.toFixed(2) }})</span>
           </span>
         </div>
       </div>
@@ -101,8 +101,8 @@
               <i class="bi bi-exclamation-triangle-fill" *ngIf="isAprobadoPorAproximacion(ramo.nota)" title="Aprobado por aproximación" style="margin-left: 3px;"></i>
             </span>
             <span class="val">
-              {{ ramo.nota ? ramo.nota.toFixed(2) : '--' }}
-              <span *ngIf="ramo.nota" style="font-size: 0.6em; opacity: 0.8; margin-left: 2px;">(~{{ getAproximado(ramo.nota) }})</span>
+              {{ ramo.nota ? getAproximado(ramo.nota) : '--' }}
+              <span *ngIf="ramo.nota" style="font-size: 0.6em; opacity: 0.8; margin-left: 2px;" title="Promedio exacto">({{ ramo.nota.toFixed(2) }})</span>
             </span>
           </div>
         </div>
