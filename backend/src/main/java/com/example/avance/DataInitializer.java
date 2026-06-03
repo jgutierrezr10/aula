@@ -24,12 +24,13 @@ public class DataInitializer implements CommandLineRunner {
         if (!iciCompleta) {
             // Eliminar las mallas de prueba antiguas e incompletas
             repository.findAll().stream()
-                    .filter(m -> "Ingeniería Civil Informática".equals(m.getNombre()) || "Nutrición y Dietética".equals(m.getNombre()))
+                    .filter(m -> "Ingeniería Civil Informática".equals(m.getNombre())
+                            || "Nutrición y Dietética".equals(m.getNombre()))
                     .forEach(repository::delete);
 
             repository.flush();
 
-            // Malla 1: Ing. Civil Informática (58 ramos aprox)
+            // Malla 1: Ing. Civil Informática (approx 58 ramos)
             MallaPredeterminada ici = new MallaPredeterminada();
             ici.setNombre("Ingeniería Civil Informática");
             ici.setUniversidad("Universidad San Sebastian");
@@ -41,80 +42,80 @@ public class DataInitializer implements CommandLineRunner {
             // Semestre 1
             agregarRamo(ici, "Introducción al Cálculo", 1);
             agregarRamo(ici, "Álgebra", 1);
-            agregarRamo(ici, "Introducción a la Programación", 1);
-            agregarRamo(ici, "Física General", 1);
-            agregarRamo(ici, "Química para Ingeniería", 1);
-            agregarRamo(ici, "Desarrollo Personal", 1);
+            agregarRamo(ici, "Introducción a la Ingeniería Informática", 1);
+            agregarRamo(ici, "Taller de Introducción a la Ingeniería", 1);
+            agregarRamo(ici, "Estrategias para el Aprendizaje", 1);
 
             // Semestre 2
             agregarRamo(ici, "Cálculo Diferencial e Integral", 2);
             agregarRamo(ici, "Álgebra Lineal", 2);
-            agregarRamo(ici, "Programación Orientada a Objetos", 2);
-            agregarRamo(ici, "Física Mecánica", 2);
-            agregarRamo(ici, "Inglés I", 2);
-            agregarRamo(ici, "Comunicación Efectiva", 2);
+            agregarRamo(ici, "Química General", 2);
+            agregarRamo(ici, "Introducción a la Programación", 2);
+            agregarRamo(ici, "Taller de Trabajo en Equipo", 2);
 
             // Semestre 3
-            agregarRamo(ici, "Cálculo en Varias Variables", 3);
-            agregarRamo(ici, "Ecuaciones Diferenciales", 3);
-            agregarRamo(ici, "Estructura de Datos", 3);
-            agregarRamo(ici, "Física Electromagnetismo", 3);
-            agregarRamo(ici, "Inglés II", 3);
-            agregarRamo(ici, "Emprendimiento", 3);
+            agregarRamo(ici, "Cálculo Multivariable", 3);
+            agregarRamo(ici, "Mecánica", 3);
+            agregarRamo(ici, "Tecnologías Digitales para la Ingeniería", 3);
+            agregarRamo(ici, "Programación Orientada a Objetos", 3);
+            agregarRamo(ici, "Taller de Liderazgo y Negociación", 3);
+            agregarRamo(ici, "Inglés I", 3);
 
             // Semestre 4
-            agregarRamo(ici, "Probabilidades y Estadística", 4);
-            agregarRamo(ici, "Base de Datos", 4);
-            agregarRamo(ici, "Arquitectura de Computadores", 4);
-            agregarRamo(ici, "Sistemas Operativos", 4);
-            agregarRamo(ici, "Inglés III", 4);
-            agregarRamo(ici, "Ética Profesional", 4);
+            agregarRamo(ici, "Ecuaciones Diferenciales", 4);
+            agregarRamo(ici, "Electricidad y Magnetismo", 4);
+            agregarRamo(ici, "Probabilidades para Ingeniería", 4);
+            agregarRamo(ici, "Taller de Programación Aplicada", 4);
+            agregarRamo(ici, "Taller de Ingeniería y Sustentabilidad", 4);
+            agregarRamo(ici, "Inglés II", 4);
 
             // Semestre 5
-            agregarRamo(ici, "Análisis de Algoritmos", 5);
-            agregarRamo(ici, "Ingeniería de Software I", 5);
-            agregarRamo(ici, "Redes de Computadores", 5);
-            agregarRamo(ici, "Investigación de Operaciones", 5);
-            agregarRamo(ici, "Economía", 5);
-            agregarRamo(ici, "Inglés IV", 5);
+            agregarRamo(ici, "Optimización", 5);
+            agregarRamo(ici, "Termofluidos", 5);
+            agregarRamo(ici, "Matemáticas Discretas", 5);
+            agregarRamo(ici, "Estadística para Ingeniería", 5);
+            agregarRamo(ici, "Estructura de Datos y Algoritmos", 5);
+            agregarRamo(ici, "Taller de Emprendimiento e Innovación I", 5);
+            agregarRamo(ici, "Inglés III", 5);
 
             // Semestre 6
-            agregarRamo(ici, "Inteligencia Artificial", 6);
-            agregarRamo(ici, "Ingeniería de Software II", 6);
-            agregarRamo(ici, "Sistemas Distribuidos", 6);
-            agregarRamo(ici, "Evaluación de Proyectos", 6);
-            agregarRamo(ici, "Gestión de Empresas", 6);
-            agregarRamo(ici, "Electivo de Formación Integral I", 6);
+            agregarRamo(ici, "Economía Financiera", 6);
+            agregarRamo(ici, "Arquitectura de Computadores", 6);
+            agregarRamo(ici, "Redes de Computadores", 6);
+            agregarRamo(ici, "Programación Avanzada", 6);
+            agregarRamo(ici, "Base de Datos", 6);
+            agregarRamo(ici, "Taller de Emprendimiento e Innovación II", 6);
+            agregarRamo(ici, "Inglés Técnico", 6);
 
             // Semestre 7
-            agregarRamo(ici, "Seguridad Informática", 7);
-            agregarRamo(ici, "Desarrollo Web y Móvil", 7);
-            agregarRamo(ici, "Arquitectura de Software", 7);
-            agregarRamo(ici, "Gestión de Proyectos de TI", 7);
-            agregarRamo(ici, "Electivo de Especialidad I", 7);
-            agregarRamo(ici, "Electivo de Formación Integral II", 7);
+            agregarRamo(ici, "Sistemas Operativos", 7);
+            agregarRamo(ici, "Aplicaciones y Tecnologías de la Web", 7);
+            agregarRamo(ici, "Taller de Interfaces y Diseño de Software", 7);
+            agregarRamo(ici, "Electivo de Profundización I", 7);
+            agregarRamo(ici, "Antropología", 7);
+            agregarRamo(ici, "Inglés de Especialidad", 7);
 
             // Semestre 8
-            agregarRamo(ici, "Minería de Datos", 8);
-            agregarRamo(ici, "Cloud Computing", 8);
-            agregarRamo(ici, "Sistemas de Información", 8);
-            agregarRamo(ici, "Legislación Laboral y TI", 8);
-            agregarRamo(ici, "Electivo de Especialidad II", 8);
-            agregarRamo(ici, "Electivo de Formación Integral III", 8);
+            agregarRamo(ici, "Formulación y Evaluación de Proyectos", 8);
+            agregarRamo(ici, "Inteligencia Artificial", 8);
+            agregarRamo(ici, "Ing. Requerimientos y Aseguramiento de Calidad", 8);
+            agregarRamo(ici, "Taller de Ingeniería de Software", 8);
+            agregarRamo(ici, "Electivo de Profundización II", 8);
+            agregarRamo(ici, "Ética", 8);
 
             // Semestre 9
-            agregarRamo(ici, "Práctica Profesional I", 9);
-            agregarRamo(ici, "Seminario de Título I", 9);
-            agregarRamo(ici, "Tópicos Avanzados en TI", 9);
-            agregarRamo(ici, "Electivo de Especialidad III", 9);
-            agregarRamo(ici, "Gestión de la Innovación", 9);
+            agregarRamo(ici, "Gestión de Proyectos", 9);
+            agregarRamo(ici, "Gestión de Operaciones TI", 9);
+            agregarRamo(ici, "Taller en Empresa I", 9);
+            agregarRamo(ici, "Minería de Datos y Big Data", 9);
+            agregarRamo(ici, "Electivo de Formación Integral", 9);
 
             // Semestre 10
-            agregarRamo(ici, "Práctica Profesional II", 10);
-            agregarRamo(ici, "Proyecto de Título", 10);
-            agregarRamo(ici, "Electivo de Especialidad IV", 10);
-            agregarRamo(ici, "Auditoría de Sistemas", 10);
-            agregarRamo(ici, "Taller de Integración", 10);
+            agregarRamo(ici, "Seguridad Informática", 10);
+            agregarRamo(ici, "Gestión Estratégica", 10);
+            agregarRamo(ici, "Taller en Empresa II", 10);
+            agregarRamo(ici, "Electivo de Profundización III", 10);
+            agregarRamo(ici, "Electivo de Profundización IV", 10);
 
             ici.setTotalRamos(ici.getRamos().size());
             repository.save(ici);

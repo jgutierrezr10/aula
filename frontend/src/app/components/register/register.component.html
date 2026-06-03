@@ -61,8 +61,10 @@
           </label>
           <div class="input-wrapper">
             <i class="bi bi-lock input-icon"></i>
-            <input id="reg-password" type="password" [(ngModel)]="password" placeholder="Mínimo 6 caracteres"
-              autocomplete="new-password" (keyup.enter)="register()" />
+            <input id="reg-password" [type]="mostrarPassword ? 'text' : 'password'" [(ngModel)]="password" placeholder="Mínimo 6 caracteres"
+              autocomplete="new-password" (keyup.enter)="register()" style="padding-right: 48px;" />
+            <i class="toggle-password bi" [ngClass]="mostrarPassword ? 'bi-eye-slash' : 'bi-eye'" 
+               (click)="mostrarPassword = !mostrarPassword"></i>
           </div>
         </div>
 

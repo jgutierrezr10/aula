@@ -18,6 +18,7 @@ export class LoginComponent {
   recordarme = false;
   error = '';
   cargando = false;
+  mostrarPassword = false;
 
   constructor(
     private authService: AuthService, 

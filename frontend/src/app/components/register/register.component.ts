@@ -19,6 +19,7 @@ export class RegisterComponent {
   terminosAceptados = false;
   error = '';
   cargando = false;
+  mostrarPassword = false;
 
   constructor(
     private authService: AuthService,
