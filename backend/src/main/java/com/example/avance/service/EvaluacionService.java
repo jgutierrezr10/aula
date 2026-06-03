@@ -118,8 +118,8 @@ public class EvaluacionService {
 
         if (sumPonderacionesConNota > 0) {
             double finalNota = sumNotasPonderadas / sumPonderacionesConNota;
-            // Redondear a 1 decimal
-            finalNota = Math.round(finalNota * 10.0) / 10.0;
+            // Redondear a 2 decimales
+            finalNota = Math.round(finalNota * 100.0) / 100.0;
             ramo.setNota(finalNota);
         } else {
             ramo.setNota(null);
