@@ -213,7 +213,7 @@ export class NotasComponent implements OnInit {
 
   formatNotaDisplay(nota?: number): string {
     if (nota === undefined || nota === null) return '';
-    return nota.toFixed(2);
+    return nota.toFixed(1);
   }
 
   onNotaInput(event: Event, ev: Evaluacion, ramoId: number) {
@@ -266,8 +266,8 @@ export class NotasComponent implements OnInit {
       num = 7.0;
     }
 
-    num = Math.round(num * 100) / 100;
-    input.value = num.toFixed(2);
+    num = Math.round(num * 10) / 10;
+    input.value = num.toFixed(1);
     this.actualizarNotaSilenciosa(ev, num, ramoId);
   }
 
@@ -316,8 +316,8 @@ export class NotasComponent implements OnInit {
       num = 7.0;
     }
 
-    num = Math.round(num * 100) / 100;
-    input.value = num.toFixed(2);
+    num = Math.round(num * 10) / 10;
+    input.value = num.toFixed(1);
     this.evEditando.nota = num;
   }
 
@@ -432,6 +432,11 @@ export class NotasComponent implements OnInit {
     return sum / ramosConNota.length;
   }
 
+  getAproximado(nota: number | null | undefined): string {
+    if (nota === null || nota === undefined) return '--';
+    return (Math.round(nota * 10) / 10).toFixed(1);
+  }
+
   getPonderacionPromedio(): number {
     const filtrados = this.getRamosFiltrados();
     if (filtrados.length === 0) return 0;
@@ -486,7 +491,7 @@ export class NotasComponent implements OnInit {
       return 'No alcanza (Requiere > 7.0)';
     } else {
       const rounded = Math.ceil(requiredGrade * 10) / 10;
-      return `Falta nota ${rounded.toFixed(2)} prom. para pasar`;
+      return `Falta nota ${rounded.toFixed(1)} prom. para pasar`;
     }
   }
 

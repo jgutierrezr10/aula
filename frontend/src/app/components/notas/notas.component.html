@@ -40,7 +40,10 @@
         </div>
         <div class="stat-content">
           <span class="stat-label">Promedio General</span>
-          <span class="stat-value">{{ getPromedioGeneral() ? getPromedioGeneral()!.toFixed(2) : '--' }}</span>
+          <span class="stat-value">
+            {{ getPromedioGeneral() ? getPromedioGeneral()!.toFixed(2) : '--' }}
+            <span *ngIf="getPromedioGeneral()" style="font-size: 0.5em; opacity: 0.8; margin-left: 4px;"> (~{{ getAproximado(getPromedioGeneral()) }})</span>
+          </span>
         </div>
       </div>
       <div class="stat-card">
@@ -94,7 +97,10 @@
             'sin-nota': !ramo.nota
           }">
             <span class="lbl">Promedio</span>
-            <span class="val">{{ ramo.nota ? ramo.nota.toFixed(2) : '--' }}</span>
+            <span class="val">
+              {{ ramo.nota ? ramo.nota.toFixed(2) : '--' }}
+              <span *ngIf="ramo.nota" style="font-size: 0.6em; opacity: 0.8; margin-left: 2px;">(~{{ getAproximado(ramo.nota) }})</span>
+            </span>
           </div>
         </div>
 
