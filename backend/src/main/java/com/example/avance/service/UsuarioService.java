@@ -242,12 +242,11 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("No se encontró una cuenta con ese correo electrónico"));
 
-        // Eliminar tokens anteriores de este usuario si existen
-        tokenRepository.deleteByUsuario(usuario);
+        // Buscar si ya tiene un token y actualizarlo para evitar el error de Constraint Unique
+        PasswordResetToken resetToken = tokenRepository.findByUsuario(usuario)
+                .orElse(new PasswordResetToken());
 
-        // Crear nuevo token
         String token = UUID.randomUUID().toString();
-        PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
         resetToken.setUsuario(usuario);
         resetToken.setExpiryDate(LocalDateTime.now().plusHours(1)); // 1 hora de validez
