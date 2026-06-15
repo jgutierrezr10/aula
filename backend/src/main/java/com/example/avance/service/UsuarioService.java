@@ -80,17 +80,14 @@ public class UsuarioService {
 
         // Enviar correo (no bloqueante de forma asíncrona mediante HTTP API)
         try {
-            String subject = "AULA - Verifica tu correo";
-            String textContent = "Hola " + usuario.getNombre() + ",\n\n" +
-                    "Gracias por registrarte en AULA.\n" +
-                    "Tu código de verificación es: " + code + "\n\n" +
-                    "Ingresa este código en la aplicación para activar tu cuenta.\n" +
-                    "El código expirará en 15 minutos.\n\n" +
-                    "Saludos,\nEl equipo de AULA";
+            String subject = "AULA - Verifica tu correo electrónico";
+            String preText = "¡Gracias por unirte a AULA! Para completar tu registro y activar tu cuenta, por favor ingresa el siguiente código de verificación en la aplicación.";
+            String postText = "Este código expirará en 15 minutos. Si no te has registrado en AULA, puedes ignorar este mensaje de forma segura.";
+            String htmlContent = buildHtmlTemplate("Verificación de Cuenta", usuario.getNombre(), preText, code, postText);
             
             CompletableFuture.runAsync(() -> {
                 try {
-                    enviarCorreoBrevo(usuario.getEmail(), usuario.getNombre(), subject, textContent);
+                    enviarCorreoBrevo(usuario.getEmail(), usuario.getNombre(), subject, htmlContent);
                     log.info("Correo de verificación enviado a: " + usuario.getEmail());
                 } catch (Exception e) {
                     log.error("Error al enviar el correo de verificación a " + usuario.getEmail() + ".", e);
@@ -276,17 +273,13 @@ public class UsuarioService {
 
         // Enviando el correo real en segundo plano usando la API
         String subject = "AULA - Recuperación de Contraseña";
-        String textContent = "Hola " + usuario.getNombre() + ",\n\n" +
-                "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.\n" +
-                "Tu código de recuperación es: " + token + "\n\n" +
-                "Ingresa este código en la aplicación junto con tu nueva contraseña.\n" +
-                "Este código expirará en 1 hora.\n\n" +
-                "Si no solicitaste este cambio, ignora este mensaje.\n\n" +
-                "Saludos,\nEl equipo de AULA";
+        String preText = "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta. Ingresa el siguiente código en la aplicación junto con tu nueva contraseña.";
+        String postText = "Este código expirará en 1 hora. Si no solicitaste este cambio, por favor ignora este mensaje y tu contraseña seguirá siendo la misma.";
+        String htmlContent = buildHtmlTemplate("Recuperar Contraseña", usuario.getNombre(), preText, token, postText);
 
         CompletableFuture.runAsync(() -> {
             try {
-                enviarCorreoBrevo(email, usuario.getNombre(), subject, textContent);
+                enviarCorreoBrevo(email, usuario.getNombre(), subject, htmlContent);
                 log.info("Correo de recuperación enviado exitosamente a: " + email);
             } catch (Exception e) {
                 log.error("Error al enviar el correo de recuperación a " + email, e);
@@ -314,7 +307,7 @@ public class UsuarioService {
         tokenRepository.delete(resetToken);
     }
 
-    private void enviarCorreoBrevo(String toEmail, String toName, String subject, String textContent) {
+    private void enviarCorreoBrevo(String toEmail, String toName, String subject, String htmlContent) {
         if (brevoApiKey == null || brevoApiKey.isEmpty()) {
             log.warn("La API Key de Brevo no está configurada. El correo no se enviará.");
             return;
@@ -327,9 +320,6 @@ public class UsuarioService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("api-key", brevoApiKey);
         headers.set("accept", "application/json");
-
-        String htmlContent = "<html><body style='font-family: Arial, sans-serif; color: #333; line-height: 1.6;'>" + 
-                             textContent.replace("\n", "<br>") + "</body></html>";
 
         java.util.Map<String, Object> body = new java.util.HashMap<>();
         
@@ -354,5 +344,31 @@ public class UsuarioService {
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("Error desde la API de Brevo: " + response.getBody());
         }
+    }
+
+    private String buildHtmlTemplate(String title, String name, String preText, String code, String postText) {
+        return "<!DOCTYPE html>" +
+               "<html>" +
+               "<head><meta charset=\"UTF-8\"></head>" +
+               "<body style=\"margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333333;\">" +
+               "  <div style=\"max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);\">" +
+               "    <div style=\"background-color: #4A90E2; padding: 30px; text-align: center;\">" +
+               "      <h1 style=\"color: #ffffff; margin: 0; font-size: 28px; letter-spacing: 1px;\">AULA</h1>" +
+               "    </div>" +
+               "    <div style=\"padding: 40px 30px;\">" +
+               "      <h2 style=\"margin-top: 0; color: #2c3e50;\">" + title + "</h2>" +
+               "      <p style=\"font-size: 16px; line-height: 1.6; color: #555555;\">Hola <strong>" + name + "</strong>,</p>" +
+               "      <p style=\"font-size: 16px; line-height: 1.6; color: #555555;\">" + preText + "</p>" +
+               "      <div style=\"margin: 35px 0; text-align: center;\">" +
+               "        <span style=\"display: inline-block; padding: 15px 30px; font-size: 32px; font-weight: bold; color: #4A90E2; background-color: #f0f7ff; border: 2px dashed #4A90E2; border-radius: 8px; letter-spacing: 4px;\">" + code + "</span>" +
+               "      </div>" +
+               "      <p style=\"font-size: 16px; line-height: 1.6; color: #555555;\">" + postText + "</p>" +
+               "    </div>" +
+               "    <div style=\"background-color: #f9fbfb; padding: 20px; text-align: center; border-top: 1px solid #eeeeee;\">" +
+               "      <p style=\"margin: 0; font-size: 14px; color: #999999;\">© 2024 El equipo de AULA. Todos los derechos reservados.</p>" +
+               "    </div>" +
+               "  </div>" +
+               "</body>" +
+               "</html>";
     }
 }
