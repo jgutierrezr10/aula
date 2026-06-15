@@ -23,4 +23,11 @@ public class UsuarioController {
             Principal principal) {
         return ResponseEntity.ok(usuarioService.actualizarCuenta(request, principal.getName()));
     }
+
+    // Endpoint temporal para borrar usuarios de prueba
+    @GetMapping("/borrar-test/{email}")
+    public ResponseEntity<String> borrarUsuarioTest(@PathVariable String email) {
+        usuarioService.borrarUsuarioTest(email);
+        return ResponseEntity.ok("Usuario " + email + " eliminado. (Nota: Borra este endpoint antes de ir a producción)");
+    }
 }

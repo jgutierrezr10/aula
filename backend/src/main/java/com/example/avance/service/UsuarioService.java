@@ -309,4 +309,13 @@ public class UsuarioService {
         // Eliminar el token ya usado
         tokenRepository.delete(resetToken);
     }
+
+    @Transactional
+    public void borrarUsuarioTest(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario != null) {
+            usuarioRepository.delete(usuario);
+            log.info("Usuario de prueba eliminado: " + email);
+        }
+    }
 }
