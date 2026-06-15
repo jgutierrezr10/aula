@@ -61,15 +61,32 @@ export class LoginComponent implements AfterViewInit {
           this.cargando = false;
           this.cdr.detectChanges();
           Swal.fire({
-            title: '¡Bienvenido!',
+            title: '<span style="font-size: 26px; font-weight: 800; color: #1e1e2d; letter-spacing: -0.5px;">¡Bienvenido a AULA!</span>',
             html: `
-              <p style="margin-bottom:12px">Antes de continuar, elige un <b>nombre de usuario</b> y una <b>contraseña</b> para poder ingresar también sin Google.</p>
-              <input type="text" id="nuevo-nombre" class="swal2-input" placeholder="Nombre de usuario" maxlength="30">
-              <input type="password" id="nuevo-pass" class="swal2-input" placeholder="Contraseña (mín. 6 caracteres)">
+              <div style="text-align: center; margin-bottom: 25px;">
+                <div style="background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(72, 198, 239, 0.1)); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 1px solid rgba(108, 99, 255, 0.2);">
+                  <svg style="width: 40px; height: 40px; color: #6C63FF;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                </div>
+                <p style="color: #64748b; font-size: 15px; margin: 0; line-height: 1.6;">Para completar tu registro, elige un nombre de usuario y contraseña. Así también podrás entrar sin depender de Google.</p>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+                <div style="width: 100%; text-align: left;">
+                  <label style="font-size: 13px; font-weight: 700; color: #475569; margin-left: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Nombre de usuario</label>
+                  <input type="text" id="nuevo-nombre" class="swal2-input" placeholder="Ej: Juan Perez" maxlength="30" style="margin-top: 8px; border-radius: 12px; font-size: 15px; width: 100%; box-sizing: border-box; background: #f8fafc; border: 2px solid transparent; transition: all 0.3s;">
+                </div>
+                <div style="width: 100%; text-align: left;">
+                  <label style="font-size: 13px; font-weight: 700; color: #475569; margin-left: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Contraseña</label>
+                  <input type="password" id="nuevo-pass" class="swal2-input" placeholder="Mínimo 6 caracteres" style="margin-top: 8px; border-radius: 12px; font-size: 15px; width: 100%; box-sizing: border-box; background: #f8fafc; border: 2px solid transparent; transition: all 0.3s;">
+                </div>
+              </div>
             `,
             confirmButtonText: 'Guardar y Entrar',
             confirmButtonColor: '#6C63FF',
             allowOutsideClick: false,
+            customClass: {
+              confirmButton: 'rounded-button',
+              popup: 'modern-popup'
+            },
             preConfirm: () => {
               const nombre = (document.getElementById('nuevo-nombre') as HTMLInputElement).value.trim();
               const pass = (document.getElementById('nuevo-pass') as HTMLInputElement).value;
