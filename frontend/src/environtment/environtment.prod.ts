@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://stu-io.onrender.com'
+  apiUrl: 'https://aula-4usl.onrender.com'
 };
