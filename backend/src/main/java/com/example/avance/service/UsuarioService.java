@@ -69,7 +69,7 @@ public class UsuarioService {
         vToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         verificationTokenRepository.save(vToken);
 
-        // Enviar correo
+        // Enviar correo (no bloqueante: si falla, devolvemos respuesta igualmente para no perder el registro)
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(usuario.getEmail());
@@ -82,8 +82,9 @@ public class UsuarioService {
                     "Saludos,\nEl equipo de AULA");
             mailSender.send(message);
         } catch (Exception e) {
-            log.error("Error al enviar el correo a " + usuario.getEmail(), e);
-            throw new RuntimeException("Usuario registrado, pero hubo un error al enviar el correo de verificación.");
+            log.error("Error al enviar el correo de verificación a " + usuario.getEmail() + ". El usuario quedó registrado pero no verificado.", e);
+            // No relanzamos la excepción: el usuario quedó guardado y el token también.
+            // El frontend mostrará la ventana de código de todas formas.
         }
 
         return new AuthResponse(null, usuario.getNombre(), usuario.getEmail());
@@ -136,6 +137,7 @@ public class UsuarioService {
         return new AuthResponse(token, usuario.getNombre(), usuario.getEmail());
     }
 
+    @Transactional
     public AuthResponse googleLogin(String googleToken) {
         try {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())

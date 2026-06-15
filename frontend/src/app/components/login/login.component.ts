@@ -127,7 +127,7 @@ export class LoginComponent implements AfterViewInit {
       },
       allowOutsideClick: () => !Swal.isLoading()
     }).then((result) => {
-      if (result.isConfirmed) {
+      if (result.isConfirmed && result.value) {
         // Pedir el código y la nueva contraseña
         Swal.fire({
           title: 'Código enviado',
