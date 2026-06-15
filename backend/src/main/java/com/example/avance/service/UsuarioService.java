@@ -126,7 +126,10 @@ public class UsuarioService {
                 .or(() -> usuarioRepository.findByNombre(request.getEmail()))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
+        String storedHash = usuario.getPassword().startsWith("{GOOGLE}") ? 
+                usuario.getPassword().substring(8) : usuario.getPassword();
+
+        if (!passwordEncoder.matches(request.getPassword(), storedHash)) {
             throw new RuntimeException("Contraseña incorrecta");
         }
 
@@ -179,7 +182,7 @@ public class UsuarioService {
                     usuario.setNombre(baseName);
                     
                     // Asignamos una contraseña aleatoria muy compleja ya que el usuario usará Google
-                    usuario.setPassword(passwordEncoder.encode(UUID.randomUUID().toString() + UUID.randomUUID().toString()));
+                    usuario.setPassword("{GOOGLE}" + passwordEncoder.encode(UUID.randomUUID().toString() + UUID.randomUUID().toString()));
                     usuario.setVerificado(true);
                     usuarioRepository.save(usuario);
                 } else if (!usuario.isVerificado()) {
@@ -207,14 +210,21 @@ public class UsuarioService {
 
         // Validar contraseña actual si se quiere cambiar la contraseña o el email
         if (request.getCurrentPassword() != null && !request.getCurrentPassword().isEmpty()) {
-            if (!passwordEncoder.matches(request.getCurrentPassword(), usuario.getPassword())) {
+            String storedHash = usuario.getPassword().startsWith("{GOOGLE}") ? 
+                    usuario.getPassword().substring(8) : usuario.getPassword();
+                    
+            if (!passwordEncoder.matches(request.getCurrentPassword(), storedHash)) {
                 throw new RuntimeException("Contraseña actual incorrecta");
             }
             if (request.getNewPassword() != null && !request.getNewPassword().isEmpty()) {
                 usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
             }
         } else if (request.getNewPassword() != null && !request.getNewPassword().isEmpty()) {
-            throw new RuntimeException("Debe ingresar su contraseña actual para establecer una nueva");
+            if (usuario.getPassword().startsWith("{GOOGLE}")) {
+                usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            } else {
+                throw new RuntimeException("Debe ingresar su contraseña actual para establecer una nueva");
+            }
         }
 
         if (request.getNombre() != null && !request.getNombre().isEmpty() && !request.getNombre().equalsIgnoreCase(usuario.getNombre())) {
