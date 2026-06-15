@@ -40,16 +40,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Esto permite que el navegador haga el chequeo de CORS (OPTIONS) sin bloqueos
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
-                .requestMatchers("/api/auth/**", "/error").permitAll()
-                .anyRequest().authenticated())
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/error").permitAll()
+                        .requestMatchers("/actuator/health").permitAll() // ← agrega esta línea
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -58,12 +57,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        
+
         // Autorizamos a tu entorno local de desarrollo y a tu frontend en producción
         config.setAllowedOrigins(List.of(
-            "http://localhost:4200",
-            "https://aulaproject.vercel.app"
-        ));
+                "http://localhost:4200",
+                "https://aulaproject.vercel.app"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
