@@ -48,6 +48,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/error").permitAll()
                         .requestMatchers("/actuator/health").permitAll() // ← agrega esta línea
                         .anyRequest().authenticated())
+                .headers(headers -> headers
+                        .addHeaderWriter((request, response) -> {
+                            response.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+                        })
+                )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
