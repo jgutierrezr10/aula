@@ -219,10 +219,13 @@ public class UsuarioService {
 
         // Validar contraseña actual si se quiere cambiar la contraseña o el email
         if (request.getCurrentPassword() != null && !request.getCurrentPassword().isEmpty()) {
-            String storedHash = (usuario.getPassword() != null && usuario.getPassword().startsWith("{GOOGLE}")) ? 
-                    usuario.getPassword().substring(8) : usuario.getPassword();
+            if (usuario.getPassword() != null && usuario.getPassword().startsWith("{GOOGLE}")) {
+                throw new RuntimeException("Las cuentas de Google no tienen contraseña actual. Deja este campo en blanco.");
+            }
+            
+            String storedHash = usuario.getPassword();
                     
-            if (!passwordEncoder.matches(request.getCurrentPassword(), storedHash)) {
+            if (storedHash == null || !passwordEncoder.matches(request.getCurrentPassword(), storedHash)) {
                 throw new RuntimeException("Contraseña actual incorrecta");
             }
             if (request.getNewPassword() != null && !request.getNewPassword().isEmpty()) {

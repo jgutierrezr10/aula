@@ -69,6 +69,9 @@ export class Navbar implements OnInit {
     this.authService.actualizarCuenta(request).subscribe({
       next: (res) => {
         this.nombreUsuario = res.nombre;
+        if (res.token) {
+          localStorage.setItem('token', res.token);
+        }
         this.successMsg = '¡Cuenta actualizada con éxito!';
         this.currentPassword = '';
         this.newPassword = '';
