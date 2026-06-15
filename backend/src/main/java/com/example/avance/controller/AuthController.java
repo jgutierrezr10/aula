@@ -25,6 +25,17 @@ public class AuthController {
         return ResponseEntity.ok(usuarioService.login(request));
     }
 
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+        try {
+            return ResponseEntity.ok(usuarioService.verifyEmail(email, code));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
     @PostMapping("/google")
     public ResponseEntity<AuthResponse> googleLogin(@RequestBody Map<String, String> request) {
         String token = request.get("token");

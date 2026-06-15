@@ -22,8 +22,13 @@ export class AuthService {
   }
 
   register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
-      tap(res => this.guardarSesion(res))
+    // Al registrar manualmente, ahora devuelve un AuthResponse sin token porque requiere verificación
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data);
+  }
+
+  verifyEmail(email: string, code: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/verify-email`, { email, code }).pipe(
+      tap(res => this.guardarSesion(res, true))
     );
   }
 
@@ -47,6 +52,14 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/google`, { token }).pipe(
       tap(res => this.guardarSesion(res, true)) // Por defecto lo recordamos
     );
+  }
+
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, { token, newPassword });
   }
 
   logout() {

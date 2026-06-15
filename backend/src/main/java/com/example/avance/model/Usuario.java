@@ -22,6 +22,9 @@ public class Usuario {
     @Column(unique = true, nullable = false)
     private String nombre;
 
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean verificado = true;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Ramo> ramos;
 }

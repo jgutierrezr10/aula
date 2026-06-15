@@ -105,5 +105,68 @@ export class LoginComponent implements AfterViewInit {
     });
   }
 
+  recuperarPassword() {
+    Swal.fire({
+      title: 'Recuperar Contraseña',
+      text: 'Ingresa el correo electrónico asociado a tu cuenta',
+      input: 'email',
+      inputPlaceholder: 'tu@email.com',
+      showCancelButton: true,
+      confirmButtonText: 'Enviar código',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#6C63FF',
+      showLoaderOnConfirm: true,
+      preConfirm: (emailStr) => {
+        if (!emailStr) {
+          Swal.showValidationMessage('El correo es obligatorio');
+          return false;
+        }
+        return this.authService.forgotPassword(emailStr).toPromise().catch(err => {
+          Swal.showValidationMessage(err.error?.message || 'Error al solicitar recuperación');
+        });
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Pedir el código y la nueva contraseña
+        Swal.fire({
+          title: 'Código enviado',
+          html: `
+            <p>Revisa tu correo e ingresa el código y tu nueva contraseña.</p>
+            <input type="text" id="reset-token" class="swal2-input" placeholder="Código de recuperación (UUID)">
+            <input type="password" id="reset-pass" class="swal2-input" placeholder="Nueva contraseña">
+          `,
+          confirmButtonText: 'Cambiar contraseña',
+          confirmButtonColor: '#6C63FF',
+          showCancelButton: true,
+          cancelButtonText: 'Cancelar',
+          preConfirm: () => {
+            const token = (document.getElementById('reset-token') as HTMLInputElement).value;
+            const newPass = (document.getElementById('reset-pass') as HTMLInputElement).value;
+            if (!token || !newPass) {
+              Swal.showValidationMessage('Debes ingresar el código y la nueva contraseña');
+              return false;
+            }
+            if (newPass.length < 6) {
+              Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres');
+              return false;
+            }
+            return this.authService.resetPassword(token, newPass).toPromise().catch(err => {
+              Swal.showValidationMessage(err.error?.message || 'Error al cambiar contraseña');
+            });
+          }
+        }).then((resetResult) => {
+          if (resetResult.isConfirmed) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Contraseña actualizada!',
+              text: 'Ya puedes iniciar sesión con tu nueva contraseña.',
+              confirmButtonColor: '#6C63FF'
+            });
+          }
+        });
+      }
+    });
+  }
 
 }

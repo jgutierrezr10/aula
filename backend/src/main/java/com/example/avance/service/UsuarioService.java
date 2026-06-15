@@ -5,6 +5,8 @@ import com.example.avance.model.Usuario;
 import com.example.avance.repository.UsuarioRepository;
 import com.example.avance.model.PasswordResetToken;
 import com.example.avance.repository.PasswordResetTokenRepository;
+import com.example.avance.model.VerificationToken;
+import com.example.avance.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +23,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordResetTokenRepository tokenRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final JavaMailSender mailSender;
@@ -36,6 +40,7 @@ public class UsuarioService {
     @Value("${google.client.id}")
     private String googleClientId;
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (request.getEmail() == null || !request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new RuntimeException("El formato del correo electrónico no es válido");
@@ -51,11 +56,66 @@ public class UsuarioService {
         usuario.setNombre(request.getNombre());
         usuario.setEmail(request.getEmail());
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        usuario.setVerificado(false); // Manualmente no verificado
 
         usuarioRepository.save(usuario);
 
-        String token = jwtService.generateToken(usuario.getEmail());
-        return new AuthResponse(token, usuario.getNombre(), usuario.getEmail());
+        // Generar código de 6 dígitos
+        String code = String.format("%06d", new Random().nextInt(999999));
+        
+        VerificationToken vToken = new VerificationToken();
+        vToken.setToken(code);
+        vToken.setUsuario(usuario);
+        vToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+        verificationTokenRepository.save(vToken);
+
+        // Enviar correo
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(usuario.getEmail());
+            message.setSubject("AULA - Verifica tu correo");
+            message.setText("Hola " + usuario.getNombre() + ",\n\n" +
+                    "Gracias por registrarte en AULA.\n" +
+                    "Tu código de verificación es: " + code + "\n\n" +
+                    "Ingresa este código en la aplicación para activar tu cuenta.\n" +
+                    "El código expirará en 15 minutos.\n\n" +
+                    "Saludos,\nEl equipo de AULA");
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("Error al enviar el correo a " + usuario.getEmail(), e);
+            throw new RuntimeException("Usuario registrado, pero hubo un error al enviar el correo de verificación.");
+        }
+
+        return new AuthResponse(null, usuario.getNombre(), usuario.getEmail());
+    }
+
+    @Transactional
+    public AuthResponse verifyEmail(String email, String code) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                
+        if (usuario.isVerificado()) {
+            throw new RuntimeException("El usuario ya está verificado");
+        }
+
+        VerificationToken vToken = verificationTokenRepository.findByUsuario(usuario)
+                .orElseThrow(() -> new RuntimeException("No hay código pendiente para este usuario"));
+
+        if (!vToken.getToken().equals(code)) {
+            throw new RuntimeException("Código de verificación incorrecto");
+        }
+
+        if (vToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            verificationTokenRepository.delete(vToken);
+            throw new RuntimeException("El código de verificación ha expirado");
+        }
+
+        usuario.setVerificado(true);
+        usuarioRepository.save(usuario);
+        verificationTokenRepository.delete(vToken);
+
+        String jwtToken = jwtService.generateToken(usuario.getEmail());
+        return new AuthResponse(jwtToken, usuario.getNombre(), usuario.getEmail());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -66,6 +126,10 @@ public class UsuarioService {
 
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
             throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        if (!usuario.isVerificado()) {
+            throw new RuntimeException("Por favor verifica tu correo electrónico antes de iniciar sesión");
         }
 
         String token = jwtService.generateToken(usuario.getEmail());
@@ -100,6 +164,10 @@ public class UsuarioService {
                     
                     // Asignamos una contraseña aleatoria muy compleja ya que el usuario usará Google
                     usuario.setPassword(passwordEncoder.encode(UUID.randomUUID().toString() + UUID.randomUUID().toString()));
+                    usuario.setVerificado(true);
+                    usuarioRepository.save(usuario);
+                } else if (!usuario.isVerificado()) {
+                    usuario.setVerificado(true);
                     usuarioRepository.save(usuario);
                 }
 

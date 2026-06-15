@@ -59,7 +59,46 @@ export class RegisterComponent {
       password: this.password
     }).subscribe({
       next: () => {
-        this.router.navigate(['/dashboard']);
+        this.cargando = false;
+        this.cdr.detectChanges();
+        
+        Swal.fire({
+          title: '¡Revisa tu correo!',
+          text: `Hemos enviado un código de 6 dígitos a ${this.email}. Ingresa el código para verificar tu cuenta:`,
+          input: 'text',
+          inputAttributes: {
+            autocapitalize: 'off',
+            maxlength: '6',
+            pattern: '[0-9]*'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Verificar',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#6C63FF',
+          showLoaderOnConfirm: true,
+          preConfirm: (code) => {
+            if (!code || code.length !== 6) {
+              Swal.showValidationMessage('El código debe tener 6 dígitos');
+              return false;
+            }
+            return this.authService.verifyEmail(this.email.trim(), code).toPromise().catch(err => {
+              Swal.showValidationMessage(err.error?.message || 'Código incorrecto o expirado');
+            });
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.isConfirmed && result.value) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Cuenta verificada!',
+              text: 'Iniciando sesión...',
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => {
+              this.router.navigate(['/dashboard']);
+            });
+          }
+        });
       },
       error: (err) => {
         const mensajeError = err.error?.message || 'Error al conectar con el servidor. Intenta nuevamente.';
