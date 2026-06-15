@@ -45,7 +45,7 @@ export class LoginComponent implements AfterViewInit {
     });
     google.accounts.id.renderButton(
       document.getElementById('google-btn'),
-      { theme: 'outline', size: 'large', width: '100%' } // personaliza según el diseño
+      { theme: 'outline', size: 'large', width: 350 } // El ancho en píxeles
     );
   }
 
