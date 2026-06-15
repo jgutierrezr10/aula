@@ -126,8 +126,19 @@
               <ng-container *ngIf="editandoEvId !== ev.id">
                 <span class="col-name val-name">{{ ev.nombre }}</span>
                 <span class="col-date val-date">{{ formatFecha(ev.fecha) }}</span>
-                <span class="col-weight val-weight">
-                  {{ ev.ponderacion > 0 ? ev.ponderacion + '%' : 'Tarea/Otro' }}
+                <span class="col-weight val-weight" style="display: flex; align-items: center; gap: 2px;">
+                  <input 
+                    *ngIf="ev.ponderacion > 0"
+                    type="number" 
+                    [value]="ev.ponderacion" 
+                    (input)="onPonderacionInput($event)"
+                    (blur)="onPonderacionBlur($event, ev, ramo.id!)"
+                    class="grade-input"
+                    min="1" max="100"
+                    style="width: 45px; padding: 0.2rem; text-align: center;"
+                  >
+                  <span *ngIf="ev.ponderacion > 0" style="font-size: 0.8rem;">%</span>
+                  <span *ngIf="ev.ponderacion === 0">Tarea/Otro</span>
                 </span>
                 <span class="col-grade val-grade">
                   <input 

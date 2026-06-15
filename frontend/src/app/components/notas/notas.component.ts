@@ -205,6 +205,8 @@ export class NotasComponent implements OnInit {
 
   onNotaInput(event: Event, ev: Evaluacion, ramoId: number) {
     const input = event.target as HTMLInputElement;
+    const inputEvent = event as InputEvent;
+    const isDeleting = inputEvent.inputType === 'deleteContentBackward' || inputEvent.inputType === 'deleteContentForward';
     let val = input.value;
 
     // Solo permitir números y un punto decimal
@@ -223,9 +225,11 @@ export class NotasComponent implements OnInit {
       val = partsAfterDot[0] + '.' + partsAfterDot[1].slice(-1);
     }
 
-    // Poner el punto automáticamente si ingresan un solo dígito del 1 al 7
-    if (/^[1-7]$/.test(val)) {
-      val = val + '.';
+    if (!isDeleting) {
+      // Poner el punto automáticamente si ingresan un solo dígito del 1 al 7
+      if (/^[1-7]$/.test(val)) {
+        val = val + '.';
+      }
     }
 
     // Poner el punto automáticamente si escriben dos dígitos seguidos sin él (ej: "55" -> "5.5")
@@ -272,6 +276,8 @@ export class NotasComponent implements OnInit {
 
   onNotaInputEdit(event: Event) {
     const input = event.target as HTMLInputElement;
+    const inputEvent = event as InputEvent;
+    const isDeleting = inputEvent.inputType === 'deleteContentBackward' || inputEvent.inputType === 'deleteContentForward';
     let val = input.value;
 
     val = val.replace(/[^0-9.]/g, '');
@@ -286,9 +292,11 @@ export class NotasComponent implements OnInit {
       val = partsAfterDot[0] + '.' + partsAfterDot[1].slice(-1);
     }
 
-    // Poner el punto automáticamente si ingresan un solo dígito del 1 al 7
-    if (/^[1-7]$/.test(val)) {
-      val = val + '.';
+    if (!isDeleting) {
+      // Poner el punto automáticamente si ingresan un solo dígito del 1 al 7
+      if (/^[1-7]$/.test(val)) {
+        val = val + '.';
+      }
     }
 
     if (/^[0-9]{2}$/.test(val)) {
@@ -350,6 +358,58 @@ export class NotasComponent implements OnInit {
           this.errorMsg[ramoId] = 'Error al actualizar la nota.';
           this.cdr.detectChanges();
           console.error(err);
+        }
+      });
+    }
+  }
+
+  onPonderacionInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let val = input.value.replace(/[^0-9]/g, '');
+    let num = parseInt(val, 10);
+    if (!isNaN(num) && num > 100) val = '100';
+    input.value = val;
+  }
+
+  onPonderacionBlur(event: Event, ev: Evaluacion, ramoId: number) {
+    const input = event.target as HTMLInputElement;
+    let val = input.value.trim();
+    if (val === '') val = '1';
+    let num = parseInt(val, 10);
+    if (isNaN(num)) num = 1;
+    if (num < 1) num = 1;
+    if (num > 100) num = 100;
+    
+    input.value = num.toString();
+    this.actualizarPonderacionSilenciosa(ev, num, ramoId, input);
+  }
+
+  actualizarPonderacionSilenciosa(ev: Evaluacion, ponderacion: number, ramoId: number, inputEl: HTMLInputElement) {
+    if (ev.ponderacion === ponderacion) return;
+    this.errorMsg[ramoId] = '';
+    
+    const evs = this.evaluacionesPorRamo[ramoId] || [];
+    const sumaExcluyendoActual = evs
+      .filter(e => e.id !== ev.id)
+      .reduce((sum, e) => sum + e.ponderacion, 0);
+
+    if (sumaExcluyendoActual + ponderacion > 100) {
+      this.errorMsg[ramoId] = `La ponderación excede el 100% (sería ${sumaExcluyendoActual + ponderacion}%).`;
+      inputEl.value = ev.ponderacion.toString(); // Revertir visualmente
+      this.cdr.detectChanges();
+      return;
+    }
+
+    ev.ponderacion = ponderacion;
+    this.recalcularPromedioLocal(ramoId);
+    this.cdr.detectChanges();
+
+    if (ev.id) {
+      this.evaluacionService.actualizarEvaluacion(ev.id, ev).subscribe({
+        next: () => {},
+        error: (err) => {
+          this.errorMsg[ramoId] = 'Error al actualizar ponderación.';
+          this.cdr.detectChanges();
         }
       });
     }
