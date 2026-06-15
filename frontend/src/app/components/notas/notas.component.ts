@@ -223,6 +223,11 @@ export class NotasComponent implements OnInit {
       val = partsAfterDot[0] + '.' + partsAfterDot[1].slice(-1);
     }
 
+    // Poner el punto automáticamente si ingresan un solo dígito del 1 al 7
+    if (/^[1-7]$/.test(val)) {
+      val = val + '.';
+    }
+
     // Poner el punto automáticamente si escriben dos dígitos seguidos sin él (ej: "55" -> "5.5")
     if (/^[0-9]{2}$/.test(val)) {
       val = val[0] + '.' + val[1];
@@ -279,6 +284,11 @@ export class NotasComponent implements OnInit {
     const partsAfterDot = val.split('.');
     if (partsAfterDot.length === 2 && partsAfterDot[1].length > 1) {
       val = partsAfterDot[0] + '.' + partsAfterDot[1].slice(-1);
+    }
+
+    // Poner el punto automáticamente si ingresan un solo dígito del 1 al 7
+    if (/^[1-7]$/.test(val)) {
+      val = val + '.';
     }
 
     if (/^[0-9]{2}$/.test(val)) {
