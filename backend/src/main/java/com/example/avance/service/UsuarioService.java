@@ -155,7 +155,12 @@ public class UsuarioService {
                     name = email.split("@")[0];
                 }
 
-                Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+                String emailNormalizado = email.trim().toLowerCase();
+                Usuario usuario = usuarioRepository.findByEmail(emailNormalizado).orElse(null);
+                // Fallback: buscar sin normalizar por si el correo fue guardado diferente
+                if (usuario == null) {
+                    usuario = usuarioRepository.findByEmail(email).orElse(null);
+                }
                 
                 if (usuario == null) {
                     // Crear nuevo usuario si no existe
