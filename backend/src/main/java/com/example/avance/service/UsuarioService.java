@@ -70,7 +70,7 @@ public class UsuarioService {
         vToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         verificationTokenRepository.save(vToken);
 
-        // Enviar correo (no bloqueante: si falla, devolvemos respuesta igualmente para no perder el registro)
+        // Enviar correo (no bloqueante de forma asíncrona)
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(usuario.getEmail());
@@ -81,11 +81,17 @@ public class UsuarioService {
                     "Ingresa este código en la aplicación para activar tu cuenta.\n" +
                     "El código expirará en 15 minutos.\n\n" +
                     "Saludos,\nEl equipo de AULA");
-            mailSender.send(message);
+            
+            CompletableFuture.runAsync(() -> {
+                try {
+                    mailSender.send(message);
+                    log.info("Correo de verificación enviado a: " + usuario.getEmail());
+                } catch (Exception e) {
+                    log.error("Error al enviar el correo de verificación a " + usuario.getEmail() + ".", e);
+                }
+            });
         } catch (Exception e) {
-            log.error("Error al enviar el correo de verificación a " + usuario.getEmail() + ". El usuario quedó registrado pero no verificado.", e);
-            // No relanzamos la excepción: el usuario quedó guardado y el token también.
-            // El frontend mostrará la ventana de código de todas formas.
+            log.error("Error al preparar el correo de verificación.", e);
         }
 
         return new AuthResponse(null, usuario.getNombre(), usuario.getEmail());
@@ -126,10 +132,10 @@ public class UsuarioService {
                 .or(() -> usuarioRepository.findByNombre(request.getEmail()))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        String storedHash = usuario.getPassword().startsWith("{GOOGLE}") ? 
+        String storedHash = (usuario.getPassword() != null && usuario.getPassword().startsWith("{GOOGLE}")) ? 
                 usuario.getPassword().substring(8) : usuario.getPassword();
 
-        if (!passwordEncoder.matches(request.getPassword(), storedHash)) {
+        if (storedHash == null || !passwordEncoder.matches(request.getPassword(), storedHash)) {
             throw new RuntimeException("Contraseña incorrecta");
         }
 
@@ -210,7 +216,7 @@ public class UsuarioService {
 
         // Validar contraseña actual si se quiere cambiar la contraseña o el email
         if (request.getCurrentPassword() != null && !request.getCurrentPassword().isEmpty()) {
-            String storedHash = usuario.getPassword().startsWith("{GOOGLE}") ? 
+            String storedHash = (usuario.getPassword() != null && usuario.getPassword().startsWith("{GOOGLE}")) ? 
                     usuario.getPassword().substring(8) : usuario.getPassword();
                     
             if (!passwordEncoder.matches(request.getCurrentPassword(), storedHash)) {
@@ -220,7 +226,7 @@ public class UsuarioService {
                 usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
             }
         } else if (request.getNewPassword() != null && !request.getNewPassword().isEmpty()) {
-            if (usuario.getPassword().startsWith("{GOOGLE}")) {
+            if (usuario.getPassword() != null && usuario.getPassword().startsWith("{GOOGLE}")) {
                 usuario.setPassword(passwordEncoder.encode(request.getNewPassword()));
             } else {
                 throw new RuntimeException("Debe ingresar su contraseña actual para establecer una nueva");
