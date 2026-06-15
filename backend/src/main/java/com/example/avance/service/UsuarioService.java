@@ -148,7 +148,12 @@ public class UsuarioService {
             if (idToken != null) {
                 GoogleIdToken.Payload payload = idToken.getPayload();
                 String email = payload.getEmail();
+                // Google puede no devolver el nombre si el perfil no lo tiene configurado
                 String name = (String) payload.get("name");
+                if (name == null || name.isBlank()) {
+                    // Usamos la parte del correo antes del @ como nombre de fallback
+                    name = email.split("@")[0];
+                }
 
                 Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
                 
@@ -159,6 +164,7 @@ public class UsuarioService {
                     
                     // Si el nombre ya existe, le agregamos un sufijo aleatorio corto
                     String baseName = name.replaceAll("\\s+", "");
+                    if (baseName.isEmpty()) baseName = "usuario";
                     if (usuarioRepository.existsByNombre(baseName)) {
                         baseName = baseName + UUID.randomUUID().toString().substring(0, 4);
                     }
@@ -176,10 +182,13 @@ public class UsuarioService {
                 String token = jwtService.generateToken(usuario.getEmail());
                 return new AuthResponse(token, usuario.getNombre(), usuario.getEmail());
             } else {
-                throw new RuntimeException("Token de Google inválido");
+                throw new RuntimeException("Token de Google inválido o expirado");
             }
+        } catch (RuntimeException e) {
+            // Re-lanzamos RuntimeExceptions directamente (ya tienen un mensaje claro)
+            throw e;
         } catch (Exception e) {
-            log.error("Error al verificar token de Google", e);
+            log.error("Error inesperado al verificar token de Google", e);
             throw new RuntimeException("Error al autenticar con Google: " + e.getMessage());
         }
     }
