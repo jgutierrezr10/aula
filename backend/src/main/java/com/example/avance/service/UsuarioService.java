@@ -268,7 +268,7 @@ public class UsuarioService {
         PasswordResetToken resetToken = tokenRepository.findByUsuario(usuario)
                 .orElse(new PasswordResetToken());
 
-        String token = UUID.randomUUID().toString();
+        String token = String.format("%06d", new java.util.Random().nextInt(999999));
         resetToken.setToken(token);
         resetToken.setUsuario(usuario);
         resetToken.setExpiryDate(LocalDateTime.now().plusHours(1)); // 1 hora de validez
