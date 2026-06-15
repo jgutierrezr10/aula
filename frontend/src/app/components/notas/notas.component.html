@@ -144,7 +144,8 @@
                   <input 
                     *ngIf="ev.ponderacion > 0"
                     type="text" 
-                    [value]="formatNotaDisplay(ev.nota)" 
+                    [id]="'input-nota-' + ev.id"
+                    [value]="formatNotaDisplay(ev.nota, 'input-nota-' + ev.id)" 
                     (input)="onNotaInput($event, ev, ramo.id!)"
                     (blur)="onNotaBlur($event, ev, ramo.id!)"
                     placeholder="--"
@@ -192,7 +193,8 @@
                   <input 
                     *ngIf="evEditando.ponderacion !== 0"
                     type="text" 
-                    [value]="formatNotaDisplay(evEditando.nota)"
+                    [id]="'input-edit-nota-' + ev.id"
+                    [value]="formatNotaDisplay(evEditando.nota, 'input-edit-nota-' + ev.id)"
                     (input)="onNotaInputEdit($event)"
                     (blur)="onNotaBlurEdit($event)"
                     placeholder="--"
