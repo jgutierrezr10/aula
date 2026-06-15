@@ -12,8 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Value;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -36,7 +39,12 @@ public class UsuarioService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final JavaMailSender mailSender;
+
+    @Value("${brevo.api.key:}")
+    private String brevoApiKey;
+
+    @Value("${brevo.sender.email:tu_correo@gmail.com}")
+    private String senderEmail;
 
     @Value("${google.client.id}")
     private String googleClientId;
@@ -70,21 +78,19 @@ public class UsuarioService {
         vToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         verificationTokenRepository.save(vToken);
 
-        // Enviar correo (no bloqueante de forma asíncrona)
+        // Enviar correo (no bloqueante de forma asíncrona mediante HTTP API)
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(usuario.getEmail());
-            message.setSubject("AULA - Verifica tu correo");
-            message.setText("Hola " + usuario.getNombre() + ",\n\n" +
+            String subject = "AULA - Verifica tu correo";
+            String textContent = "Hola " + usuario.getNombre() + ",\n\n" +
                     "Gracias por registrarte en AULA.\n" +
                     "Tu código de verificación es: " + code + "\n\n" +
                     "Ingresa este código en la aplicación para activar tu cuenta.\n" +
                     "El código expirará en 15 minutos.\n\n" +
-                    "Saludos,\nEl equipo de AULA");
+                    "Saludos,\nEl equipo de AULA";
             
             CompletableFuture.runAsync(() -> {
                 try {
-                    mailSender.send(message);
+                    enviarCorreoBrevo(usuario.getEmail(), usuario.getNombre(), subject, textContent);
                     log.info("Correo de verificación enviado a: " + usuario.getEmail());
                 } catch (Exception e) {
                     log.error("Error al enviar el correo de verificación a " + usuario.getEmail() + ".", e);
@@ -268,21 +274,19 @@ public class UsuarioService {
         resetToken.setExpiryDate(LocalDateTime.now().plusHours(1)); // 1 hora de validez
         tokenRepository.save(resetToken);
 
-        // Enviando el correo real en segundo plano
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("AULA - Recuperación de Contraseña");
-        message.setText("Hola " + usuario.getNombre() + ",\n\n" +
+        // Enviando el correo real en segundo plano usando la API
+        String subject = "AULA - Recuperación de Contraseña";
+        String textContent = "Hola " + usuario.getNombre() + ",\n\n" +
                 "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.\n" +
                 "Tu código de recuperación es: " + token + "\n\n" +
                 "Ingresa este código en la aplicación junto con tu nueva contraseña.\n" +
                 "Este código expirará en 1 hora.\n\n" +
                 "Si no solicitaste este cambio, ignora este mensaje.\n\n" +
-                "Saludos,\nEl equipo de AULA");
+                "Saludos,\nEl equipo de AULA";
 
         CompletableFuture.runAsync(() -> {
             try {
-                mailSender.send(message);
+                enviarCorreoBrevo(email, usuario.getNombre(), subject, textContent);
                 log.info("Correo de recuperación enviado exitosamente a: " + email);
             } catch (Exception e) {
                 log.error("Error al enviar el correo de recuperación a " + email, e);
@@ -308,5 +312,47 @@ public class UsuarioService {
 
         // Eliminar el token ya usado
         tokenRepository.delete(resetToken);
+    }
+
+    private void enviarCorreoBrevo(String toEmail, String toName, String subject, String textContent) {
+        if (brevoApiKey == null || brevoApiKey.isEmpty()) {
+            log.warn("La API Key de Brevo no está configurada. El correo no se enviará.");
+            return;
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "https://api.brevo.com/v3/smtp/email";
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", brevoApiKey);
+        headers.set("accept", "application/json");
+
+        String htmlContent = "<html><body style='font-family: Arial, sans-serif; color: #333; line-height: 1.6;'>" + 
+                             textContent.replace("\n", "<br>") + "</body></html>";
+
+        java.util.Map<String, Object> body = new java.util.HashMap<>();
+        
+        java.util.Map<String, String> sender = new java.util.HashMap<>();
+        sender.put("name", "AULA App");
+        sender.put("email", senderEmail);
+        body.put("sender", sender);
+        
+        java.util.List<java.util.Map<String, String>> to = new java.util.ArrayList<>();
+        java.util.Map<String, String> toUser = new java.util.HashMap<>();
+        toUser.put("email", toEmail);
+        toUser.put("name", toName != null ? toName : "");
+        to.add(toUser);
+        body.put("to", to);
+        
+        body.put("subject", subject);
+        body.put("htmlContent", htmlContent);
+
+        HttpEntity<java.util.Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Error desde la API de Brevo: " + response.getBody());
+        }
     }
 }
