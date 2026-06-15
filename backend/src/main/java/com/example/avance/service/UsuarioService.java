@@ -12,8 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.beans.factory.annotation.Value;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.UUID;
 
 @Service
@@ -27,7 +33,13 @@ public class UsuarioService {
     private final JwtService jwtService;
     private final JavaMailSender mailSender;
 
+    @Value("${google.client.id}")
+    private String googleClientId;
+
     public AuthResponse register(RegisterRequest request) {
+        if (request.getEmail() == null || !request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new RuntimeException("El formato del correo electrónico no es válido");
+        }
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }
@@ -58,6 +70,48 @@ public class UsuarioService {
 
         String token = jwtService.generateToken(usuario.getEmail());
         return new AuthResponse(token, usuario.getNombre(), usuario.getEmail());
+    }
+
+    public AuthResponse googleLogin(String googleToken) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(googleToken);
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+                String email = payload.getEmail();
+                String name = (String) payload.get("name");
+
+                Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+                
+                if (usuario == null) {
+                    // Crear nuevo usuario si no existe
+                    usuario = new Usuario();
+                    usuario.setEmail(email);
+                    
+                    // Si el nombre ya existe, le agregamos un sufijo aleatorio corto
+                    String baseName = name.replaceAll("\\s+", "");
+                    if (usuarioRepository.existsByNombre(baseName)) {
+                        baseName = baseName + UUID.randomUUID().toString().substring(0, 4);
+                    }
+                    usuario.setNombre(baseName);
+                    
+                    // Asignamos una contraseña aleatoria muy compleja ya que el usuario usará Google
+                    usuario.setPassword(passwordEncoder.encode(UUID.randomUUID().toString() + UUID.randomUUID().toString()));
+                    usuarioRepository.save(usuario);
+                }
+
+                String token = jwtService.generateToken(usuario.getEmail());
+                return new AuthResponse(token, usuario.getNombre(), usuario.getEmail());
+            } else {
+                throw new RuntimeException("Token de Google inválido");
+            }
+        } catch (Exception e) {
+            log.error("Error al verificar token de Google", e);
+            throw new RuntimeException("Error al autenticar con Google: " + e.getMessage());
+        }
     }
 
     public AuthResponse actualizarCuenta(UpdateUserRequest request, String currentEmail) {

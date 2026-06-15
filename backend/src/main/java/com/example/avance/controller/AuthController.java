@@ -25,6 +25,12 @@ public class AuthController {
         return ResponseEntity.ok(usuarioService.login(request));
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleLogin(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        return ResponseEntity.ok(usuarioService.googleLogin(token));
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");

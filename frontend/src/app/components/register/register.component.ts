@@ -37,6 +37,11 @@ export class RegisterComponent {
       this.error = 'El email es obligatorio';
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email.trim())) {
+      this.error = 'Ingresa un formato de correo válido (ej: correo@ejemplo.com)';
+      return;
+    }
     if (!this.password || this.password.length < 6) {
       this.error = 'La contraseña debe tener al menos 6 caracteres';
       return;
