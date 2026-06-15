@@ -162,8 +162,10 @@ public class UsuarioService {
                     usuario = usuarioRepository.findByEmail(email).orElse(null);
                 }
                 
+                boolean esNuevoUsuario = false;
                 if (usuario == null) {
                     // Crear nuevo usuario si no existe
+                    esNuevoUsuario = true;
                     usuario = new Usuario();
                     usuario.setEmail(email);
                     
@@ -185,7 +187,7 @@ public class UsuarioService {
                 }
 
                 String token = jwtService.generateToken(usuario.getEmail());
-                return new AuthResponse(token, usuario.getNombre(), usuario.getEmail());
+                return new AuthResponse(token, usuario.getNombre(), usuario.getEmail(), esNuevoUsuario);
             } else {
                 throw new RuntimeException("Token de Google inválido o expirado");
             }
@@ -250,25 +252,26 @@ public class UsuarioService {
         resetToken.setExpiryDate(LocalDateTime.now().plusHours(1)); // 1 hora de validez
         tokenRepository.save(resetToken);
 
-        // Enviando el correo real
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(email);
-            message.setSubject("AULA - Recuperación de Contraseña");
-            message.setText("Hola " + usuario.getNombre() + ",\n\n" +
-                    "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.\n" +
-                    "Tu código de recuperación es: " + token + "\n\n" +
-                    "Ingresa este código en la aplicación junto con tu nueva contraseña.\n" +
-                    "Este código expirará en 1 hora.\n\n" +
-                    "Si no solicitaste este cambio, ignora este mensaje.\n\n" +
-                    "Saludos,\nEl equipo de AULA");
+        // Enviando el correo real en segundo plano
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("AULA - Recuperación de Contraseña");
+        message.setText("Hola " + usuario.getNombre() + ",\n\n" +
+                "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.\n" +
+                "Tu código de recuperación es: " + token + "\n\n" +
+                "Ingresa este código en la aplicación junto con tu nueva contraseña.\n" +
+                "Este código expirará en 1 hora.\n\n" +
+                "Si no solicitaste este cambio, ignora este mensaje.\n\n" +
+                "Saludos,\nEl equipo de AULA");
 
-            mailSender.send(message);
-            log.info("Correo de recuperación enviado exitosamente a: " + email);
-        } catch (Exception e) {
-            log.error("Error al enviar el correo a " + email, e);
-            throw new RuntimeException("Error al enviar el correo de recuperación. Por favor intenta más tarde.");
-        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                mailSender.send(message);
+                log.info("Correo de recuperación enviado exitosamente a: " + email);
+            } catch (Exception e) {
+                log.error("Error al enviar el correo de recuperación a " + email, e);
+            }
+        });
 
         return "Si el correo existe, se ha enviado un código de recuperación.";
     }

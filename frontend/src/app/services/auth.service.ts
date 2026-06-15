@@ -39,7 +39,8 @@ export class AuthService {
   }
 
   actualizarCuenta(data: UpdateUserRequest): Observable<AuthResponse> {
-    return this.http.put<AuthResponse>(`${this.apiUrl}/usuarios/cuenta`, data).pipe(
+    const usuariosUrl = environment.apiUrl + '/api/usuarios';
+    return this.http.put<AuthResponse>(`${usuariosUrl}/cuenta`, data).pipe(
       tap(res => {
         // Maintain the same storage type that was previously used
         const useLocalStorage = !!localStorage.getItem('usuario');

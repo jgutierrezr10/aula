@@ -11,6 +11,7 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@CrossOrigin(origins = "https://aulaproject.vercel.app", allowedHeaders = "*", allowCredentials = "true")
 @RequiredArgsConstructor
 public class UsuarioController {
 

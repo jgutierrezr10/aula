@@ -55,10 +55,39 @@ export class LoginComponent implements AfterViewInit {
     this.cdr.detectChanges();
     
     this.authService.loginWithGoogle(response.credential).subscribe({
-      next: () => {
-        this.ngZone.run(() => {
-          this.router.navigate(['/dashboard']);
-        });
+      next: (res) => {
+        if (res.nuevoUsuario) {
+          // Es un usuario nuevo: pedirle nombre y contraseña
+          this.cargando = false;
+          this.cdr.detectChanges();
+          Swal.fire({
+            title: '¡Bienvenido!',
+            html: `
+              <p style="margin-bottom:12px">Antes de continuar, elige un <b>nombre de usuario</b> y una <b>contraseña</b> para poder ingresar también sin Google.</p>
+              <input type="text" id="nuevo-nombre" class="swal2-input" placeholder="Nombre de usuario" maxlength="30">
+              <input type="password" id="nuevo-pass" class="swal2-input" placeholder="Contraseña (mín. 6 caracteres)">
+            `,
+            confirmButtonText: 'Guardar y Entrar',
+            confirmButtonColor: '#6C63FF',
+            allowOutsideClick: false,
+            preConfirm: () => {
+              const nombre = (document.getElementById('nuevo-nombre') as HTMLInputElement).value.trim();
+              const pass = (document.getElementById('nuevo-pass') as HTMLInputElement).value;
+              if (!nombre) { Swal.showValidationMessage('El nombre de usuario es obligatorio'); return false; }
+              if (nombre.length < 3) { Swal.showValidationMessage('El nombre debe tener al menos 3 caracteres'); return false; }
+              if (!pass || pass.length < 6) { Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres'); return false; }
+              return this.authService.actualizarCuenta({ nombre, newPassword: pass }).toPromise().catch(err => {
+                Swal.showValidationMessage(err.error?.message || 'Error al guardar los datos');
+              });
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.ngZone.run(() => this.router.navigate(['/dashboard']));
+            }
+          });
+        } else {
+          this.ngZone.run(() => this.router.navigate(['/dashboard']));
+        }
       },
       error: (err) => {
         this.error = 'Error al iniciar sesión con Google';
@@ -107,18 +136,36 @@ export class LoginComponent implements AfterViewInit {
 
   recuperarPassword() {
     Swal.fire({
-      title: 'Recuperar Contraseña',
-      text: 'Ingresa el correo electrónico asociado a tu cuenta',
-      input: 'email',
-      inputPlaceholder: 'tu@email.com',
+      title: '<span style="font-size: 26px; font-weight: 700; color: #333;">Recuperar Contraseña</span>',
+      html: `
+        <div style="text-align: center; margin-bottom: 25px;">
+          <div style="background: #EEEDFF; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <svg style="width: 40px; height: 40px; color: #6C63FF;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </div>
+          <p style="color: #666; font-size: 16px; margin: 0; line-height: 1.5;">Ingresa el correo electrónico asociado a tu cuenta y te enviaremos un código para restablecer tu acceso.</p>
+        </div>
+        <input type="email" id="forgot-email" class="swal2-input" placeholder="Ingresa tu correo: tu@email.com" style="border-radius: 12px; font-size: 16px; padding: 15px; width: 85%; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      `,
       showCancelButton: true,
-      confirmButtonText: 'Enviar código',
+      confirmButtonText: 'Enviar Código',
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#6C63FF',
+      cancelButtonColor: '#d33',
+      customClass: {
+        confirmButton: 'rounded-button',
+        cancelButton: 'rounded-button',
+        popup: 'modern-popup'
+      },
       showLoaderOnConfirm: true,
-      preConfirm: (emailStr) => {
+      preConfirm: () => {
+        const emailStr = (document.getElementById('forgot-email') as HTMLInputElement).value.trim();
         if (!emailStr) {
           Swal.showValidationMessage('El correo es obligatorio');
+          return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailStr)) {
+          Swal.showValidationMessage('Por favor ingresa un correo válido');
           return false;
         }
         return this.authService.forgotPassword(emailStr).toPromise().catch(err => {
@@ -127,21 +174,40 @@ export class LoginComponent implements AfterViewInit {
       },
       allowOutsideClick: () => !Swal.isLoading()
     }).then((result) => {
-      if (result.isConfirmed && result.value) {
-        // Pedir el código y la nueva contraseña
+      if (result.isConfirmed) {
         Swal.fire({
-          title: 'Código enviado',
+          title: '<span style="font-size: 26px; font-weight: 700; color: #333;">Código Enviado</span>',
           html: `
-            <p>Revisa tu correo e ingresa el código y tu nueva contraseña.</p>
-            <input type="text" id="reset-token" class="swal2-input" placeholder="Código de recuperación (UUID)">
-            <input type="password" id="reset-pass" class="swal2-input" placeholder="Nueva contraseña">
+            <div style="text-align: center; margin-bottom: 25px;">
+              <div style="background: #E8F5E9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                <svg style="width: 40px; height: 40px; color: #4CAF50;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <p style="color: #666; font-size: 15px; margin: 0; line-height: 1.5;">Revisa tu bandeja de entrada o spam. Ingresa el código recibido junto con tu nueva contraseña.</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+              <div style="width: 90%; text-align: left;">
+                <label style="font-size: 14px; font-weight: 600; color: #555; margin-left: 5px;">Código de recuperación</label>
+                <input type="text" id="reset-token" class="swal2-input" placeholder="Pega el código aquí..." style="margin-top: 8px; border-radius: 12px; font-size: 15px; width: 100%; box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+              </div>
+              <div style="width: 90%; text-align: left;">
+                <label style="font-size: 14px; font-weight: 600; color: #555; margin-left: 5px;">Nueva Contraseña</label>
+                <input type="password" id="reset-pass" class="swal2-input" placeholder="••••••••" style="margin-top: 8px; border-radius: 12px; font-size: 15px; width: 100%; box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+              </div>
+            </div>
           `,
-          confirmButtonText: 'Cambiar contraseña',
+          confirmButtonText: 'Actualizar Contraseña',
           confirmButtonColor: '#6C63FF',
           showCancelButton: true,
           cancelButtonText: 'Cancelar',
+          cancelButtonColor: '#d33',
+          customClass: {
+            confirmButton: 'rounded-button',
+            cancelButton: 'rounded-button',
+            popup: 'modern-popup'
+          },
+          showLoaderOnConfirm: true,
           preConfirm: () => {
-            const token = (document.getElementById('reset-token') as HTMLInputElement).value;
+            const token = (document.getElementById('reset-token') as HTMLInputElement).value.trim();
             const newPass = (document.getElementById('reset-pass') as HTMLInputElement).value;
             if (!token || !newPass) {
               Swal.showValidationMessage('Debes ingresar el código y la nueva contraseña');
@@ -152,16 +218,27 @@ export class LoginComponent implements AfterViewInit {
               return false;
             }
             return this.authService.resetPassword(token, newPass).toPromise().catch(err => {
-              Swal.showValidationMessage(err.error?.message || 'Error al cambiar contraseña');
+              Swal.showValidationMessage(err.error?.message || 'El código es inválido o ha expirado');
             });
           }
         }).then((resetResult) => {
           if (resetResult.isConfirmed) {
             Swal.fire({
-              icon: 'success',
-              title: '¡Contraseña actualizada!',
-              text: 'Ya puedes iniciar sesión con tu nueva contraseña.',
-              confirmButtonColor: '#6C63FF'
+              title: '<span style="font-size: 26px; font-weight: 700; color: #333;">¡Todo listo!</span>',
+              html: `
+                <div style="text-align: center; margin-bottom: 10px;">
+                  <div style="background: #E8F5E9; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; animation: pulse 2s infinite;">
+                    <svg style="width: 40px; height: 40px; color: #4CAF50;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  </div>
+                  <p style="color: #666; font-size: 16px;">Tu contraseña ha sido actualizada exitosamente. Ya puedes iniciar sesión con tu nueva clave.</p>
+                </div>
+              `,
+              confirmButtonText: 'Ir a Iniciar Sesión',
+              confirmButtonColor: '#6C63FF',
+              customClass: {
+                confirmButton: 'rounded-button',
+                popup: 'modern-popup'
+              }
             });
           }
         });
