@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.avance.security.LoginAttemptService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +40,7 @@ public class UsuarioService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LoginAttemptService loginAttemptService;
 
     @Value("${brevo.api.key:}")
     private String brevoApiKey;
@@ -130,15 +132,25 @@ public class UsuarioService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        String loginKey = request.getEmail() != null ? request.getEmail().toLowerCase() : "unknown";
+        
+        if (loginAttemptService.isBlocked(loginKey)) {
+            throw new RuntimeException("Demasiados intentos fallidos. Cuenta bloqueada temporalmente por 15 minutos.");
+        }
+
         // Buscar por email o por nombre
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
                 .or(() -> usuarioRepository.findByNombre(request.getEmail()))
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    loginAttemptService.loginFailed(loginKey);
+                    return new RuntimeException("Usuario no encontrado");
+                });
 
         String storedHash = (usuario.getPassword() != null && usuario.getPassword().startsWith("{GOOGLE}")) ? 
                 usuario.getPassword().substring(8) : usuario.getPassword();
 
         if (storedHash == null || !passwordEncoder.matches(request.getPassword(), storedHash)) {
+            loginAttemptService.loginFailed(loginKey);
             throw new RuntimeException("Contraseña incorrecta");
         }
 
@@ -146,6 +158,7 @@ public class UsuarioService {
             throw new RuntimeException("Por favor verifica tu correo electrónico antes de iniciar sesión");
         }
 
+        loginAttemptService.loginSucceeded(loginKey);
         String token = jwtService.generateToken(usuario.getEmail());
         return new AuthResponse(token, usuario.getNombre(), usuario.getEmail());
     }
@@ -261,8 +274,19 @@ public class UsuarioService {
 
     @Transactional
     public String forgotPassword(String email) {
+        String emailKey = email != null ? email.toLowerCase() : "unknown";
+        
+        if (loginAttemptService.isBlocked(emailKey)) {
+            throw new RuntimeException("Demasiados intentos. Bloqueado temporalmente por 15 minutos.");
+        }
+
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("No se encontró una cuenta con ese correo electrónico"));
+                .orElseThrow(() -> {
+                    loginAttemptService.loginFailed(emailKey);
+                    return new RuntimeException("No se encontró una cuenta con ese correo electrónico");
+                });
+
+        loginAttemptService.loginSucceeded(emailKey);
 
         // Buscar si ya tiene un token y actualizarlo para evitar el error de Constraint Unique
         PasswordResetToken resetToken = tokenRepository.findByUsuario(usuario)
