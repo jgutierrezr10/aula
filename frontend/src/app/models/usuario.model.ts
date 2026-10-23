@@ -1,4 +1,4 @@
-export type Rol = 'ADMIN' | 'ESTUDIANTE_BASICA' | 'ESTUDIANTE_PREGRADO' | 'ESTUDIANTE_POSTGRADO';
+export type Rol = 'ADMIN' | 'ESTUDIANTE_BASICA' | 'ESTUDIANTE_PREGRADO' | 'ESTUDIANTE_POSTGRADO' | 'INVITADO';
 
 export interface Usuario {
   id?: number;

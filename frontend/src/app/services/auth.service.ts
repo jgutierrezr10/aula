@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthResponse, LoginRequest, RegisterRequest, UpdateUserRequest, Rol } from '../models/usuario.model';
 import { environment } from '../../environtment/environtment.prod';
+import { GuestDataService } from './guest-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class AuthService {
   private mallaPendienteSubject = new BehaviorSubject<boolean>(false);
   mallaPendiente$ = this.mallaPendienteSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient, private router: Router, private guestData: GuestDataService) {
     const stored = localStorage.getItem('usuario') || sessionStorage.getItem('usuario');
     if (stored) {
       const user = JSON.parse(stored);
@@ -43,6 +44,9 @@ export class AuthService {
   }
 
   actualizarCuenta(data: UpdateUserRequest): Observable<AuthResponse> {
+    if (this.isGuest()) {
+      return new Observable(subscriber => subscriber.error(new Error('Inicia sesión para guardar cambios en tu cuenta.')));
+    }
     const usuariosUrl = environment.apiUrl + '/api/usuarios';
     return this.http.put<AuthResponse>(`${usuariosUrl}/cuenta`, data).pipe(
       tap(res => {
@@ -68,7 +72,9 @@ export class AuthService {
   }
 
   logout() {
+    this.guestData.reset();
     localStorage.removeItem('usuario');
+    localStorage.removeItem('token');
     sessionStorage.removeItem('usuario');
     this.usuarioSubject.next(null);
     this.mallaPendienteSubject.next(false);
@@ -81,6 +87,24 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.usuarioSubject.value;
+  }
+
+  isGuest(): boolean {
+    return this.getRol() === 'INVITADO';
+  }
+
+  entrarComoInvitado(): void {
+    this.guestData.reset();
+    localStorage.removeItem('usuario');
+    sessionStorage.removeItem('usuario');
+    localStorage.removeItem('token');
+    const guest: AuthResponse = {
+      token: '', nombre: 'Invitado', email: '', rol: 'INVITADO', tutorialPendiente: false
+    };
+    // La sesión vive solo en memoria y se elimina al recargar o salir.
+    this.usuarioSubject.next(guest);
+    this.mallaPendienteSubject.next(false);
+    this.router.navigate(['/dashboard']);
   }
 
   getUsuario(): AuthResponse | null {
@@ -118,6 +142,7 @@ export class AuthService {
       case 'ESTUDIANTE_BASICA': return 'Estudiante Básica';
       case 'ESTUDIANTE_PREGRADO': return 'Estudiante de Pregrado';
       case 'ESTUDIANTE_POSTGRADO': return 'Estudiante de Postgrado';
+      case 'INVITADO': return 'Invitado · temporal';
       default: return 'Estudiante';
     }
   }
@@ -129,6 +154,7 @@ export class AuthService {
       case 'ESTUDIANTE_BASICA': return 'badge-role-basica';
       case 'ESTUDIANTE_PREGRADO': return 'badge-role-pregrado';
       case 'ESTUDIANTE_POSTGRADO': return 'badge-role-postgrado';
+      case 'INVITADO': return 'badge-role-invitado';
       default: return 'badge-role-pregrado';
     }
   }
@@ -140,6 +166,7 @@ export class AuthService {
       case 'ESTUDIANTE_BASICA': return 'bi-backpack';
       case 'ESTUDIANTE_PREGRADO': return 'bi-mortarboard';
       case 'ESTUDIANTE_POSTGRADO': return 'bi-award';
+      case 'INVITADO': return 'bi-person-walking';
       default: return 'bi-mortarboard';
     }
   }

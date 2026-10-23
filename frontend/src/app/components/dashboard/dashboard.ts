@@ -10,6 +10,7 @@ import { EvaluacionService } from '../../services/evaluacion.service';
 import { Ramo } from '../../models/ramo.model';
 import { Evaluacion } from '../../models/evaluacion.model';
 import { Rol } from '../../models/usuario.model';
+import { GuestDataService } from '../../services/guest-data.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -57,7 +58,8 @@ export class Dashboard implements OnInit {
     private ramoService: RamoService,
     private horarioService: HorarioService,
     private evaluacionService: EvaluacionService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private guestData: GuestDataService
   ) {}
 
   ngOnInit() {
@@ -217,7 +219,7 @@ export class Dashboard implements OnInit {
         const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
         let etiquetasHora = {};
-        try { etiquetasHora = JSON.parse(localStorage.getItem('etiquetas_hora') || '{}'); } catch (e) { }
+        try { etiquetasHora = this.authService.isGuest() ? this.guestData.etiquetasHora : JSON.parse(localStorage.getItem('etiquetas_hora') || '{}'); } catch (e) { }
         const etiquetasPorDefecto: any = {
           'Bloque 1': '08:00 - 09:20', 'Bloque 2': '09:30 - 10:50', 'Bloque 3': '11:00 - 12:20', 'Bloque 4': '12:30 - 13:50',
           'Bloque 5': '14:00 - 15:20', 'Bloque 6': '16:00 - 17:20', 'Bloque 7': '17:30 - 18:50', 'Bloque 8': '19:00 - 20:10'

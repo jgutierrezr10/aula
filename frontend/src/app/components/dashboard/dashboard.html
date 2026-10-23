@@ -3,6 +3,12 @@
 
   <main class="dashboard-container">
 
+    <aside class="guest-session-notice" *ngIf="authService.isGuest()" role="status">
+      <i class="bi bi-clock-history"></i>
+      <span><strong>Estás usando AULA como invitado.</strong> Tus cambios solo viven en esta sesión y se borrarán al salir o recargar.</span>
+      <a routerLink="/register">Crear cuenta</a>
+    </aside>
+
     <section class="dashboard-load-errors" *ngIf="!cargandoDatos && (erroresCarga.ramos || erroresCarga.evaluaciones || erroresCarga.horario)" role="alert" aria-live="assertive">
       <p>No se pudo cargar {{ erroresCarga.ramos ? 'la malla' : '' }}{{ erroresCarga.ramos && erroresCarga.evaluaciones ? ', ' : '' }}{{ erroresCarga.evaluaciones ? 'las notas' : '' }}{{ erroresCarga.horario ? ' el horario' : '' }}. Los datos mostrados pueden estar incompletos.</p>
       <button type="button" (click)="cargarDatos()">Reintentar</button>

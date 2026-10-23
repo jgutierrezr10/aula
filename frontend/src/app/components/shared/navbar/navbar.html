@@ -48,12 +48,15 @@
           <button class="dropdown-item" *ngIf="authService.isOwnerAdmin()" routerLink="/admin" (click)="mostrarDropdown = false">
             <i class="bi bi-shield-lock-fill text-purple"></i> Panel Administrador
           </button>
-          <button class="dropdown-item" (click)="abrirMiCuenta()">
+          <button class="dropdown-item" *ngIf="!authService.isGuest()" (click)="abrirMiCuenta()">
             <i class="bi bi-person-gear"></i> Mi Cuenta
           </button>
+          <a class="dropdown-item" *ngIf="authService.isGuest()" routerLink="/login" (click)="mostrarDropdown = false">
+            <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión para guardar
+          </a>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item text-danger" (click)="logout()">
-            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            <i class="bi bi-box-arrow-right"></i> {{ authService.isGuest() ? 'Salir del modo invitado' : 'Cerrar Sesión' }}
           </button>
         </div>
       </div>

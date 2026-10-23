@@ -23,6 +23,10 @@ export class LoginComponent implements AfterViewInit {
   cargando = false;
   mostrarPassword = false;
 
+  entrarComoInvitado() {
+    this.authService.entrarComoInvitado();
+  }
+
   constructor(
     private authService: AuthService, 
     private router: Router,

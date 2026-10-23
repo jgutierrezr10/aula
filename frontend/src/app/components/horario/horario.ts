@@ -8,6 +8,8 @@ import { RamoService } from '../../services/ramo.service';
 import { HorarioService, BloqueHorarioDTO } from '../../services/horario.service';
 import { Ramo } from '../../models/ramo.model';
 import { Navbar } from '../shared/navbar/navbar';
+import { AuthService } from '../../services/auth.service';
+import { GuestDataService } from '../../services/guest-data.service';
 
 @Component({
   selector: 'app-horario',
@@ -90,7 +92,9 @@ export class Horario implements OnInit {
   constructor(
     private ramoService: RamoService,
     private horarioService: HorarioService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService,
+    private guestData: GuestDataService
   ) { }
 
   ngOnInit() {
@@ -162,7 +166,7 @@ export class Horario implements OnInit {
   }
 
   cargarEtiquetasGuardadas() {
-    const guardadas = localStorage.getItem('etiquetas_hora');
+    const guardadas = this.authService.isGuest() ? (Object.keys(this.guestData.etiquetasHora).length ? JSON.stringify(this.guestData.etiquetasHora) : null) : localStorage.getItem('etiquetas_hora');
     if (guardadas) {
       this.etiquetasHora = JSON.parse(guardadas);
     } else {
@@ -171,7 +175,8 @@ export class Horario implements OnInit {
   }
 
   guardarEtiquetas() {
-    localStorage.setItem('etiquetas_hora', JSON.stringify(this.etiquetasHora));
+    if (this.authService.isGuest()) this.guestData.etiquetasHora = { ...this.etiquetasHora };
+    else localStorage.setItem('etiquetas_hora', JSON.stringify(this.etiquetasHora));
     this.editandoBloque = null;
   }
 

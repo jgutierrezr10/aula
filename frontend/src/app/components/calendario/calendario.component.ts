@@ -9,6 +9,7 @@ import { EvaluacionService } from '../../services/evaluacion.service';
 import { Ramo } from '../../models/ramo.model';
 import { Evaluacion } from '../../models/evaluacion.model';
 import Swal from 'sweetalert2';
+import { AuthService } from '../../services/auth.service';
 
 interface CalendarDay {
   date: Date;
@@ -56,13 +57,15 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   readonly recordatorios = [0, 10, 30, 60, 1440];
   permisoNotificaciones: NotificationPermission | 'unsupported' = typeof Notification === 'undefined' ? 'unsupported' : Notification.permission;
   private reminderInterval: ReturnType<typeof setInterval> | null = null;
+  private recordatoriosVistos = new Set<string>();
 
   loading = true;
 
   constructor(
     private ramoService: RamoService,
     private evaluacionService: EvaluacionService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -134,9 +137,11 @@ export class CalendarioComponent implements OnInit, OnDestroy {
       const horaEvento = new Date(`${ev.fecha}T${ev.hora}:00`).getTime();
       const horaAviso = horaEvento - ev.recordatorioMinutos * 60_000;
       const key = `aula-recordatorio-${ev.id}-${ev.fecha}-${ev.hora}`;
-      if (ahora >= horaAviso && ahora < horaEvento && !sessionStorage.getItem(key)) {
+      const yaAvisado = this.authService.isGuest() ? this.recordatoriosVistos.has(key) : !!sessionStorage.getItem(key);
+      if (ahora >= horaAviso && ahora < horaEvento && !yaAvisado) {
         new Notification(`Recordatorio: ${ev.nombre}`, { body: `${this.getRamoNombre(ev.ramoId)} · ${this.formatFechaAgenda(ev.fecha)} a las ${ev.hora}` });
-        sessionStorage.setItem(key, '1');
+        if (this.authService.isGuest()) this.recordatoriosVistos.add(key);
+        else sessionStorage.setItem(key, '1');
       }
     }
   }

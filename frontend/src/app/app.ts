@@ -1,5 +1,6 @@
 import { Component, signal, ViewChild, ElementRef, AfterViewInit, HostListener, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,14 @@ export class App implements AfterViewInit, OnInit {
   
   isDarkMode = false;
 
+  constructor(public authService: AuthService) {
+    this.authService.usuario$.subscribe(user => {
+      if (user?.rol === 'INVITADO' && this.ctx && this.canvasRef) {
+        this.ctx.clearRect(0, 0, this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height);
+      }
+    });
+  }
+
   ngOnInit() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
@@ -32,10 +41,10 @@ export class App implements AfterViewInit, OnInit {
     this.isDarkMode = !this.isDarkMode;
     if (this.isDarkMode) {
       document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
+      if (!this.authService.isGuest()) localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
+      if (!this.authService.isGuest()) localStorage.setItem('theme', 'light');
     }
   }
 
@@ -51,7 +60,7 @@ export class App implements AfterViewInit, OnInit {
   }
 
   private saveCanvasToStorage() {
-    if (this.canvasRef) {
+    if (this.canvasRef && !this.authService.isGuest()) {
       const dataUrl = this.canvasRef.nativeElement.toDataURL();
       localStorage.setItem('canvas_drawing', dataUrl);
     }
@@ -105,7 +114,7 @@ export class App implements AfterViewInit, OnInit {
     if (this.ctx && this.canvasRef) {
       const canvas = this.canvasRef.nativeElement;
       this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-      localStorage.removeItem('canvas_drawing');
+      if (!this.authService.isGuest()) localStorage.removeItem('canvas_drawing');
     }
   }
 
