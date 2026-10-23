@@ -200,6 +200,7 @@ input:checked + .switch-slider:before {
   box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
   transition: all 0.2s ease;
 }
+.empty-state button.btn-action { border: 0; font: inherit; cursor: pointer; }
 
 .btn-action:hover {
   background: #4338ca;

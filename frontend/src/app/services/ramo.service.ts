@@ -37,7 +37,7 @@ export class RamoService {
   }
 
   eliminarRamo(id: number): Observable<void> {
-    if (this.auth.isGuest()) { this.guestData.ramos = this.guestData.ramos.filter(r => r.id !== id); return of(void 0); }
+    if (this.auth.isGuest()) { this.guestData.removeRamo(id); return of(void 0); }
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
@@ -48,10 +48,6 @@ export class RamoService {
 
   cargarMallaPredeterminada(ramos: Ramo[]): Observable<Ramo[]> {
     if (this.auth.isGuest()) {
-      this.guestData.ramos = [];
-      this.guestData.evaluaciones = [];
-      this.guestData.horarios.clear();
-      this.guestData.etiquetasHora = {};
       return of(ramos.map(r => this.guestData.addRamo(r)));
     }
     return this.http.post<Ramo[]>(`${this.apiUrl}/bulk`, ramos);
@@ -93,10 +89,6 @@ export class RamoService {
     if (this.auth.isGuest()) {
       return this.http.post<Ramo[]>(`${this.apiUrl}/analizar-ia`, formData).pipe(
         map(ramos => {
-          this.guestData.ramos = [];
-          this.guestData.evaluaciones = [];
-          this.guestData.horarios.clear();
-          this.guestData.etiquetasHora = {};
           return ramos.map(r => this.guestData.addRamo(r));
         })
       );

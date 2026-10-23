@@ -58,7 +58,7 @@ export class NotasComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.ramos = res.ramos;
-        this.evaluaciones = res.evaluaciones;
+        this.evaluaciones = res.evaluaciones.filter(ev => ev.tipoEvento !== 'actividad');
         this.inicializarNuevasEvs();
         this.agruparEvaluaciones();
         this.crearEvaluacionesPorDefecto(silent);
@@ -105,6 +105,27 @@ export class NotasComponent implements OnInit {
       if (ramo.id && this.evaluacionesPorRamo[ramo.id]) {
         this.evaluacionesPorRamo[ramo.id] = this.ordenarEvaluaciones(this.evaluacionesPorRamo[ramo.id]);
       }
+    });
+  }
+
+  async crearRamoRapido() {
+    const resultado = await Swal.fire({
+      title: 'Agregar ramo',
+      input: 'text',
+      inputLabel: 'Nombre del ramo',
+      inputPlaceholder: 'Ej.: Matemáticas',
+      showCancelButton: true,
+      confirmButtonText: 'Crear ramo',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#6c63ff',
+      inputValidator: value => !value?.trim() ? 'Escribe el nombre del ramo.' : null
+    });
+    const nombre = resultado.value?.trim();
+    if (!resultado.isConfirmed || !nombre) return;
+
+    this.ramoService.crearRamo({ nombre, semestre: 1, aprobado: false, cursando: true }).subscribe({
+      next: () => this.cargarDatos(true),
+      error: () => Swal.fire('No se pudo crear', 'Inténtalo nuevamente.', 'error')
     });
   }
 
@@ -481,7 +502,7 @@ export class NotasComponent implements OnInit {
         next: () => {
           this.evaluacionService.getEvaluaciones().subscribe({
             next: (evs) => {
-              this.evaluaciones = evs;
+              this.evaluaciones = evs.filter(ev => ev.tipoEvento !== 'actividad');
               this.agruparEvaluaciones();
               this.loading = false;
               this.cdr.detectChanges();

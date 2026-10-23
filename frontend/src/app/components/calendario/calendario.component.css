@@ -637,3 +637,12 @@
   .modal-event-item { gap: 0.5rem; }
   .agenda-upcoming li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
 }
+.btn-add-course {
+  margin-top: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: #5b21b6;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}

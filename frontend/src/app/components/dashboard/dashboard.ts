@@ -165,7 +165,7 @@ export class Dashboard implements OnInit {
         const topRamosTemp: { ramo: string; promedio: number }[] = [];
 
         cursando.forEach(ramo => {
-          const evsRamo = safeEvaluaciones.filter(e => e.ramoId === ramo.id && e.nota && e.nota > 0 && e.ponderacion > 0);
+          const evsRamo = safeEvaluaciones.filter(e => e.tipoEvento !== 'actividad' && e.ramoId === ramo.id && e.nota && e.nota > 0 && e.ponderacion > 0);
           if (evsRamo.length > 0) {
             const sumaNotas = evsRamo.reduce((acc, e) => acc + (e.nota! * (e.ponderacion / 100)), 0);
             const sumaPond = evsRamo.reduce((acc, e) => acc + (e.ponderacion / 100), 0);

@@ -122,6 +122,11 @@
   font-weight: 500;
   box-shadow: var(--shadow-sm);
 }
+.info-banner .btn-add-course { margin-left: auto; flex: 0 0 auto; }
+@media (max-width: 640px) {
+  .info-banner { align-items: flex-start; flex-wrap: wrap; }
+  .info-banner .btn-add-course { margin-left: 2.5rem; }
+}
 
 .info-banner i {
   font-size: 1.5rem;
@@ -663,4 +668,14 @@
   .skeleton-cell::after {
     height: 60px;
   }
+}
+.btn-add-course {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  background: #6c63ff;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
 }

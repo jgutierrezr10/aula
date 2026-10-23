@@ -171,6 +171,7 @@
           <select id="event-course" [(ngModel)]="nuevaEv.ramoId" class="form-control">
             <option *ngFor="let r of ramosCursando" [ngValue]="r.id">{{ r.nombre }}</option>
           </select>
+          <button *ngIf="ramosCursando.length === 0" type="button" class="btn-add-course" (click)="crearRamoRapido()">Crear ramo para este evento</button>
         </div>
 
         <!-- Nombre -->

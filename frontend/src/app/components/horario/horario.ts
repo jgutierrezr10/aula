@@ -165,6 +165,30 @@ export class Horario implements OnInit {
     this.cargarDatos();
   }
 
+  async crearRamoRapido() {
+    const resultado = await Swal.fire({
+      title: 'Agregar ramo al horario',
+      input: 'text',
+      inputLabel: 'Nombre del ramo',
+      inputPlaceholder: 'Ej.: Física',
+      showCancelButton: true,
+      confirmButtonText: 'Agregar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#6c63ff',
+      inputValidator: value => !value?.trim() ? 'Escribe el nombre del ramo.' : null
+    });
+    const nombre = resultado.value?.trim();
+    if (!resultado.isConfirmed || !nombre) return;
+
+    this.ramoService.crearRamo({ nombre, semestre: 1, aprobado: false, cursando: true }).subscribe({
+      next: ramo => {
+        this.ramosCursando.push(ramo);
+        this.cdr.detectChanges();
+      },
+      error: () => Swal.fire('No se pudo crear', 'Inténtalo nuevamente.', 'error')
+    });
+  }
+
   cargarEtiquetasGuardadas() {
     const guardadas = this.authService.isGuest() ? (Object.keys(this.guestData.etiquetasHora).length ? JSON.stringify(this.guestData.etiquetasHora) : null) : localStorage.getItem('etiquetas_hora');
     if (guardadas) {

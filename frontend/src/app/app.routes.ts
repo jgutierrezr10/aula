@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
-import { mallaGuard } from './guards/malla.guard';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -19,7 +18,7 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () =>
       import('./components/dashboard/dashboard').then(m => m.Dashboard),
-    canActivate: [authGuard, mallaGuard]
+    canActivate: [authGuard]
   },
   {
     path: 'malla',
@@ -31,19 +30,19 @@ export const routes: Routes = [
     path: 'horario',
     loadComponent: () =>
       import('./components/horario/horario').then(m => m.Horario),
-    canActivate: [authGuard, mallaGuard]
+    canActivate: [authGuard]
   },
   {
     path: 'notas',
     loadComponent: () =>
       import('./components/notas/notas.component').then(m => m.NotasComponent),
-    canActivate: [authGuard, mallaGuard]
+    canActivate: [authGuard]
   },
   {
     path: 'calendario',
     loadComponent: () =>
       import('./components/calendario/calendario.component').then(m => m.CalendarioComponent),
-    canActivate: [authGuard, mallaGuard]
+    canActivate: [authGuard]
   },
   {
     path: 'admin',

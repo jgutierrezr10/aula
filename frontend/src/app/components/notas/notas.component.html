@@ -76,8 +76,9 @@
     <div *ngIf="!loading && getRamosFiltrados().length === 0" class="empty-state">
       <i class="bi bi-journal-x"></i>
       <h3>No se encontraron asignaturas</h3>
-      <p *ngIf="soloCursando">No tienes asignaturas marcadas como <strong>Cursando</strong> en este filtro. Ve a tu malla curricular para marcar ramos como cursando.</p>
-      <p *ngIf="!soloCursando">No has cargado asignaturas en tu avance curricular.</p>
+      <p *ngIf="soloCursando">No hay ramos cursando todavía. Puedes crear uno aquí sin cargar una malla completa.</p>
+      <p *ngIf="!soloCursando">Aún no tienes ramos. Crea uno aquí o agrega varios desde tu malla.</p>
+      <button type="button" class="btn-action" (click)="crearRamoRapido()">Agregar ramo y empezar a registrar notas</button>
       <a routerLink="/malla" class="btn-action">Ir a Malla Curricular</a>
     </div>
 

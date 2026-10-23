@@ -33,4 +33,17 @@ export class GuestDataService {
     this.evaluaciones.push(creada);
     return creada;
   }
+
+  removeRamo(id: number): void {
+    this.ramos = this.ramos.filter(r => r.id !== id);
+    this.evaluaciones = this.evaluaciones.filter(ev => ev.ramoId !== id);
+    this.horarios.forEach((bloques, opcion) => {
+      this.horarios.set(opcion, bloques.map(b => {
+        const actualizado = { ...b };
+        if (actualizado.ramoId === id) { actualizado.ramoId = null; actualizado.detalle1 = ''; }
+        if (actualizado.ramo2Id === id) { actualizado.ramo2Id = null; actualizado.detalle2 = ''; }
+        return actualizado;
+      }));
+    });
+  }
 }

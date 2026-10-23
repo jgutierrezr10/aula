@@ -266,6 +266,33 @@ export class CalendarioComponent implements OnInit, OnDestroy {
     this.buildCalendar();
   }
 
+  async crearRamoRapido() {
+    const resultado = await Swal.fire({
+      title: 'Crear ramo',
+      input: 'text',
+      inputLabel: 'Nombre del ramo',
+      inputPlaceholder: 'Ej.: Historia',
+      showCancelButton: true,
+      confirmButtonText: 'Crear',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#6c63ff',
+      inputValidator: value => !value?.trim() ? 'Escribe el nombre del ramo.' : null
+    });
+    const nombre = resultado.value?.trim();
+    if (!resultado.isConfirmed || !nombre) return;
+
+    this.ramoService.crearRamo({ nombre, semestre: 1, aprobado: false, cursando: true }).subscribe({
+      next: ramo => {
+        this.ramos.push(ramo);
+        this.ramosCursando.push(ramo);
+        this.nuevaEv.ramoId = ramo.id;
+        this.buildCalendar();
+        this.cdr.detectChanges();
+      },
+      error: () => Swal.fire('No se pudo crear', 'Inténtalo nuevamente.', 'error')
+    });
+  }
+
   get eventosAgenda(): Evaluacion[] {
     const hoy = this.toDateStr(new Date());
     return this.evaluaciones

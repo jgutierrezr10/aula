@@ -28,7 +28,8 @@
     </div>
     <div class="info-banner" *ngIf="!cargandoHorario && !errorRamosCarga && ramosCursando.length === 0">
       <i class="bi bi-info-circle-fill"></i>
-      <span>No tienes ramos marcados como "Cursando" en tu Malla. Ve a tu malla y marca los ramos que estás tomando actualmente para poder armar tu horario.</span>
+      <span>No necesitas cargar una malla completa. Agrega un ramo aquí para empezar tu horario.</span>
+      <button type="button" class="btn-add-course" (click)="crearRamoRapido()">Agregar ramo</button>
     </div>
 
     <div class="horario-stats" *ngIf="!cargandoHorario && !errorHorarioCarga && ramosCursando.length > 0">
