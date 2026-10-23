@@ -198,10 +198,11 @@
                 <div class="role-selector-wrapper">
                   <select
                     class="role-select"
-                    [value]="u.rol"
-                    (change)="confirmarCambioRol(u, $any($event.target).value)"
+                    [ngModel]="u.rol"
+                    [ngModelOptions]="{ standalone: true }"
+                    (change)="confirmarCambioRol(u, $any($event.target).value, $any($event.target))"
                   >
-                    <option *ngFor="let r of rolesDisponibles" [value]="r.valor">
+                    <option *ngFor="let r of rolesDisponibles" [ngValue]="r.valor">
                       {{ r.label }}
                     </option>
                   </select>

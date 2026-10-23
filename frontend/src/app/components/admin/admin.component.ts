@@ -90,8 +90,12 @@ export class AdminComponent implements OnInit {
     this.filtrar();
   }
 
-  confirmarCambioRol(usuario: UsuarioAdminDTO, nuevoRol: Rol): void {
-    if (usuario.rol === nuevoRol) return;
+  confirmarCambioRol(usuario: UsuarioAdminDTO, nuevoRol: Rol, selector: HTMLSelectElement): void {
+    const rolActual = usuario.rol;
+    // El selector nativo cambia antes de pedir confirmación; conservar el rol
+    // real evita mostrar ADMIN cuando se cancela o falla la operación.
+    selector.value = rolActual;
+    if (rolActual === nuevoRol) return;
 
     const labelNuevo = this.authService.getRolLabel(nuevoRol);
 
@@ -109,6 +113,7 @@ export class AdminComponent implements OnInit {
         this.adminService.cambiarRol(usuario.id, nuevoRol).subscribe({
           next: (actualizado) => {
             usuario.rol = actualizado.rol;
+            selector.value = actualizado.rol;
             this.filtrar();
             this.adminService.getStats().subscribe(st => this.stats = st);
 
@@ -123,6 +128,7 @@ export class AdminComponent implements OnInit {
             this.cdr.detectChanges();
           },
           error: (err) => {
+            selector.value = rolActual;
             Swal.fire({
               icon: 'error',
               title: 'Error',
@@ -132,8 +138,7 @@ export class AdminComponent implements OnInit {
           }
         });
       } else {
-        // Revert select back to current user role
-        this.filtrar();
+        selector.value = rolActual;
       }
     });
   }
