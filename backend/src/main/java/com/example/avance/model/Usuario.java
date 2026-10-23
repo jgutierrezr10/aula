@@ -26,7 +26,9 @@ public class Usuario {
     private boolean verificado = true;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    // Must remain nullable during Hibernate's schema update so legacy NULL rows
+    // can be migrated by DataInitializer after the EntityManagerFactory starts.
+    @Column(length = 30)
     private Rol rol = Rol.ESTUDIANTE_PREGRADO;
 
     public Rol getRol() {

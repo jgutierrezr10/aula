@@ -21,13 +21,11 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // Inicializar / asegurar roles válidos en usuarios existentes
-        usuarioRepository.findAll().forEach(u -> {
-            if (u.getRol() == null) {
-                u.setRol(Rol.ESTUDIANTE_PREGRADO);
-                usuarioRepository.save(u);
-            }
-        });
+        // El getter seguro traduce los NULL históricos al rol por defecto.
+        // Persistimos ese valor después de que Hibernate haya actualizado el esquema.
+        var usuarios = usuarioRepository.findAll();
+        usuarios.forEach(usuario -> usuario.setRol(usuario.getRol()));
+        usuarioRepository.saveAll(usuarios);
 
         // La cuenta dueña del panel es la única raíz de administración.
         usuarioRepository.findByNombreIgnoreCase("elkiubs").ifPresent(owner -> {
