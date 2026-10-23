@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Rol } from '../../models/usuario.model';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -16,10 +17,17 @@ export class RegisterComponent {
   nombre = '';
   email = '';
   password = '';
+  rol: Rol = 'ESTUDIANTE_PREGRADO';
   terminosAceptados = false;
   error = '';
   cargando = false;
   mostrarPassword = false;
+
+  opcionesRol: { valor: Rol; label: string; icon: string; desc: string }[] = [
+    { valor: 'ESTUDIANTE_BASICA', label: 'Básica / Media', icon: 'bi-backpack', desc: 'Educación básica y media' },
+    { valor: 'ESTUDIANTE_PREGRADO', label: 'Pregrado', icon: 'bi-mortarboard', desc: 'Universidad o Instituto' },
+    { valor: 'ESTUDIANTE_POSTGRADO', label: 'Postgrado', icon: 'bi-award', desc: 'Magíster o Doctorado' }
+  ];
 
   constructor(
     private authService: AuthService,
@@ -56,7 +64,8 @@ export class RegisterComponent {
     this.authService.register({
       nombre: this.nombre.trim(),
       email: this.email.trim(),
-      password: this.password
+      password: this.password,
+      rol: this.rol
     }).subscribe({
       next: () => {
         this.cargando = false;

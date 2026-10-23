@@ -6,7 +6,7 @@ export const mallaGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.isMallaPendiente()) {
+  if (authService.isAdmin() || !authService.isMallaPendiente()) {
     return true;
   }
 

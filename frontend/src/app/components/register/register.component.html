@@ -75,6 +75,29 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Nivel académico / Rol</label>
+          <div class="role-selector-cards">
+            <div
+              *ngFor="let opt of opcionesRol"
+              class="role-card-option"
+              [class.selected]="rol === opt.valor"
+              (click)="rol = opt.valor"
+            >
+              <div class="role-card-icon">
+                <i [class]="'bi ' + opt.icon"></i>
+              </div>
+              <div class="role-card-content">
+                <span class="role-card-title">{{ opt.label }}</span>
+                <span class="role-card-desc">{{ opt.desc }}</span>
+              </div>
+              <div class="role-card-check" *ngIf="rol === opt.valor">
+                <i class="bi bi-check-circle-fill"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="form-actions">
           <div class="checkbox-wrapper">
             <input type="checkbox" id="terminos" [(ngModel)]="terminosAceptados" name="terminos" required />

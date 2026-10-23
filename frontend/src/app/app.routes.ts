@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { mallaGuard } from './guards/malla.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -43,6 +44,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./components/calendario/calendario.component').then(m => m.CalendarioComponent),
     canActivate: [authGuard, mallaGuard]
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./components/admin/admin.component').then(m => m.AdminComponent),
+    canActivate: [authGuard, adminGuard]
   },
   { path: '**', redirectTo: 'login' }
 ];

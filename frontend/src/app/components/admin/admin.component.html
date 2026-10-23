@@ -1,0 +1,243 @@
+<div class="admin-page">
+  <app-navbar></app-navbar>
+
+  <main class="admin-container">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="header-text">
+        <div class="header-badge">
+          <i class="bi bi-shield-lock-fill"></i> Módulo de Seguridad y Gestión
+        </div>
+        <h1>Panel de Administración</h1>
+        <p>Gestiona usuarios, asigna roles académicos y supervisa la plataforma.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-refresh" (click)="cargarDatos()" title="Recargar información">
+          <i class="bi bi-arrow-clockwise" [class.spin]="cargando"></i> Actualizar
+        </button>
+      </div>
+    </header>
+
+    <!-- Stat Cards Grid -->
+    <section class="stats-grid" *ngIf="stats">
+      <div class="stat-card card-total">
+        <div class="stat-icon-wrapper icon-blue">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number">{{ stats.totalUsuarios }}</span>
+          <span class="stat-title">Total Usuarios</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-admin">
+        <div class="stat-icon-wrapper icon-purple">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number">{{ stats.totalAdmins }}</span>
+          <span class="stat-title">Administradores</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-basica">
+        <div class="stat-icon-wrapper icon-emerald">
+          <i class="bi bi-backpack-fill"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number">{{ stats.totalEstudiantesBasica }}</span>
+          <span class="stat-title">Estudiantes Básica</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-pregrado">
+        <div class="stat-icon-wrapper icon-sky">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number">{{ stats.totalEstudiantesPregrado }}</span>
+          <span class="stat-title">Estudiantes Pregrado</span>
+        </div>
+      </div>
+
+      <div class="stat-card card-postgrado">
+        <div class="stat-icon-wrapper icon-amber">
+          <i class="bi bi-award-fill"></i>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number">{{ stats.totalEstudiantesPostgrado }}</span>
+          <span class="stat-title">Estudiantes Postgrado</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Error alert if any -->
+    <div class="alert-error" *ngIf="errorCarga">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span>{{ errorCarga }}</span>
+      <button (click)="cargarDatos()">Reintentar</button>
+    </div>
+
+    <!-- Management Card -->
+    <section class="management-card">
+      <div class="management-header">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [(ngModel)]="busqueda"
+            (input)="filtrar()"
+            placeholder="Buscar por nombre o correo electrónico..."
+          />
+          <button *ngIf="busqueda" class="btn-clear" (click)="busqueda = ''; filtrar()">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        </div>
+
+        <div class="filters-pills">
+          <button
+            class="filter-pill"
+            [class.active]="filtroRol === 'TODOS'"
+            (click)="setFiltroRol('TODOS')"
+          >
+            Todos <span class="pill-badge">{{ usuarios.length }}</span>
+          </button>
+
+          <button
+            class="filter-pill pill-admin"
+            [class.active]="filtroRol === 'ADMIN'"
+            (click)="setFiltroRol('ADMIN')"
+          >
+            <i class="bi bi-shield-check"></i> Admin
+            <span class="pill-badge" *ngIf="stats">{{ stats.totalAdmins }}</span>
+          </button>
+
+          <button
+            class="filter-pill pill-basica"
+            [class.active]="filtroRol === 'ESTUDIANTE_BASICA'"
+            (click)="setFiltroRol('ESTUDIANTE_BASICA')"
+          >
+            <i class="bi bi-backpack"></i> Básica
+            <span class="pill-badge" *ngIf="stats">{{ stats.totalEstudiantesBasica }}</span>
+          </button>
+
+          <button
+            class="filter-pill pill-pregrado"
+            [class.active]="filtroRol === 'ESTUDIANTE_PREGRADO'"
+            (click)="setFiltroRol('ESTUDIANTE_PREGRADO')"
+          >
+            <i class="bi bi-mortarboard"></i> Pregrado
+            <span class="pill-badge" *ngIf="stats">{{ stats.totalEstudiantesPregrado }}</span>
+          </button>
+
+          <button
+            class="filter-pill pill-postgrado"
+            [class.active]="filtroRol === 'ESTUDIANTE_POSTGRADO'"
+            (click)="setFiltroRol('ESTUDIANTE_POSTGRADO')"
+          >
+            <i class="bi bi-award"></i> Postgrado
+            <span class="pill-badge" *ngIf="stats">{{ stats.totalEstudiantesPostgrado }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div class="loading-state" *ngIf="cargando">
+        <div class="spinner"></div>
+        <p>Cargando información de usuarios...</p>
+      </div>
+
+      <!-- Users Table -->
+      <div class="table-responsive" *ngIf="!cargando && usuariosFiltrados.length > 0">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Rol Actual</th>
+              <th>Estado</th>
+              <th>Ramos Registrados</th>
+              <th>Asignar Rol</th>
+              <th class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usuariosFiltrados" class="user-row">
+              <td>
+                <div class="user-info-cell">
+                  <div class="user-avatar" [ngClass]="authService.getRolBadgeClass(u.rol)">
+                    {{ u.nombre ? u.nombre.charAt(0).toUpperCase() : 'U' }}
+                  </div>
+                  <div class="user-meta">
+                    <span class="user-name">{{ u.nombre }}</span>
+                    <span class="user-email">{{ u.email }}</span>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="role-badge" [ngClass]="authService.getRolBadgeClass(u.rol)">
+                  <i class="bi" [ngClass]="authService.getRolIcon(u.rol)"></i>
+                  {{ authService.getRolLabel(u.rol) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="status-badge" [class.verified]="u.verificado" [class.pending]="!u.verificado">
+                  <i class="bi" [ngClass]="u.verificado ? 'bi-check-circle-fill' : 'bi-clock-fill'"></i>
+                  {{ u.verificado ? 'Verificado' : 'Pendiente' }}
+                </span>
+              </td>
+
+              <td>
+                <span class="ramos-pill">
+                  <i class="bi bi-book"></i> {{ u.totalRamos }} ramo(s)
+                </span>
+              </td>
+
+              <td>
+                <div class="role-selector-wrapper">
+                  <select
+                    class="role-select"
+                    [value]="u.rol"
+                    (change)="confirmarCambioRol(u, $any($event.target).value)"
+                  >
+                    <option *ngFor="let r of rolesDisponibles" [value]="r.valor">
+                      {{ r.label }}
+                    </option>
+                  </select>
+                </div>
+              </td>
+
+              <td class="text-right">
+                <button
+                  class="btn-delete-user"
+                  (click)="eliminarUsuario(u)"
+                  title="Eliminar usuario"
+                  [disabled]="u.email.toLowerCase() === authService.getUsuario()?.email?.toLowerCase()"
+                >
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!cargando && usuariosFiltrados.length === 0">
+        <div class="empty-icon">
+          <i class="bi bi-search"></i>
+        </div>
+        <h3>No se encontraron usuarios</h3>
+        <p>No hay usuarios que coincidan con el término de búsqueda o filtro seleccionado.</p>
+        <button class="btn-reset" (click)="busqueda = ''; filtroRol = 'TODOS'; filtrar()">
+          Limpiar filtros
+        </button>
+      </div>
+
+      <div class="table-footer" *ngIf="!cargando && usuariosFiltrados.length > 0">
+        <span>Mostrando {{ usuariosFiltrados.length }} de {{ usuarios.length }} usuarios registrados</span>
+      </div>
+    </section>
+  </main>
+</div>

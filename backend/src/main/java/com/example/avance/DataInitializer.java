@@ -6,6 +6,10 @@ import com.example.avance.repository.MallaPredeterminadaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import com.example.avance.model.Rol;
+import com.example.avance.model.Usuario;
+import com.example.avance.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -13,10 +17,35 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataInitializer implements CommandLineRunner {
 
     private final MallaPredeterminadaRepository repository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        // Inicializar / asegurar roles válidos en usuarios existentes
+        usuarioRepository.findAll().forEach(u -> {
+            if (u.getRol() == null) {
+                u.setRol(Rol.ESTUDIANTE_PREGRADO);
+                usuarioRepository.save(u);
+            }
+        });
+
+        // Asegurar que exista al menos una cuenta de Administrador
+        boolean existeAdmin = usuarioRepository.findAll().stream().anyMatch(u -> u.getRol() == Rol.ADMIN);
+        if (!existeAdmin) {
+            Usuario admin = usuarioRepository.findByEmail("admin@aula.cl").orElseGet(() -> {
+                Usuario nuevo = new Usuario();
+                nuevo.setEmail("admin@aula.cl");
+                nuevo.setNombre("Administrador");
+                nuevo.setPassword(passwordEncoder.encode("Admin1234!"));
+                return nuevo;
+            });
+            admin.setRol(Rol.ADMIN);
+            admin.setVerificado(true);
+            usuarioRepository.save(admin);
+        }
+
         // Forzar la eliminación y recreación para que tome tus nuevos cambios
         repository.findAll().stream()
                 .filter(m -> "Ingeniería Civil Informática".equals(m.getNombre()) || "Nutrición y Dietética".equals(m.getNombre()))

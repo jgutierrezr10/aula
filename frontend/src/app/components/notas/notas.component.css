@@ -902,3 +902,28 @@ input:checked + .switch-slider:before {
     grid-column: span 1;
   }
 }
+
+@media (max-width: 560px) {
+  .page-header { margin-bottom: 1rem; }
+  .header-left h1 { font-size: 1.55rem; line-height: 1.2; }
+  .header-left p { font-size: 0.88rem; }
+  .filter-bar { padding: 0.85rem; gap: 0.85rem; margin-bottom: 1.25rem; }
+  .filter-group label, .toggle-group > span { font-size: 0.85rem; }
+  .stats-banner { gap: 0.65rem; }
+  .stat-card { padding: 0.85rem; gap: 0.8rem; }
+  .stat-value { font-size: 1.4rem; }
+  .ramo-header { gap: 0.65rem; }
+  .ramo-header h2 { overflow-wrap: anywhere; }
+  .ramo-body { padding: 0.85rem; gap: 1rem; }
+  .evaluaciones-list { overflow-x: visible; }
+  .eval-header-row { display: none; }
+  .eval-row { min-width: 0; grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); grid-template-areas: "name date" "weight grade" "actions actions"; gap: 0.45rem; padding: 0.65rem 0.35rem; border-bottom: 1px solid var(--border-color); }
+  .eval-row .val-name { grid-area: name; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+  .eval-row .val-date { grid-area: date; text-align: right; }
+  .eval-row .val-weight { grid-area: weight; }
+  .eval-row .val-grade { grid-area: grade; }
+  .eval-row .val-actions { grid-area: actions; display: flex; justify-content: flex-end; gap: 0.5rem; }
+  .eval-row .grade-input { min-width: 0; }
+  .form-row { grid-template-columns: minmax(0, 1fr); }
+  .form-row > * { min-width: 0; }
+}

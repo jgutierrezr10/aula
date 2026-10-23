@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { AuthResponse, LoginRequest, RegisterRequest, UpdateUserRequest } from '../models/usuario.model';
+import { AuthResponse, LoginRequest, RegisterRequest, UpdateUserRequest, Rol } from '../models/usuario.model';
 import { environment } from '../../environtment/environtment.prod';
 
 @Injectable({
@@ -85,6 +85,59 @@ export class AuthService {
 
   getUsuario(): AuthResponse | null {
     return this.usuarioSubject.value;
+  }
+
+  getRol(): Rol {
+    return this.usuarioSubject.value?.rol || 'ESTUDIANTE_PREGRADO';
+  }
+
+  isAdmin(): boolean {
+    return this.getRol() === 'ADMIN';
+  }
+
+  isEstudianteBasica(): boolean {
+    return this.getRol() === 'ESTUDIANTE_BASICA';
+  }
+
+  isEstudiantePregrado(): boolean {
+    return this.getRol() === 'ESTUDIANTE_PREGRADO';
+  }
+
+  isEstudiantePostgrado(): boolean {
+    return this.getRol() === 'ESTUDIANTE_POSTGRADO';
+  }
+
+  getRolLabel(rol?: Rol): string {
+    const r = rol || this.getRol();
+    switch (r) {
+      case 'ADMIN': return 'Administrador';
+      case 'ESTUDIANTE_BASICA': return 'Estudiante Básica';
+      case 'ESTUDIANTE_PREGRADO': return 'Estudiante de Pregrado';
+      case 'ESTUDIANTE_POSTGRADO': return 'Estudiante de Postgrado';
+      default: return 'Estudiante';
+    }
+  }
+
+  getRolBadgeClass(rol?: Rol): string {
+    const r = rol || this.getRol();
+    switch (r) {
+      case 'ADMIN': return 'badge-role-admin';
+      case 'ESTUDIANTE_BASICA': return 'badge-role-basica';
+      case 'ESTUDIANTE_PREGRADO': return 'badge-role-pregrado';
+      case 'ESTUDIANTE_POSTGRADO': return 'badge-role-postgrado';
+      default: return 'badge-role-pregrado';
+    }
+  }
+
+  getRolIcon(rol?: Rol): string {
+    const r = rol || this.getRol();
+    switch (r) {
+      case 'ADMIN': return 'bi-shield-check';
+      case 'ESTUDIANTE_BASICA': return 'bi-backpack';
+      case 'ESTUDIANTE_PREGRADO': return 'bi-mortarboard';
+      case 'ESTUDIANTE_POSTGRADO': return 'bi-award';
+      default: return 'bi-mortarboard';
+    }
   }
 
   isMallaPendiente(): boolean {
