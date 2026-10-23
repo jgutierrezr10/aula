@@ -515,20 +515,16 @@
 .toggle-password { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: #475569; cursor: pointer; padding: 0.4rem; }
 .toggle-password:focus-visible, .forgot-password-button:focus-visible { outline: 3px solid #6d28d9; outline-offset: 2px; border-radius: 4px; }
 .guest-access-button {
-  width: 100%;
-  margin-top: 0.85rem;
-  padding: 0.75rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  border: 1px solid #c4b5fd;
-  border-radius: 12px;
-  background: #faf8ff;
-  color: #5b21b6;
+  display: block;
+  margin: 0.75rem auto 0;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: #6c63ff;
   font: inherit;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
 }
-.guest-access-button small { color: #6b7280; font-size: 0.75rem; font-weight: 400; }
-.guest-access-button:hover { background: #f3efff; }
+.guest-access-button:hover { text-decoration: underline; }
+.guest-access-button:focus-visible { outline: 3px solid #6d28d9; outline-offset: 2px; border-radius: 4px; }

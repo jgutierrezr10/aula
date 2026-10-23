@@ -96,16 +96,16 @@
         <div class="module-body">
           <h3>Malla Curricular</h3>
           <p>Visualiza tu progreso, registra ramos aprobados y planifica tu avance académico.</p>
-          <div class="module-widget">
-            <div class="progress-bar-container">
-              <div class="progress-bar-fill" [style.width]="progresoMalla + '%'"></div>
-            </div>
-            <span class="progress-text">{{ progresoMalla }}%</span>
-          </div>
         </div>
         <div class="module-footer">
           <a routerLink="/malla" class="module-link text-purple">Ver malla</a>
           <i class="bi bi-arrow-right text-purple"></i>
+        </div>
+        <div class="module-widget">
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" [style.width]="progresoMalla + '%'"></div>
+          </div>
+          <span class="progress-text">{{ progresoMalla }}%</span>
         </div>
       </div>
 

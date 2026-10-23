@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, map } from 'rxjs';
 import { Ramo } from '../models/ramo.model';
 import { environment } from '../../environtment/environtment.prod';
 import { MallaPredeterminadaDTO } from '../models/malla-predeterminada.model';
@@ -47,7 +47,13 @@ export class RamoService {
   }
 
   cargarMallaPredeterminada(ramos: Ramo[]): Observable<Ramo[]> {
-    if (this.auth.isGuest()) { this.guestData.ramos = []; return of(ramos.map(r => this.guestData.addRamo(r))); }
+    if (this.auth.isGuest()) {
+      this.guestData.ramos = [];
+      this.guestData.evaluaciones = [];
+      this.guestData.horarios.clear();
+      this.guestData.etiquetasHora = {};
+      return of(ramos.map(r => this.guestData.addRamo(r)));
+    }
     return this.http.post<Ramo[]>(`${this.apiUrl}/bulk`, ramos);
   }
 
@@ -82,9 +88,19 @@ export class RamoService {
   }
 
   importarConIA(imagen: File): Observable<Ramo[]> {
-    if (this.auth.isGuest()) return new Observable(subscriber => subscriber.error(new Error('Inicia sesión para usar la importación con IA.')));
     const formData = new FormData();
     formData.append('imagen', imagen);
+    if (this.auth.isGuest()) {
+      return this.http.post<Ramo[]>(`${this.apiUrl}/analizar-ia`, formData).pipe(
+        map(ramos => {
+          this.guestData.ramos = [];
+          this.guestData.evaluaciones = [];
+          this.guestData.horarios.clear();
+          this.guestData.etiquetasHora = {};
+          return ramos.map(r => this.guestData.addRamo(r));
+        })
+      );
+    }
     return this.http.post<Ramo[]>(`${this.apiUrl}/importar-ia`, formData);
   }
 }

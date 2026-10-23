@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/mallas-predeterminadas").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/ramos/analizar-ia").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

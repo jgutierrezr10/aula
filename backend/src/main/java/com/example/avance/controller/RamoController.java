@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -88,5 +89,11 @@ public class RamoController {
             @AuthenticationPrincipal UserDetails userDetails) {
         List<RamoDTO> resultado = aiMallaService.importarMallaConIA(imagen, userDetails.getUsername());
         return ResponseEntity.ok(resultado);
+    }
+
+    @PostMapping("/analizar-ia")
+    public ResponseEntity<List<RamoDTO>> analizarConIA(@RequestParam("imagen") MultipartFile imagen,
+                                                       HttpServletRequest request) {
+        return ResponseEntity.ok(aiMallaService.analizarMallaConIA(imagen, request.getRemoteAddr()));
     }
 }

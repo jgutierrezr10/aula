@@ -274,8 +274,8 @@
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
-/* Mantiene el indicador de avance de la malla al pie de su tarjeta, alineado
-   con las acciones aunque el texto ocupe menos espacio. */
+/* Extiende el cuerpo para que el enlace pueda quedar arriba del indicador,
+   que se muestra como último elemento de la tarjeta. */
 .module-malla .module-body {
   display: flex;
   flex: 1;
@@ -283,8 +283,8 @@
 }
 
 .module-malla .module-widget {
-  margin-top: auto;
-  margin-bottom: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
 }
 
 .dash-module-card:hover {

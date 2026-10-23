@@ -10,10 +10,12 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class AiMallaService {
 
     private final UsuarioRepository usuarioRepository;
     private final RamoService ramoService;
+    private final ConcurrentHashMap<String, GuestAiWindow> guestAiWindows = new ConcurrentHashMap<>();
 
     @Value("${ai.api.key:}")
     private String apiKey;
@@ -34,25 +37,35 @@ public class AiMallaService {
     }
 
     public List<RamoDTO> importarMallaConIA(MultipartFile imagen, String email) {
+        usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return ramoService.crearRamosBulk(analizarImagen(imagen), email);
+    }
+
+    /** Analiza la imagen sin asociar ni guardar los ramos en una cuenta. */
+    public List<RamoDTO> analizarMallaConIA(MultipartFile imagen, String cliente) {
+        limitarUsoInvitado(cliente);
+        return analizarImagen(imagen);
+    }
+
+    private List<RamoDTO> analizarImagen(MultipartFile imagen) {
         if (apiKey == null || apiKey.isEmpty()) {
             throw new RuntimeException(
                 "API key de IA no configurada. Obtén una key gratis en https://aistudio.google.com/apikey y configúrala como GEMINI_API_KEY"
             );
         }
-
-        usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (imagen == null || imagen.isEmpty()) throw new RuntimeException("Selecciona una imagen para analizar.");
+        if (imagen.getSize() > 5L * 1024 * 1024) throw new RuntimeException("La imagen no puede superar 5 MB.");
+        String contentType = imagen.getContentType();
+        if (contentType == null || !contentType.toLowerCase(Locale.ROOT).startsWith("image/")) {
+            throw new RuntimeException("El archivo debe ser una imagen.");
+        }
 
         String base64Image;
         try {
             base64Image = Base64.getEncoder().encodeToString(imagen.getBytes());
         } catch (IOException e) {
             throw new RuntimeException("Error al leer la imagen: " + e.getMessage());
-        }
-
-        String contentType = imagen.getContentType();
-        if (contentType == null) {
-            contentType = "image/jpeg";
         }
 
         Map<String, Object> requestBody = buildRequestBody(base64Image, contentType);
@@ -84,13 +97,36 @@ public class AiMallaService {
             List<Map<String, Object>> mallaData = parseJsonResponse(content);
             List<RamoDTO> dtos = mapToRamoDTO(mallaData);
 
-            return ramoService.crearRamosBulk(dtos, email);
+            return dtos;
 
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             log.error("Error al procesar la imagen con Gemini", e);
             throw new RuntimeException("Error al procesar la imagen con Gemini: " + e.getMessage());
+        }
+    }
+
+    private void limitarUsoInvitado(String cliente) {
+        long ahora = System.currentTimeMillis();
+        if (guestAiWindows.size() > 5_000) {
+            guestAiWindows.entrySet().removeIf(entry -> ahora - entry.getValue().inicio >= 60_000);
+        }
+        guestAiWindows.compute(cliente, (key, ventana) -> {
+            if (ventana == null || ahora - ventana.inicio >= 60_000) return new GuestAiWindow(ahora, 1);
+            if (ventana.solicitudes >= 10) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Has alcanzado el límite de 10 análisis por minuto. Inténtalo más tarde.");
+            ventana.solicitudes++;
+            return ventana;
+        });
+    }
+
+    private static final class GuestAiWindow {
+        private final long inicio;
+        private int solicitudes;
+
+        private GuestAiWindow(long inicio, int solicitudes) {
+            this.inicio = inicio;
+            this.solicitudes = solicitudes;
         }
     }
 
