@@ -25,6 +25,14 @@ public class Usuario {
     @Column(columnDefinition = "boolean default true")
     private boolean verificado = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private Rol rol = Rol.ESTUDIANTE_PREGRADO;
+
+    public Rol getRol() {
+        return rol != null ? rol : Rol.ESTUDIANTE_PREGRADO;
+    }
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Ramo> ramos;
 }

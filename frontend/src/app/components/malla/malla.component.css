@@ -241,7 +241,8 @@
   display: flex;
   gap: 4px;
   align-items: flex-start;
-  min-width: max-content;
+  width: max-content;
+  margin-inline: auto;
 }
 
 /* ══════════════════════════════════════

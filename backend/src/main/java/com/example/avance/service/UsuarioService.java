@@ -1,6 +1,7 @@
 package com.example.avance.service;
 
 import com.example.avance.dto.*;
+import com.example.avance.model.Rol;
 import com.example.avance.model.Usuario;
 import com.example.avance.repository.UsuarioRepository;
 import com.example.avance.repository.RamoRepository;
@@ -71,6 +72,12 @@ public class UsuarioService {
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
         usuario.setVerificado(false); // Manualmente no verificado
 
+        Rol rolAsignado = request.getRol();
+        if (rolAsignado == null || rolAsignado == Rol.ADMIN) {
+            rolAsignado = Rol.ESTUDIANTE_PREGRADO;
+        }
+        usuario.setRol(rolAsignado);
+
         usuarioRepository.save(usuario);
 
         // Generar código de 6 dígitos
@@ -101,7 +108,7 @@ public class UsuarioService {
             log.error("Error al preparar el correo de verificación.", e);
         }
 
-        return new AuthResponse(null, usuario.getNombre(), usuario.getEmail());
+        return new AuthResponse(null, usuario.getNombre(), usuario.getEmail(), usuario.getRol(), false, false);
     }
 
     @Transactional
@@ -131,7 +138,7 @@ public class UsuarioService {
 
         String jwtToken = jwtService.generateToken(usuario.getEmail());
         boolean tutorialPendiente = ramoRepository.findByUsuarioId(usuario.getId()).isEmpty();
-        return new AuthResponse(jwtToken, usuario.getNombre(), usuario.getEmail(), false, tutorialPendiente);
+        return new AuthResponse(jwtToken, usuario.getNombre(), usuario.getEmail(), usuario.getRol(), false, tutorialPendiente);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -164,7 +171,7 @@ public class UsuarioService {
         loginAttemptService.loginSucceeded(loginKey);
         String token = jwtService.generateToken(usuario.getEmail());
         boolean tutorialPendiente = ramoRepository.findByUsuarioId(usuario.getId()).isEmpty();
-        return new AuthResponse(token, usuario.getNombre(), usuario.getEmail(), false, tutorialPendiente);
+        return new AuthResponse(token, usuario.getNombre(), usuario.getEmail(), usuario.getRol(), false, tutorialPendiente);
     }
 
     @Transactional
@@ -210,6 +217,7 @@ public class UsuarioService {
                     // Asignamos una contraseña aleatoria muy compleja ya que el usuario usará Google
                     usuario.setPassword("{GOOGLE}" + passwordEncoder.encode(UUID.randomUUID().toString() + UUID.randomUUID().toString()));
                     usuario.setVerificado(true);
+                    usuario.setRol(Rol.ESTUDIANTE_PREGRADO);
                     usuarioRepository.save(usuario);
                 } else if (!usuario.isVerificado()) {
                     usuario.setVerificado(true);
@@ -218,7 +226,7 @@ public class UsuarioService {
 
                 String token = jwtService.generateToken(usuario.getEmail());
                 boolean tutorialPendiente = ramoRepository.findByUsuarioId(usuario.getId()).isEmpty();
-                return new AuthResponse(token, usuario.getNombre(), usuario.getEmail(), esNuevoUsuario, tutorialPendiente);
+                return new AuthResponse(token, usuario.getNombre(), usuario.getEmail(), usuario.getRol(), esNuevoUsuario, tutorialPendiente);
             } else {
                 throw new RuntimeException("Token de Google inválido o expirado");
             }
@@ -271,11 +279,18 @@ public class UsuarioService {
             usuario.setEmail(request.getEmail());
         }
 
+        if (request.getRol() != null && request.getRol() != usuario.getRol()) {
+            if (request.getRol() == Rol.ADMIN && usuario.getRol() != Rol.ADMIN) {
+                throw new RuntimeException("No tienes permisos para asignarte el rol de Administrador");
+            }
+            usuario.setRol(request.getRol());
+        }
+
         usuarioRepository.save(usuario);
 
         String nuevoToken = jwtService.generateToken(usuario.getEmail());
         boolean tutorialPendiente = ramoRepository.findByUsuarioId(usuario.getId()).isEmpty();
-        return new AuthResponse(nuevoToken, usuario.getNombre(), usuario.getEmail(), false, tutorialPendiente);
+        return new AuthResponse(nuevoToken, usuario.getNombre(), usuario.getEmail(), usuario.getRol(), false, tutorialPendiente);
     }
 
     @Transactional
