@@ -9,6 +9,7 @@ import { HorarioService, BloqueHorarioDTO } from '../../services/horario.service
 import { EvaluacionService } from '../../services/evaluacion.service';
 import { Ramo } from '../../models/ramo.model';
 import { Evaluacion } from '../../models/evaluacion.model';
+import { Rol } from '../../models/usuario.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,6 +20,7 @@ import { Evaluacion } from '../../models/evaluacion.model';
 })
 export class Dashboard implements OnInit {
   nombreUsuario = '';
+  rolUsuario: Rol = 'ESTUDIANTE_PREGRADO';
 
   estadisticas = {
     ramosInscritos: 0,
@@ -51,7 +53,7 @@ export class Dashboard implements OnInit {
   mejoresRamos: { ramo: string, promedio: number }[] = [];
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private ramoService: RamoService,
     private horarioService: HorarioService,
     private evaluacionService: EvaluacionService,
@@ -59,6 +61,7 @@ export class Dashboard implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.rolUsuario = this.authService.getRol();
     const usuario = this.authService.getUsuario();
     if (usuario && usuario.nombre) {
       this.nombreUsuario = usuario.nombre;

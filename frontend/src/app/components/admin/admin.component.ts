@@ -11,7 +11,7 @@ import { AdminStatsDTO, UsuarioAdminDTO, Rol } from '../../models/usuario.model'
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, Navbar],
+  imports: [CommonModule, FormsModule, Navbar],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css'
 })

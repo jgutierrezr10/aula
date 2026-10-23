@@ -4,7 +4,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../../services/auth.service';
-import { UpdateUserRequest } from '../../../models/usuario.model';
+import { UpdateUserRequest, Rol } from '../../../models/usuario.model';
 
 @Component({
   selector: 'app-navbar',
@@ -15,6 +15,7 @@ import { UpdateUserRequest } from '../../../models/usuario.model';
 })
 export class Navbar implements OnInit {
   nombreUsuario: string = '';
+  rolUsuario: Rol = 'ESTUDIANTE_PREGRADO';
   mostrarModalCuenta: boolean = false;
   mostrarDropdown: boolean = false;
 
@@ -28,7 +29,7 @@ export class Navbar implements OnInit {
   successMsg: string = '';
   guardando: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router, private eRef: ElementRef) {}
+  constructor(public authService: AuthService, private router: Router, private eRef: ElementRef) {}
 
   @HostListener('document:click', ['$event'])
   clickout(event: Event) {
@@ -52,6 +53,7 @@ export class Navbar implements OnInit {
       this.nombreUsuario = usuario.nombre;
       this.nombre = usuario.nombre;
       this.email = usuario.email;
+      this.rolUsuario = this.authService.getRol();
     }
   }
 
@@ -78,12 +80,16 @@ export class Navbar implements OnInit {
       nombre: this.nombre,
       email: this.email,
       currentPassword: this.currentPassword || undefined,
-      newPassword: this.newPassword || undefined
+      newPassword: this.newPassword || undefined,
+      rol: this.rolUsuario
     };
 
     this.authService.actualizarCuenta(request).subscribe({
       next: (res) => {
         this.nombreUsuario = res.nombre;
+        if (res.rol) {
+          this.rolUsuario = res.rol;
+        }
         if (res.token) {
           localStorage.setItem('token', res.token);
         }

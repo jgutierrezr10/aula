@@ -21,24 +21,33 @@
       <a routerLink="/calendario" routerLinkActive="active" class="nav-link">
         <i class="bi bi-calendar-event"></i> Calendario
       </a>
+      <a *ngIf="authService.isAdmin()" routerLink="/admin" routerLinkActive="active" class="nav-link nav-link-admin">
+        <i class="bi bi-shield-lock-fill"></i> Admin
+      </a>
     </div>
 
     <div class="nav-actions">
 
       <div class="nav-profile-container">
         <div class="nav-profile" (click)="toggleDropdown($event)">
-          <div class="avatar-circle">
+          <div class="avatar-circle" [ngClass]="authService.getRolBadgeClass(rolUsuario)">
             {{ nombreUsuario ? nombreUsuario.charAt(0).toUpperCase() : 'U' }}
           </div>
           <div class="profile-text">
             <span class="user-name">{{ nombreUsuario }}</span>
-            <span class="user-role">Estudiante</span>
+            <span class="user-role-badge" [ngClass]="authService.getRolBadgeClass(rolUsuario)">
+              <i class="bi" [ngClass]="authService.getRolIcon(rolUsuario)"></i>
+              {{ authService.getRolLabel(rolUsuario) }}
+            </span>
           </div>
           <i class="bi bi-chevron-down profile-chevron"></i>
         </div>
 
         <!-- Dropdown Menu -->
         <div class="profile-dropdown" *ngIf="mostrarDropdown">
+          <button class="dropdown-item" *ngIf="authService.isAdmin()" routerLink="/admin" (click)="mostrarDropdown = false">
+            <i class="bi bi-shield-lock-fill text-purple"></i> Panel Administrador
+          </button>
           <button class="dropdown-item" (click)="abrirMiCuenta()">
             <i class="bi bi-person-gear"></i> Mi Cuenta
           </button>
@@ -65,8 +74,6 @@
     <form (ngSubmit)="actualizarCuenta()">
       <div class="modal-body">
 
-        <!-- Mensajes de Estado (Reemplazados por SweetAlert2) -->
-
         <!-- Nombre -->
         <div class="form-group">
           <label for="nombre">Nombre Completo</label>
@@ -76,6 +83,24 @@
           </div>
         </div>
 
+        <!-- Rol / Nivel Académico -->
+        <div class="form-group">
+          <label>Nivel Académico / Rol</label>
+          <div *ngIf="authService.isAdmin()" class="admin-badge-container">
+            <span class="role-badge badge-role-admin">
+              <i class="bi bi-shield-check"></i> Administrador
+            </span>
+            <p class="role-desc-text">Cuentas con rol de Administrador para gestionar el sistema.</p>
+          </div>
+          <div *ngIf="!authService.isAdmin()" class="input-container">
+            <i class="bi" [ngClass]="authService.getRolIcon(rolUsuario)"></i>
+            <select id="rol" name="rol" [(ngModel)]="rolUsuario" class="select-role-input">
+              <option value="ESTUDIANTE_BASICA">Estudiante Básica (Básica / Media)</option>
+              <option value="ESTUDIANTE_PREGRADO">Estudiante de Pregrado (Universidad / Instituto)</option>
+              <option value="ESTUDIANTE_POSTGRADO">Estudiante de Postgrado (Magíster / Doctorado)</option>
+            </select>
+          </div>
+        </div>
 
         <div class="form-divider">
           <span>Cambiar Contraseña (Opcional)</span>

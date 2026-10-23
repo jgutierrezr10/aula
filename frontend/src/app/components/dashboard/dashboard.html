@@ -14,7 +14,13 @@
       <!-- Welcome Card -->
       <div class="welcome-card">
         <div class="welcome-content">
-          <h1>¡Hola, {{ nombreUsuario }}! <span class="wave">👋</span></h1>
+          <div class="welcome-title-wrapper" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
+            <h1 style="margin-bottom: 0;">¡Hola, {{ nombreUsuario }}! <span class="wave">👋</span></h1>
+            <span class="user-role-badge" [ngClass]="authService.getRolBadgeClass(rolUsuario)">
+              <i class="bi" [ngClass]="authService.getRolIcon(rolUsuario)"></i>
+              {{ authService.getRolLabel(rolUsuario) }}
+            </span>
+          </div>
           <p class="welcome-subtitle">¡Qué bueno verte de nuevo!<br>Vamos a lograr grandes cosas hoy.</p>
           
           <div class="stats-row">
@@ -55,6 +61,22 @@
         <div class="books-illustration"></div>
       </div>
 
+    </section>
+
+    <!-- Admin Quick Access Card -->
+    <section class="admin-quick-card" *ngIf="authService.isAdmin()" style="margin-bottom: 2rem; background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 1px solid #ddd6fe; border-radius: 16px; padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: #7c3aed; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0;">
+          <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <div>
+          <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #4c1d95;">Acceso de Administrador Activo</h3>
+          <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: #6d28d9;">Tienes permisos para gestionar usuarios, cambiar roles académicos y administrar el sistema.</p>
+        </div>
+      </div>
+      <a routerLink="/admin" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #7c3aed; color: white; padding: 0.65rem 1.25rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);">
+        <i class="bi bi-gear-fill"></i> Gestionar Usuarios y Roles
+      </a>
     </section>
 
     <!-- Middle Section: Modules -->
