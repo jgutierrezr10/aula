@@ -5,6 +5,10 @@
   color: var(--text-main);
 }
 
+.mobile-day-view { display: none; }
+.load-error-banner { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.load-error-banner button { margin-left: 0.5rem; padding: 0.4rem 0.65rem; background: #7f1d1d; border: 0; border-radius: 6px; color: #fff; font-weight: 700; cursor: pointer; }
+
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -596,6 +600,14 @@
     border-radius: 12px;
     margin-bottom: 0.75rem;
   }
+  .mobile-day-view { display: block; padding: 0.75rem; background: var(--bg-card, #fff); border-radius: 12px; }
+  .horario-table { display: none; }
+  .mobile-day-view > label { display: block; font-weight: 700; margin-bottom: 0.35rem; }
+  .mobile-day-select, .mobile-slot select, .mobile-slot input { width: 100%; min-height: 44px; padding: 0.55rem; border: 1px solid var(--border-color, #cbd5e1); border-radius: 8px; background: var(--bg-card, #fff); color: var(--text-main, #1e293b); }
+  .mobile-time-card { margin-top: 0.65rem; padding: 0.75rem; border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; }
+  .mobile-time-card h3 { margin: 0 0 0.5rem; font-size: 0.9rem; }
+  .mobile-slot { display: grid; grid-template-columns: 1fr; gap: 0.35rem; margin-top: 0.5rem; }
+  .mobile-slot label { font-size: 0.78rem; color: var(--text-muted, #64748b); }
   .horario-table th {
     height: 38px;
     font-size: 0.75rem;

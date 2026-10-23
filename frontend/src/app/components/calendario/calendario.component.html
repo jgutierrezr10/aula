@@ -1,7 +1,7 @@
 <div class="cal-page">
   <app-navbar></app-navbar>
 
-  <main class="cal-container" *ngIf="!loading">
+  <main class="cal-container">
 
     <!-- Page Header -->
     <header class="page-header">
@@ -14,19 +14,35 @@
       </div>
     </header>
 
+    <div class="calendar-load-error" *ngIf="cargaError" role="alert" aria-live="assertive">
+      No se pudieron cargar los eventos. <button type="button" (click)="cargarDatos()">Reintentar</button>
+    </div>
+    <div class="calendar-filters">
+      <label for="calendar-course-filter">Filtrar por ramo</label>
+      <select id="calendar-course-filter" class="form-control" [ngModel]="ramoFiltro" (ngModelChange)="cambiarFiltroRamo($event)">
+        <option value="">Todos los ramos</option>
+        <option *ngFor="let ramo of ramos" [value]="ramo.id">{{ ramo.nombre }}</option>
+      </select>
+    </div>
+    <div class="reminder-permission" *ngIf="permisoNotificaciones !== 'unsupported'">
+      <button *ngIf="permisoNotificaciones === 'default'" type="button" (click)="activarRecordatorios()">Activar notificaciones de recordatorio</button>
+      <span *ngIf="permisoNotificaciones === 'granted'" role="status">Notificaciones de recordatorio activadas</span>
+      <span *ngIf="permisoNotificaciones === 'denied'">Notificaciones bloqueadas en el navegador. Los recordatorios siguen visibles en la agenda.</span>
+    </div>
+
     <!-- Calendar Card -->
     <div class="calendar-card">
 
       <!-- Month Navigation -->
       <div class="calendar-nav">
-        <button class="nav-btn" (click)="prevMonth()">
+        <button class="nav-btn" type="button" aria-label="Mes anterior" (click)="prevMonth()">
           <i class="bi bi-chevron-left"></i>
         </button>
         <div class="month-label">
           <h2>{{ monthLabel }}</h2>
-          <button class="today-btn" (click)="goToToday()">Hoy</button>
+          <button class="today-btn" type="button" (click)="goToToday()">Hoy</button>
         </div>
-        <button class="nav-btn" (click)="nextMonth()">
+        <button class="nav-btn" type="button" aria-label="Mes siguiente" (click)="nextMonth()">
           <i class="bi bi-chevron-right"></i>
         </button>
       </div>
@@ -48,6 +64,8 @@
             'weekend': day.date.getDay() === 0 || day.date.getDay() === 6
           }"
           (click)="clickDay(day)"
+          role="button" tabindex="0" [attr.aria-label]="fullWeekDays[day.date.getDay()] + ' ' + day.dayNumber + ', ' + day.evaluaciones.length + ' eventos'"
+          (keydown.enter)="clickDay(day)" (keydown.space)="$event.preventDefault(); clickDay(day)"
         >
           <span class="day-number">{{ day.dayNumber }}</span>
 
@@ -68,10 +86,22 @@
         </div>
       </div>
     </div>
+
+    <section class="agenda-upcoming" aria-labelledby="agenda-title">
+      <h2 id="agenda-title">Próximos eventos</h2>
+      <p *ngIf="eventosAgenda.length === 0">No hay eventos próximos para este filtro.</p>
+      <ul *ngIf="eventosAgenda.length > 0">
+        <li *ngFor="let ev of eventosAgenda.slice(0, 8)">
+          <strong>{{ ev.nombre }}</strong> · {{ getRamoNombre(ev.ramoId) }} · {{ formatFechaAgenda(ev.fecha) }}
+          <span>{{ ev.hora || 'Hora por definir' }}</span>
+          <small *ngIf="ev.recordatorioMinutos">Recordatorio: {{ textoRecordatorio(ev.recordatorioMinutos) }}</small>
+        </li>
+      </ul>
+    </section>
   </main>
 
   <!-- Loading -->
-  <div class="loading-overlay" *ngIf="loading">
+  <div class="loading-overlay" *ngIf="loading && !calendarDays.length" aria-live="polite">
     <div class="spinner"></div>
     <p>Cargando calendario...</p>
   </div>
@@ -81,7 +111,7 @@
      MODAL: Ver/Agregar evaluaciones en un día
      ============================================ -->
 <div class="modal-overlay" *ngIf="mostrarModal && selectedDay" (click)="cerrarModal()">
-  <div class="day-modal" (click)="$event.stopPropagation()">
+  <div class="day-modal" role="dialog" aria-modal="true" aria-labelledby="calendar-modal-title" (click)="$event.stopPropagation()">
 
     <!-- Modal Header -->
     <div class="modal-header">
@@ -91,7 +121,7 @@
           <span class="badge-month">{{ monthNames[selectedDay.date.getMonth()] }}</span>
         </div>
         <div>
-          <h2>{{ selectedDay.isToday ? '¡Hoy! — ' : '' }}{{ fullWeekDays[selectedDay.date.getDay()] }}</h2>
+          <h2 id="calendar-modal-title">{{ selectedDay.isToday ? '¡Hoy! — ' : '' }}{{ fullWeekDays[selectedDay.date.getDay()] }}</h2>
           <p>{{ selectedDay.evaluaciones.length }} evaluación(es) programada(s)</p>
         </div>
       </div>
@@ -107,9 +137,11 @@
         <div class="ev-item-info">
           <span class="ev-ramo-lbl">{{ ev.ramoNombre }}</span>
           <span class="ev-nombre">{{ ev.nombre }}</span>
+            <span class="ev-time">{{ ev.hora || 'Hora por definir' }}</span>
           <div class="ev-meta">
             <span *ngIf="ev.ponderacion > 0"><i class="bi bi-percent"></i> {{ ev.ponderacion }}%</span>
-            <span *ngIf="ev.ponderacion === 0" class="ev-actividad-lbl"><i class="bi bi-bookmark-fill"></i> Tarea / Actividad</span>
+            <span *ngIf="ev.ponderacion === 0" class="ev-actividad-lbl"><i class="bi bi-bookmark-fill"></i> {{ ev.tipoEvento === 'actividad' ? 'Actividad' : 'Tarea / Actividad' }}</span>
+            <span *ngIf="ev.recordatorioMinutos">Recordatorio: {{ textoRecordatorio(ev.recordatorioMinutos) }}</span>
             
             <span *ngIf="ev.ponderacion > 0 && ev.nota" class="ev-nota" [ngClass]="ev.nota >= 4.0 ? 'aprobado' : 'reprobado'">
               Nota: {{ ev.nota.toFixed(1) }}
@@ -135,27 +167,28 @@
       <div class="form-grid">
         <!-- Ramo Selector -->
         <div class="form-field full">
-          <label>Asignatura *</label>
-          <select [(ngModel)]="nuevaEv.ramoId" class="form-control">
-            <option *ngFor="let r of ramos" [ngValue]="r.id">{{ r.nombre }}</option>
+          <label for="event-course">Asignatura *</label>
+          <select id="event-course" [(ngModel)]="nuevaEv.ramoId" class="form-control">
+            <option *ngFor="let r of ramosCursando" [ngValue]="r.id">{{ r.nombre }}</option>
           </select>
         </div>
 
         <!-- Nombre -->
         <div class="form-field full">
-          <label>Nombre del Evento *</label>
+          <label for="event-name">Nombre del Evento *</label>
           <input
             type="text"
             placeholder="Ej: Certamen 1, Lab 2, Tarea 1..."
             [(ngModel)]="nuevaEv.nombre"
+            id="event-name"
             class="form-control"
           >
         </div>
 
         <!-- Tipo de Evento -->
         <div class="form-field full">
-          <label>Tipo de Evento</label>
-          <select [(ngModel)]="tipoEvento" (change)="onTipoEventoChange()" class="form-control">
+          <label for="event-type">Tipo de Evento</label>
+          <select id="event-type" [(ngModel)]="tipoEvento" (change)="onTipoEventoChange()" class="form-control">
             <option value="evaluacion">Evaluación con Nota (Certamen, Taller, etc.)</option>
             <option value="actividad">Actividad sin Nota (Tarea, Lectura, etc.)</option>
           </select>
@@ -185,11 +218,30 @@
         </ng-container>
       </div>
 
+      <div class="form-grid event-schedule-fields">
+        <div class="form-field">
+          <label for="event-time">Hora <span>(opcional)</span></label>
+          <input id="event-time" type="time" [(ngModel)]="nuevaEv.hora" class="form-control" aria-describedby="event-time-help">
+          <small id="event-time-help">Si no la sabes, quedará como “Hora por definir”.</small>
+        </div>
+        <div class="form-field">
+          <label for="event-reminder">Recordatorio</label>
+          <select id="event-reminder" [(ngModel)]="nuevaEv.recordatorioMinutos" class="form-control">
+            <option [ngValue]="0">Sin recordatorio</option>
+            <option [ngValue]="10">10 minutos antes</option>
+            <option [ngValue]="30">30 minutos antes</option>
+            <option [ngValue]="60">1 hora antes</option>
+            <option [ngValue]="1440">1 día antes</option>
+          </select>
+          <small>Para recibir el aviso, activa notificaciones y define una hora.</small>
+        </div>
+      </div>
+
       <div *ngIf="errorMsg" class="error-msg">
         <i class="bi bi-exclamation-circle-fill"></i> {{ errorMsg }}
       </div>
 
-      <button class="btn-guardar" (click)="guardarEvaluacion()" [disabled]="guardando">
+      <button class="btn-guardar" (click)="guardarEvaluacion()" [disabled]="guardando" [attr.aria-busy]="guardando">
         <i class="bi bi-check-lg" *ngIf="!guardando"></i>
         <span>{{ guardando ? 'Guardando...' : 'Guardar' }}</span>
       </button>

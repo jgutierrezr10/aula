@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -25,8 +25,9 @@ interface CalendarDay {
   templateUrl: './calendario.component.html',
   styleUrl: './calendario.component.css'
 })
-export class CalendarioComponent implements OnInit {
+export class CalendarioComponent implements OnInit, OnDestroy {
   ramos: Ramo[] = [];
+  ramosCursando: Ramo[] = [];
   evaluaciones: Evaluacion[] = [];
 
   // Calendar state
@@ -50,6 +51,11 @@ export class CalendarioComponent implements OnInit {
   tipoEvento: 'evaluacion' | 'actividad' = 'evaluacion';
   errorMsg = '';
   guardando = false;
+  cargaError = false;
+  ramoFiltro = '';
+  readonly recordatorios = [0, 10, 30, 60, 1440];
+  permisoNotificaciones: NotificationPermission | 'unsupported' = typeof Notification === 'undefined' ? 'unsupported' : Notification.permission;
+  private reminderInterval: ReturnType<typeof setInterval> | null = null;
 
   loading = true;
 
@@ -74,12 +80,12 @@ export class CalendarioComponent implements OnInit {
       evaluaciones: this.evaluacionService.getEvaluaciones()
     }).subscribe({
       next: (res) => {
-        this.ramos = res.ramos
-          .filter(r => r.cursando)
-          .sort((a, b) => a.nombre.localeCompare(b.nombre));
+        this.cargaError = false;
+        this.ramos = res.ramos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        this.ramosCursando = this.ramos.filter(r => r.cursando);
         
-        if (this.ramos.length > 0) {
-          this.nuevaEv.ramoId = this.ramos[0].id;
+        if (this.ramosCursando.length > 0) {
+          this.nuevaEv.ramoId = this.ramosCursando[0].id;
         }
 
         this.evaluaciones = res.evaluaciones.map(ev => {
@@ -91,15 +97,48 @@ export class CalendarioComponent implements OnInit {
         });
         
         this.buildCalendar();
+        this.planificarRevisionRecordatorios();
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar datos', err);
+        this.cargaError = true;
         this.loading = false;
         this.cdr.detectChanges();
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.reminderInterval) clearInterval(this.reminderInterval);
+  }
+
+  async activarRecordatorios() {
+    if (typeof Notification === 'undefined') return;
+    this.permisoNotificaciones = await Notification.requestPermission();
+    if (this.permisoNotificaciones === 'granted') this.planificarRevisionRecordatorios();
+  }
+
+  private planificarRevisionRecordatorios() {
+    if (this.reminderInterval) clearInterval(this.reminderInterval);
+    if (this.permisoNotificaciones !== 'granted') return;
+    this.revisarRecordatorios();
+    this.reminderInterval = setInterval(() => this.revisarRecordatorios(), 30_000);
+  }
+
+  private revisarRecordatorios() {
+    const ahora = Date.now();
+    for (const ev of this.evaluaciones) {
+      if (!ev.id || !ev.fecha || !ev.hora || !ev.recordatorioMinutos) continue;
+      const horaEvento = new Date(`${ev.fecha}T${ev.hora}:00`).getTime();
+      const horaAviso = horaEvento - ev.recordatorioMinutos * 60_000;
+      const key = `aula-recordatorio-${ev.id}-${ev.fecha}-${ev.hora}`;
+      if (ahora >= horaAviso && ahora < horaEvento && !sessionStorage.getItem(key)) {
+        new Notification(`Recordatorio: ${ev.nombre}`, { body: `${this.getRamoNombre(ev.ramoId)} · ${this.formatFechaAgenda(ev.fecha)} a las ${ev.hora}` });
+        sessionStorage.setItem(key, '1');
+      }
+    }
   }
 
   cargarEvaluaciones() {
@@ -121,10 +160,12 @@ export class CalendarioComponent implements OnInit {
           const refreshed = this.calendarDays.find(d => this.toDateStr(d.date) === dateStr);
           if (refreshed) this.selectedDay = refreshed;
         }
+        this.planificarRevisionRecordatorios();
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar evaluaciones', err);
+        this.cargaError = true;
         // Calendar already showing, just no events loaded
         this.cdr.detectChanges();
       }
@@ -172,7 +213,7 @@ export class CalendarioComponent implements OnInit {
 
   createDay(date: Date, isCurrentMonth: boolean, today: Date): CalendarDay {
     const dateStr = this.toDateStr(date);
-    const evsDia = this.evaluaciones.filter(ev => ev.fecha === dateStr);
+    const evsDia = this.evaluaciones.filter(ev => ev.fecha === dateStr && (!this.ramoFiltro || String(ev.ramoId) === this.ramoFiltro));
     return {
       date,
       dayNumber: date.getDate(),
@@ -215,6 +256,18 @@ export class CalendarioComponent implements OnInit {
     this.buildCalendar();
   }
 
+  cambiarFiltroRamo(value: string) {
+    this.ramoFiltro = value;
+    this.buildCalendar();
+  }
+
+  get eventosAgenda(): Evaluacion[] {
+    const hoy = this.toDateStr(new Date());
+    return this.evaluaciones
+      .filter(ev => !!ev.fecha && ev.fecha >= hoy && (!this.ramoFiltro || String(ev.ramoId) === this.ramoFiltro))
+      .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || '') || (a.hora || '99:99').localeCompare(b.hora || '99:99'));
+  }
+
   clickDay(day: CalendarDay) {
     this.selectedDay = day;
     this.mostrarModal = true;
@@ -229,7 +282,10 @@ export class CalendarioComponent implements OnInit {
       ponderacion: 20,
       nota: undefined,
       fecha: this.toDateStr(day.date),
-      ramoId: this.ramos.length > 0 ? this.ramos[0].id : undefined
+      ramoId: this.ramosCursando.length > 0 ? this.ramosCursando[0].id : undefined,
+      tipoEvento: 'evaluacion',
+      hora: '',
+      recordatorioMinutos: 0
     };
   }
 
@@ -258,6 +314,10 @@ export class CalendarioComponent implements OnInit {
       this.errorMsg = 'Debes seleccionar un ramo.';
       return;
     }
+    if ((this.nuevaEv.recordatorioMinutos || 0) > 0 && !this.nuevaEv.hora) {
+      this.errorMsg = 'Indica una hora para poder activar el recordatorio.';
+      return;
+    }
 
     if (this.tipoEvento === 'evaluacion') {
       if (this.nuevaEv.ponderacion === undefined || this.nuevaEv.ponderacion === null || this.nuevaEv.ponderacion <= 0 || this.nuevaEv.ponderacion > 100) {
@@ -275,7 +335,10 @@ export class CalendarioComponent implements OnInit {
       ponderacion: this.nuevaEv.ponderacion,
       nota: this.nuevaEv.nota || undefined,
       fecha: this.nuevaEv.fecha,
-      ramoId: this.nuevaEv.ramoId!
+      ramoId: this.nuevaEv.ramoId!,
+      tipoEvento: this.tipoEvento,
+      hora: this.nuevaEv.hora || undefined,
+      recordatorioMinutos: this.nuevaEv.recordatorioMinutos || 0
     };
 
     this.evaluacionService.crearEvaluacion(ev).subscribe({
@@ -320,6 +383,19 @@ export class CalendarioComponent implements OnInit {
 
   get monthLabel(): string {
     return `${this.monthNames[this.currentMonth]} ${this.currentYear}`;
+  }
+
+  formatFechaAgenda(fecha?: string): string {
+    if (!fecha) return 'Fecha por definir';
+    const [year, month, day] = fecha.split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+
+  textoRecordatorio(minutos?: number): string {
+    if (!minutos) return 'Sin recordatorio';
+    if (minutos < 60) return `${minutos} minutos antes`;
+    if (minutos < 1440) return `${minutos / 60} hora${minutos === 60 ? '' : 's'} antes`;
+    return '1 día antes';
   }
 
   getColorClass(index: number): string {

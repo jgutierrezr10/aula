@@ -511,3 +511,6 @@
     font-size: 0.9rem;
   }
 }
+.forgot-password-button { border: 0; padding: 0; background: transparent; font: inherit; cursor: pointer; }
+.toggle-password { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: #475569; cursor: pointer; padding: 0.4rem; }
+.toggle-password:focus-visible, .forgot-password-button:focus-visible { outline: 3px solid #6d28d9; outline-offset: 2px; border-radius: 4px; }

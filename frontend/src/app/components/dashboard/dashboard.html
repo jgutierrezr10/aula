@@ -2,6 +2,11 @@
   <app-navbar></app-navbar>
 
   <main class="dashboard-container">
+
+    <section class="dashboard-load-errors" *ngIf="!cargandoDatos && (erroresCarga.ramos || erroresCarga.evaluaciones || erroresCarga.horario)" role="alert" aria-live="assertive">
+      <p>No se pudo cargar {{ erroresCarga.ramos ? 'la malla' : '' }}{{ erroresCarga.ramos && erroresCarga.evaluaciones ? ', ' : '' }}{{ erroresCarga.evaluaciones ? 'las notas' : '' }}{{ erroresCarga.horario ? ' el horario' : '' }}. Los datos mostrados pueden estar incompletos.</p>
+      <button type="button" (click)="cargarDatos()">Reintentar</button>
+    </section>
     
     <!-- Top Section: Welcome and Next Class -->
     <section class="section-top">
@@ -23,7 +28,7 @@
             <div class="stat-badge">
               <div class="stat-icon icon-yellow"><i class="bi bi-star"></i></div>
               <div class="stat-info">
-                <span class="stat-value">{{ estadisticas.promedioGeneral }}</span>
+                <span class="stat-value">{{ promedioGeneralConEvaluaciones ? estadisticas.promedioGeneral : '--' }}</span>
                 <span class="stat-label">Promedio<br>semestre</span>
               </div>
             </div>
@@ -39,12 +44,12 @@
       <div class="next-class-card">
         <div class="card-header-small">
           <div class="icon-square icon-purple-light"><i class="bi bi-calendar-event"></i></div>
-          <span>Próxima clase</span>
+          <span>{{ proximaClaseLabel }}</span>
         </div>
         <h3 class="class-title">{{ proximaClase.ramo }}</h3>
         <ul class="class-details">
           <li><span class="dot dot-purple"></span>{{ proximaClase.horario }}</li>
-          <li><i class="bi bi-clock history-icon"></i>{{ proximaClase.sala }}</li>
+          <li><i class="bi bi-geo-alt-fill history-icon"></i>Sala / sección: {{ proximaClase.sala }}</li>
         </ul>
         <a routerLink="/horario" class="btn-outline-purple">Ver mi horario <i class="bi bi-arrow-right"></i></a>
         <div class="books-illustration"></div>
@@ -116,12 +121,13 @@
             </div>
           </div>
           
-          <div class="top-ramos" *ngIf="mejoresRamos.length > 0">
-            <span class="widget-label mt-3">Mejores Promedios</span>
+            <div class="top-ramos" *ngIf="mejoresRamos.length > 0">
+            <span class="widget-label mt-3">Promedios por ramo cursando</span>
             <div class="top-ramo-item" *ngFor="let m of mejoresRamos">
                <span class="top-ramo-name">{{ m.ramo }}</span>
                <span class="top-ramo-grade text-yellow">{{ m.promedio | number:'1.1-1' }}</span>
             </div>
+            <small class="average-help">Promedio por ramo: suma de nota × ponderación, dividida por las ponderaciones con nota. El general es el promedio simple de esos ramos.</small>
           </div>
         </div>
         <div class="module-footer">

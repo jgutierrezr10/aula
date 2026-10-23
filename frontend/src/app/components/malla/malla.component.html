@@ -32,6 +32,9 @@
           <button class="dropdown-item" (click)="abrirModalImportar(); dropdownActivo = ''">
             <i class="bi bi-file-earmark-arrow-up"></i> Desde archivo (.csv)
           </button>
+          <button class="dropdown-item" (click)="abrirSelectorBackup(); dropdownActivo = ''">
+            <i class="bi bi-arrow-counterclockwise"></i> Restaurar respaldo AULA (.json)
+          </button>
           <button class="dropdown-item" (click)="importarConIA(); dropdownActivo = ''">
             <i class="bi bi-stars"></i> Desde imagen (IA)
           </button>
@@ -56,6 +59,7 @@
       <button class="btn-danger" (click)="eliminarTodos()" *ngIf="ramos.length > 0">
         <i class="bi bi-trash3-fill"></i> Eliminar
       </button>
+      <input id="aula-backup-file" type="file" accept="application/json,.json" (change)="restaurarRespaldo($event)" hidden aria-label="Seleccionar respaldo AULA para restaurar">
     </div>
   </div>
 
@@ -184,17 +188,19 @@
             [class.aprobado]="ramo.aprobado"
             [class.cursando]="ramo.cursando"
             [class.pendiente]="!ramo.aprobado && !ramo.cursando"
-            (click)="toggleEstado(ramo)">
+            (click)="toggleEstado(ramo)"
+            role="button" tabindex="0" [attr.aria-label]="ramo.nombre + ': ' + (ramo.aprobado ? 'aprobado' : (ramo.cursando ? 'cursando' : 'pendiente')) + '. Activar para cambiar estado'"
+            (keydown.enter)="toggleEstado(ramo)" (keydown.space)="$event.preventDefault(); toggleEstado(ramo)">
 
             <div class="ramo-top">
               <span class="estado-icon">
                 <i class="bi" [ngClass]="ramo.aprobado ? 'bi-check-circle-fill' : (ramo.cursando ? 'bi-book-half' : 'bi-clock')"></i>
               </span>
-              <div class="ramo-btns" (click)="$event.stopPropagation()">
-                <button (click)="editarRamo(ramo)" title="Editar">
+          <div class="ramo-btns" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                <button (click)="editarRamo(ramo)" title="Editar" [attr.aria-label]="'Editar '+ramo.nombre">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button (click)="eliminarRamo(ramo.id!)" title="Eliminar">
+                <button (click)="eliminarRamo(ramo.id!)" title="Eliminar" [attr.aria-label]="'Eliminar '+ramo.nombre">
                   <i class="bi bi-trash3-fill"></i>
                 </button>
               </div>
@@ -353,10 +359,15 @@
 
       <!-- Preview -->
       <div class="preview" *ngIf="mostrarPreview">
-        <p>
-          <i class="bi bi-eye"></i>
-          <strong>{{ ramosImportados.length }} ramos detectados:</strong>
-        </p>
+        <p><i class="bi bi-eye"></i><strong>Vista previa: {{ ramosImportados.length }} ramos válidos.</strong></p>
+        <div class="import-preview-errors" *ngIf="erroresImportacion.length" role="alert">
+          <strong>Filas con errores (no se importarán):</strong>
+          <p *ngFor="let error of erroresImportacion">{{ error }}</p>
+        </div>
+        <div class="import-preview-errors duplicates" *ngIf="duplicadosImportacion.length">
+          <strong>Duplicados ignorados:</strong>
+          <p *ngFor="let duplicado of duplicadosImportacion">{{ duplicado }}</p>
+        </div>
         <div class="preview-lista">
           <div class="preview-item" *ngFor="let r of ramosImportados">
             <span><i class="bi bi-book"></i> {{ r.nombre }}</span>
@@ -369,7 +380,7 @@
         <button class="btn-cancelar" (click)="mostrarModalImportar = false">
           <i class="bi bi-x-circle"></i> Cancelar
         </button>
-        <button class="btn-guardar" *ngIf="mostrarPreview" (click)="confirmarImportacion()">
+        <button class="btn-guardar" *ngIf="mostrarPreview" (click)="confirmarImportacion()" [disabled]="ramosImportados.length === 0">
           <i class="bi bi-download"></i> Importar {{ ramosImportados.length }} ramos
         </button>
       </div>

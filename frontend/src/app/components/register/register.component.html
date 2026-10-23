@@ -70,8 +70,8 @@
             <i class="bi bi-lock input-icon"></i>
             <input id="reg-password" [type]="mostrarPassword ? 'text' : 'password'" [(ngModel)]="password" placeholder="Mínimo 6 caracteres"
               autocomplete="new-password" (keyup.enter)="register()" />
-            <i class="toggle-password bi" [ngClass]="mostrarPassword ? 'bi-eye-slash' : 'bi-eye'" 
-               (click)="mostrarPassword = !mostrarPassword"></i>
+            <button type="button" class="toggle-password" [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+               [attr.aria-pressed]="mostrarPassword" (click)="mostrarPassword = !mostrarPassword"><i class="bi" [ngClass]="mostrarPassword ? 'bi-eye-slash' : 'bi-eye'"></i></button>
           </div>
         </div>
 

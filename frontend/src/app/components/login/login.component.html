@@ -61,8 +61,8 @@
             <i class="bi bi-lock input-icon"></i>
             <input id="login-password" [type]="mostrarPassword ? 'text' : 'password'" [(ngModel)]="password" placeholder="Ingresa tu contraseña"
               autocomplete="current-password" (keyup.enter)="login()" style="padding-right: 48px;" />
-            <i class="toggle-password bi" [ngClass]="mostrarPassword ? 'bi-eye-slash' : 'bi-eye'" 
-               (click)="mostrarPassword = !mostrarPassword"></i>
+            <button type="button" class="toggle-password" [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+               [attr.aria-pressed]="mostrarPassword" (click)="mostrarPassword = !mostrarPassword"><i class="bi" [ngClass]="mostrarPassword ? 'bi-eye-slash' : 'bi-eye'"></i></button>
           </div>
         </div>
 
@@ -71,10 +71,10 @@
             <input type="checkbox" id="login-recordar" [(ngModel)]="recordarme" />
             <label for="login-recordar">Recordarme</label>
           </div>
-          <a href="javascript:void(0)" (click)="recuperarPassword()" class="forgot-password-link">¿Olvidaste tu contraseña?</a>
+          <button type="button" (click)="recuperarPassword()" class="forgot-password-link forgot-password-button">¿Olvidaste tu contraseña?</button>
         </div>
 
-        <div class="error-msg" *ngIf="error">
+        <div class="error-msg" *ngIf="error" role="alert" aria-live="polite">
           <i class="bi bi-exclamation-triangle-fill"></i>
           {{ error }}
         </div>

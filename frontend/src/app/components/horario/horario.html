@@ -23,19 +23,22 @@
   </div>
 
   <div class="horario-container">
-    <div class="info-banner" *ngIf="!cargandoHorario && ramosCursando.length === 0">
+    <div class="info-banner load-error-banner" *ngIf="!cargandoHorario && (errorRamosCarga || errorHorarioCarga)" role="alert" aria-live="assertive">
+      No se pudo cargar {{ errorRamosCarga ? 'la lista de ramos' : 'el horario' }}. <button type="button" (click)="cargarDatos()">Reintentar</button>
+    </div>
+    <div class="info-banner" *ngIf="!cargandoHorario && !errorRamosCarga && ramosCursando.length === 0">
       <i class="bi bi-info-circle-fill"></i>
       <span>No tienes ramos marcados como "Cursando" en tu Malla. Ve a tu malla y marca los ramos que estás tomando actualmente para poder armar tu horario.</span>
     </div>
 
-    <div class="horario-stats" *ngIf="!cargandoHorario && ramosCursando.length > 0">
+    <div class="horario-stats" *ngIf="!cargandoHorario && !errorHorarioCarga && ramosCursando.length > 0">
       <div class="stat-badge" [class.complete]="ramosEnHorario === ramosCursando.length">
         <i class="bi" [ngClass]="ramosEnHorario === ramosCursando.length ? 'bi-check-circle-fill' : 'bi-pie-chart-fill'"></i>
         Ramos asignados: <strong>{{ ramosEnHorario }} / {{ ramosCursando.length }}</strong>
       </div>
     </div>
 
-    <div class="mobile-scroll-hint" *ngIf="!cargandoHorario">
+    <div class="mobile-scroll-hint desktop-table-hint" *ngIf="!cargandoHorario && !errorHorarioCarga">
       <i class="bi bi-arrow-left-right"></i> Desliza para ver todos los días
     </div>
 
@@ -52,7 +55,7 @@
       </div>
 
       <!-- Tabla Real -->
-      <table class="horario-table" *ngIf="!cargandoHorario">
+      <table class="horario-table" *ngIf="!cargandoHorario && !errorHorarioCarga">
         <thead>
           <tr>
             <th class="time-header"><i class="bi bi-clock-history"></i> Hora</th>
@@ -89,6 +92,7 @@
                      [class.filled]="getBloque(dia, bloqueKey).ramoId"
                      [ngStyle]="getSlotStyle(getBloque(dia, bloqueKey).ramoId)">
                   <select class="ramo-select-visible" 
+                          [attr.aria-label]="dia + ', ' + etiquetasHora[bloqueKey] + ', ramo principal'"
                           [ngModel]="getBloque(dia, bloqueKey).ramoId" 
                           (ngModelChange)="asignarRamo(getBloque(dia, bloqueKey), $event, false)"
                           [class.empty-select]="!getBloque(dia, bloqueKey).ramoId"
@@ -115,6 +119,7 @@
                      [ngStyle]="getSlotStyle(getBloque(dia, bloqueKey).ramo2Id)">
                   
                   <select class="ramo-select-visible" 
+                          [attr.aria-label]="dia + ', ' + etiquetasHora[bloqueKey] + ', segundo ramo o tope'"
                           [ngModel]="getBloque(dia, bloqueKey).ramo2Id" 
                           (ngModelChange)="asignarRamo(getBloque(dia, bloqueKey), $event, true)"
                           [class.empty-select]="!getBloque(dia, bloqueKey).ramo2Id"
@@ -144,7 +149,7 @@
     </div>
 
     <!-- Leyenda de colores -->
-    <div class="leyenda-colores" *ngIf="!cargandoHorario && ramosCursando.length > 0">
+    <div class="leyenda-colores" *ngIf="!cargandoHorario && !errorHorarioCarga && ramosCursando.length > 0">
       <span class="leyenda-titulo"><i class="bi bi-palette"></i> Ramos:</span>
       <div class="leyenda-items">
         <div class="leyenda-item" *ngFor="let ramo of ramosCursando"
@@ -152,6 +157,32 @@
           {{ ramo.nombre }}
         </div>
       </div>
+
+      <section class="mobile-day-view" *ngIf="!cargandoHorario && !errorHorarioCarga" aria-label="Vista diaria del horario">
+        <label for="mobile-day-select">Ver día</label>
+        <select id="mobile-day-select" [(ngModel)]="diaMovil" class="mobile-day-select">
+          <option *ngFor="let dia of dias" [value]="dia">{{ dia }}</option>
+        </select>
+        <article class="mobile-time-card" *ngFor="let bloqueKey of bloquesKeys">
+          <h3>{{ etiquetasHora[bloqueKey] }}</h3>
+          <div class="mobile-slot">
+            <label [for]="'mobile-'+diaMovil+'-'+bloqueKey">Ramo</label>
+            <select [id]="'mobile-'+diaMovil+'-'+bloqueKey" [ngModel]="getBloque(diaMovil, bloqueKey).ramoId" (ngModelChange)="asignarRamo(getBloque(diaMovil, bloqueKey), $event, false)">
+              <option [ngValue]="null">Sin ramo</option>
+              <option *ngFor="let ramo of ramosCursando" [ngValue]="ramo.id">{{ ramo.nombre }}</option>
+            </select>
+            <input *ngIf="getBloque(diaMovil, bloqueKey).ramoId" type="text" [(ngModel)]="getBloque(diaMovil, bloqueKey).detalle1" (blur)="actualizarDetalle(getBloque(diaMovil, bloqueKey))" placeholder="Sala o sección (opcional)" [attr.aria-label]="'Sala o sección de '+getRamoNombre(getBloque(diaMovil, bloqueKey).ramoId)" />
+          </div>
+          <div class="mobile-slot" *ngIf="getBloque(diaMovil, bloqueKey).ramoId || getBloque(diaMovil, bloqueKey).ramo2Id">
+            <label [for]="'mobile2-'+diaMovil+'-'+bloqueKey">Segundo ramo / tope</label>
+            <select [id]="'mobile2-'+diaMovil+'-'+bloqueKey" [ngModel]="getBloque(diaMovil, bloqueKey).ramo2Id" (ngModelChange)="asignarRamo(getBloque(diaMovil, bloqueKey), $event, true)">
+              <option [ngValue]="null">Sin segundo ramo</option>
+              <option *ngFor="let ramo of ramosCursando" [ngValue]="ramo.id">{{ ramo.nombre }}</option>
+            </select>
+            <input *ngIf="getBloque(diaMovil, bloqueKey).ramo2Id" type="text" [(ngModel)]="getBloque(diaMovil, bloqueKey).detalle2" (blur)="actualizarDetalle(getBloque(diaMovil, bloqueKey))" placeholder="Sala o sección (opcional)" [attr.aria-label]="'Sala o sección de '+getRamoNombre(getBloque(diaMovil, bloqueKey).ramo2Id ?? null)" />
+          </div>
+        </article>
+      </section>
     </div>
   </div>
 </div>

@@ -14,4 +14,7 @@ public class EvaluacionDTO {
     private LocalDate fecha;
     private Long ramoId;
     private String ramoNombre;
+    private String tipoEvento;
+    private String hora;
+    private Integer recordatorioMinutos;
 }

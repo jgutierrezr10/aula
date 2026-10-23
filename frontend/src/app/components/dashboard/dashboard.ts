@@ -2,7 +2,6 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin, of, timeout, catchError } from 'rxjs';
-import Swal from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
 import { Navbar } from '../shared/navbar/navbar';
 import { RamoService } from '../../services/ramo.service';
@@ -31,9 +30,13 @@ export class Dashboard implements OnInit {
     horario: '--:-- – --:--',
     sala: 'N/A'
   };
+  proximaClaseLabel = 'Próxima clase';
 
   progresoMalla = 0;
   promedioActual = '0.0 / 7.0';
+  promedioGeneralConEvaluaciones = false;
+  cargandoDatos = true;
+  erroresCarga = { ramos: false, evaluaciones: false, horario: false };
   proximaEntrega = {
     nombre: 'Sin entregas pendientes',
     fecha: '--'
@@ -67,13 +70,15 @@ export class Dashboard implements OnInit {
   }
 
   cargarDatos() {
+    this.cargandoDatos = true;
+    this.erroresCarga = { ramos: false, evaluaciones: false, horario: false };
     const TIMEOUT_MS = 15000;
 
     const ramos$ = this.ramoService.getRamos().pipe(
       timeout(TIMEOUT_MS),
       catchError(err => {
         console.error('Error/timeout al cargar ramos en dashboard:', err);
-        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error al cargar malla', showConfirmButton: false, timer: 3000 });
+        this.erroresCarga.ramos = true;
         return of([] as Ramo[]);
       })
     );
@@ -82,7 +87,7 @@ export class Dashboard implements OnInit {
       timeout(TIMEOUT_MS),
       catchError(err => {
         console.error('Error/timeout al cargar evaluaciones en dashboard:', err);
-        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error al cargar notas', showConfirmButton: false, timer: 3000 });
+        this.erroresCarga.evaluaciones = true;
         return of([] as Evaluacion[]);
       })
     );
@@ -91,13 +96,14 @@ export class Dashboard implements OnInit {
       timeout(TIMEOUT_MS),
       catchError(err => {
         console.error('Error/timeout al cargar horario en dashboard:', err);
-        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Error al cargar horario', showConfirmButton: false, timer: 3000 });
+        this.erroresCarga.horario = true;
         return of([] as BloqueHorarioDTO[]);
       })
     );
 
     forkJoin({ ramos: ramos$, evaluaciones: evaluaciones$, bloques: bloques$ }).subscribe({
       next: ({ ramos, evaluaciones, bloques }) => {
+        this.cargandoDatos = false;
         const safeRamos = ramos || [];
         const safeEvaluaciones = evaluaciones || [];
         const safeBloques = bloques || [];
@@ -149,16 +155,6 @@ export class Dashboard implements OnInit {
         }
 
         // Calcular promedio actual
-        const conNota = safeEvaluaciones.filter(e => e.nota && e.nota > 0);
-        if (conNota.length > 0) {
-          const sumaNotas = conNota.reduce((acc, e) => acc + (e.nota! * (e.ponderacion / 100)), 0);
-          const sumaPond = conNota.reduce((acc, e) => acc + (e.ponderacion / 100), 0);
-          const prom = sumaPond > 0 ? sumaNotas / sumaPond : 0;
-          this.promedioActual = `${prom.toFixed(1)} / 7.0`;
-        } else {
-          this.promedioActual = '0.0 / 7.0';
-        }
-
         // Calcular promedios por ramo cursando
         const promediosSemestre: number[] = [];
         const topRamosTemp: { ramo: string; promedio: number }[] = [];
@@ -181,9 +177,13 @@ export class Dashboard implements OnInit {
         } else {
           this.estadisticas.promedioGeneral = 0;
         }
+        this.promedioGeneralConEvaluaciones = promediosSemestre.length > 0;
+        this.promedioActual = this.promedioGeneralConEvaluaciones
+          ? `${this.estadisticas.promedioGeneral.toFixed(1)} / 7.0`
+          : '-- / 7.0';
 
         topRamosTemp.sort((a, b) => b.promedio - a.promedio);
-        this.mejoresRamos = topRamosTemp.slice(0, 3);
+        this.mejoresRamos = topRamosTemp;
 
         // 3. Horario (Días con clases y próxima clase)
         const diasMap: { [key: string]: 'L' | 'M' | 'X' | 'J' | 'V' | 'S' | 'D' } = {
@@ -241,17 +241,22 @@ export class Dashboard implements OnInit {
 
         const currentTimeMins = timeToMinutes(currentTime);
 
+        const inicioDe = (b: BloqueHorarioDTO) => timeToMinutes(getLabel(b.hora).split('-')[0]);
+        const finDe = (b: BloqueHorarioDTO) => timeToMinutes(getEndTime(b.hora));
         const bloquesHoy = safeBloques.filter(b => b.dia === diaHoyStr && b.ramoId)
-          .filter(b => timeToMinutes(getEndTime(b.hora)) >= currentTimeMins);
+          .sort((a, b) => inicioDe(a) - inicioDe(b));
+        const claseEnCurso = bloquesHoy.find(b => inicioDe(b) <= currentTimeMins && finDe(b) > currentTimeMins);
+        const siguienteHoy = bloquesHoy.find(b => inicioDe(b) > currentTimeMins);
 
-        if (bloquesHoy.length > 0) {
-          const b = bloquesHoy[0];
+        if (claseEnCurso || siguienteHoy) {
+          const b = claseEnCurso || siguienteHoy!;
           const ramo = safeRamos.find(r => r.id === b.ramoId);
           this.proximaClase = {
             ramo: ramo ? ramo.nombre : 'Clase',
             horario: `Hoy, ${getLabel(b.hora)}`,
-            sala: b.detalle1 || b.detalle2 || 'Sala por definir'
+            sala: [b.detalle1, b.detalle2].filter(Boolean).join(' · ') || 'Sala por definir'
           };
+          this.proximaClaseLabel = claseEnCurso ? 'Clase en curso' : 'Siguiente clase';
         } else {
           let proximaClaseEncontrada = false;
           for (let offset = 1; offset <= 6; offset++) {
@@ -260,7 +265,7 @@ export class Dashboard implements OnInit {
             const bloquesProxDia = safeBloques.filter(b => b.dia === proxDiaStr && b.ramoId);
 
             if (bloquesProxDia.length > 0) {
-              const b = bloquesProxDia[0];
+              const b = bloquesProxDia.sort((a, b) => inicioDe(a) - inicioDe(b))[0];
               const ramo = safeRamos.find(r => r.id === b.ramoId);
               let prefijoDia = offset === 1 ? 'Mañana' : proxDiaStr;
               this.proximaClase = {
@@ -268,6 +273,7 @@ export class Dashboard implements OnInit {
                 horario: `${prefijoDia}, ${getLabel(b.hora)}`,
                 sala: b.detalle1 || b.detalle2 || 'Sala por definir'
               };
+              this.proximaClaseLabel = 'Siguiente clase';
               proximaClaseEncontrada = true;
               break;
             }
@@ -275,6 +281,7 @@ export class Dashboard implements OnInit {
 
           if (!proximaClaseEncontrada) {
             this.proximaClase = { ramo: 'Sin clases próximas', horario: '--:-- – --:--', sala: 'N/A' };
+            this.proximaClaseLabel = 'Próxima clase';
           }
         }
 
@@ -282,17 +289,9 @@ export class Dashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
+        this.cargandoDatos = false;
         console.error('Error al cargar datos del dashboard:', err);
         this.cdr.detectChanges();
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'error',
-          title: 'Error de conexión',
-          text: 'Hubo un problema al cargar el dashboard.',
-          showConfirmButton: false,
-          timer: 3000
-        });
       }
     });
   }

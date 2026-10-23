@@ -605,3 +605,7 @@
     min-height: auto;
   }
 }
+.dashboard-load-errors { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.75rem 1rem; margin-bottom: 1rem; border-radius: 10px; background: #fef2f2; color: #991b1b; }
+.dashboard-load-errors p { margin: 0; }
+.dashboard-load-errors button { border: 0; background: #7f1d1d; color: #fff; border-radius: 8px; padding: 0.5rem 0.85rem; font-weight: 700; cursor: pointer; }
+.average-help { display: block; margin-top: 0.5rem; color: #475569; line-height: 1.45; }

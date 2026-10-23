@@ -58,8 +58,11 @@ export class Horario implements OnInit {
   private customModeSlots = new Set<string>();
 
   cargandoHorario = true;
+  errorRamosCarga = false;
+  errorHorarioCarga = false;
 
   dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  diaMovil = 'Lunes';
 
   // Nombres internos (llaves de base de datos)
   bloquesKeys = [
@@ -98,12 +101,15 @@ export class Horario implements OnInit {
 
   cargarDatos() {
     this.cargandoHorario = true;
+    this.errorRamosCarga = false;
+    this.errorHorarioCarga = false;
     const TIMEOUT_MS = 15000; // 15 segundos de timeout
 
     const ramos$ = this.ramoService.getRamos().pipe(
       timeout(TIMEOUT_MS),
       catchError(err => {
         console.error('Error/timeout al cargar ramos:', err);
+        this.errorRamosCarga = true;
         return of([] as Ramo[]);
       })
     );
@@ -112,6 +118,7 @@ export class Horario implements OnInit {
       timeout(TIMEOUT_MS),
       catchError(err => {
         console.error('Error/timeout al cargar bloques del horario:', err);
+        this.errorHorarioCarga = true;
         return of([] as BloqueHorarioDTO[]);
       })
     );

@@ -598,3 +598,22 @@
   align-items: center;
   gap: 0.25rem;
 }
+
+.calendar-filters { display: flex; align-items: center; gap: 0.75rem; margin: 0 0 1rem; max-width: 32rem; }
+.reminder-permission { margin: 0 0 1rem; color: var(--text-muted); font-size: 0.85rem; }
+.reminder-permission button { border: 1px solid #6d28d9; border-radius: 8px; background: #fff; color: #5b21b6; padding: 0.5rem 0.75rem; font-weight: 700; cursor: pointer; }
+.calendar-filters label, .agenda-upcoming h2 { color: var(--text-main); font-weight: 700; }
+.calendar-load-error { padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 10px; background: #fef2f2; color: #991b1b; }
+.calendar-load-error button { margin-left: 0.5rem; color: #5b21b6; font-weight: 700; text-decoration: underline; }
+.agenda-upcoming { margin-top: 1.25rem; padding: 1rem 1.25rem; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border-color); }
+.agenda-upcoming ul { list-style: none; padding: 0; margin: 0; }
+.agenda-upcoming li { display: flex; flex-wrap: wrap; gap: 0.4rem 0.75rem; padding: 0.75rem 0; border-top: 1px solid var(--border-color); color: var(--text-main); }
+.agenda-upcoming li span, .agenda-upcoming li small { color: var(--text-muted); }
+.event-schedule-fields { margin-top: 0.75rem; }
+.event-schedule-fields small { color: var(--text-muted); font-size: 0.75rem; }
+.ev-time { display: block; color: var(--text-muted); font-size: 0.8rem; }
+.day-cell:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid #6d28d9; outline-offset: 2px; }
+@media (max-width: 520px) {
+  .calendar-filters { align-items: stretch; flex-direction: column; }
+  .agenda-upcoming { padding: 0.85rem; }
+}

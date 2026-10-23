@@ -8,8 +8,11 @@ import { RamoService } from '../../services/ramo.service';
 import { Ramo } from '../../models/ramo.model';
 import { AprobadosPipe } from '../../pipes/aprobados.pipe';
 import { MallaPredeterminadaDTO } from '../../models/malla-predeterminada.model';
-import { forkJoin } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 import { Navbar } from '../shared/navbar/navbar';
+import { EvaluacionService } from '../../services/evaluacion.service';
+import { HorarioService, BloqueHorarioDTO } from '../../services/horario.service';
+import { Evaluacion } from '../../models/evaluacion.model';
 
 @Component({
   selector: 'app-malla',
@@ -40,6 +43,8 @@ export class MallaComponent implements OnInit {
   importando = false;
   ramosImportados: Ramo[] = [];
   mostrarPreview = false;
+  erroresImportacion: string[] = [];
+  duplicadosImportacion: string[] = [];
 
   // Modal malla predeterminada
   mostrarModalMalla = false;
@@ -66,7 +71,9 @@ export class MallaComponent implements OnInit {
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private evaluacionService: EvaluacionService,
+    private horarioService: HorarioService
   ) {}
 
   ngOnInit() {
@@ -275,7 +282,7 @@ export class MallaComponent implements OnInit {
   eliminarTodos() {
     Swal.fire({
       title: 'Eliminar todos los ramos',
-      text: '¿Estás seguro de que deseas eliminar TODOS los ramos? Esta acción no se puede deshacer.',
+      text: 'Se eliminarán tus ramos, evaluaciones y bloques de horario. Descargaremos un respaldo JSON antes de borrar para que puedas restaurarlo después.',
       icon: 'error',
       showCancelButton: true,
       confirmButtonColor: '#dc2626',
@@ -284,14 +291,87 @@ export class MallaComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.ramoService.eliminarTodos().subscribe({
-          next: () => {
-            this.cargarRamos();
+        forkJoin({
+          ramos: this.ramoService.getRamos(),
+          evaluaciones: this.evaluacionService.getEvaluaciones(),
+          horario1: this.horarioService.obtenerHorario(1),
+          horario2: this.horarioService.obtenerHorario(2)
+        }).subscribe({
+          next: (res) => {
+            this.descargarRespaldo({ version: 1, exportado: new Date().toISOString(), ...res });
+            this.ramoService.eliminarTodos().subscribe({
+              next: () => this.cargarRamos(),
+              error: () => Swal.fire('Atención', 'No se pudieron eliminar los ramos. El respaldo JSON ya fue descargado.', 'warning')
+            });
           },
-          error: () => Swal.fire('Atención', 'Error al eliminar todos los ramos', 'warning')
+          error: () => Swal.fire('No se pudo crear el respaldo', 'No se eliminó ningún dato. Revisa tu conexión e inténtalo otra vez.', 'error')
         });
       }
     });
+  }
+
+  private descargarRespaldo(datos: unknown) {
+    const blob = new Blob([JSON.stringify(datos, null, 2) ?? '{}'], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `aula-respaldo-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async restaurarRespaldo(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const backup = JSON.parse(await file.text());
+      if (backup.version !== 1 || !Array.isArray(backup.ramos) || !Array.isArray(backup.evaluaciones)) {
+        throw new Error('El archivo no tiene el formato de respaldo AULA.');
+      }
+      const confirm = await Swal.fire({
+        title: 'Restaurar respaldo',
+        text: 'Se reemplazarán los ramos, evaluaciones y horarios actuales con los datos del respaldo seleccionado.',
+        icon: 'warning', showCancelButton: true, confirmButtonText: 'Restaurar respaldo', cancelButtonText: 'Cancelar'
+      });
+      if (!confirm.isConfirmed) return;
+
+      const respaldoActual = await firstValueFrom(forkJoin({
+        ramos: this.ramoService.getRamos(),
+        evaluaciones: this.evaluacionService.getEvaluaciones(),
+        horario1: this.horarioService.obtenerHorario(1),
+        horario2: this.horarioService.obtenerHorario(2)
+      }));
+      if (respaldoActual.ramos.length || respaldoActual.evaluaciones.length) {
+        this.descargarRespaldo({ version: 1, exportado: new Date().toISOString(), ...respaldoActual });
+      }
+      await firstValueFrom(this.ramoService.eliminarTodos());
+      const ids = new Map<number, number>();
+      for (const ramo of backup.ramos as Ramo[]) {
+        const nuevo = await firstValueFrom(this.ramoService.crearRamo({
+          nombre: ramo.nombre, semestre: ramo.semestre, aprobado: ramo.aprobado,
+          cursando: ramo.cursando, nota: ramo.nota
+        }));
+        if (ramo.id && nuevo.id) ids.set(ramo.id, nuevo.id);
+      }
+      for (const ev of backup.evaluaciones as Evaluacion[]) {
+        const ramoId = ids.get(ev.ramoId);
+        if (ramoId) await firstValueFrom(this.evaluacionService.crearEvaluacion({ ...ev, id: undefined, ramoId }));
+      }
+      for (const opcion of [1, 2]) {
+        const horario = backup[`horario${opcion}`] as BloqueHorarioDTO[] | undefined;
+        if (horario) {
+          const restaurado = horario.map(b => ({ ...b, id: `${b.dia}-${b.hora}`, ramoId: b.ramoId ? ids.get(b.ramoId) ?? null : null, ramo2Id: b.ramo2Id ? ids.get(b.ramo2Id) ?? null : null }));
+          await firstValueFrom(this.horarioService.guardarHorario(restaurado, opcion));
+        }
+      }
+      this.cargarRamos();
+      await Swal.fire('Respaldo restaurado', 'Tus ramos, evaluaciones y horarios ya están disponibles.', 'success');
+    } catch (error: any) {
+      Swal.fire('No se pudo restaurar', error?.message || 'El respaldo está dañado o no se pudo guardar.', 'error');
+    } finally {
+      input.value = '';
+    }
   }
 
   toggleEstado(ramo: Ramo) {
@@ -429,8 +509,14 @@ export class MallaComponent implements OnInit {
   abrirModalImportar() {
     this.archivoSeleccionado = null;
     this.ramosImportados = [];
+    this.erroresImportacion = [];
+    this.duplicadosImportacion = [];
     this.mostrarPreview = false;
     this.mostrarModalImportar = true;
+  }
+
+  abrirSelectorBackup() {
+    document.getElementById('aula-backup-file')?.click();
   }
 
   onArchivoSeleccionado(event: Event) {
@@ -461,17 +547,29 @@ export class MallaComponent implements OnInit {
     const reader = new FileReader();
     reader.onload = (e) => {
       const texto = e.target?.result as string;
-      const lineas = texto.split('\n').filter(l => l.trim());
-      this.ramosImportados = lineas
-        .map(linea => {
-          const partes = linea.split(',');
-          return {
-            nombre: partes[0]?.trim() ?? '',
-            semestre: parseInt(partes[1]?.trim() ?? '1') || 1,
-            aprobado: false
-          };
-        })
-        .filter(r => r.nombre.length > 0);
+      const nombresExistentes = new Set(this.ramos.map(r => r.nombre.trim().toLocaleLowerCase()));
+      const nombresArchivo = new Set<string>();
+      this.ramosImportados = [];
+      this.erroresImportacion = [];
+      this.duplicadosImportacion = [];
+      texto.split(/\r?\n/).forEach((linea, index) => {
+        if (!linea.trim()) return;
+        const partes = linea.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map(p => p.trim().replace(/^\"|\"$/g, ''));
+        const nombre = partes[0] ?? '';
+        const semestre = Number(partes[1] ?? 1);
+        if (index === 0 && /nombre/i.test(nombre) && /semestre/i.test(partes[1] ?? '')) return;
+        if (!nombre || !Number.isInteger(semestre) || semestre < 1 || semestre > 12) {
+          this.erroresImportacion.push(`Línea ${index + 1}: nombre obligatorio y semestre entero entre 1 y 12.`);
+          return;
+        }
+        const key = nombre.toLocaleLowerCase();
+        if (nombresExistentes.has(key) || nombresArchivo.has(key)) {
+          this.duplicadosImportacion.push(`Línea ${index + 1}: ${nombre}`);
+          return;
+        }
+        nombresArchivo.add(key);
+        this.ramosImportados.push({ nombre, semestre, aprobado: false, cursando: false });
+      });
 
       this.mostrarPreview = true;
       this.importando = false;

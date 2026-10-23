@@ -25,6 +25,14 @@ public class Evaluacion {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fecha;
 
+    @Column(length = 20)
+    private String tipoEvento = "evaluacion";
+
+    @Column(length = 5)
+    private String hora;
+
+    private Integer recordatorioMinutos = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ramo_id", nullable = false)
     private Ramo ramo;

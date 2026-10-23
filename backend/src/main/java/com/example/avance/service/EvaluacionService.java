@@ -28,6 +28,9 @@ public class EvaluacionService {
         dto.setFecha(ev.getFecha());
         dto.setRamoId(ev.getRamo().getId());
         dto.setRamoNombre(ev.getRamo().getNombre());
+        dto.setTipoEvento(ev.getTipoEvento() == null ? "evaluacion" : ev.getTipoEvento());
+        dto.setHora(ev.getHora());
+        dto.setRecordatorioMinutos(ev.getRecordatorioMinutos() == null ? 0 : ev.getRecordatorioMinutos());
         return dto;
     }
 
@@ -61,6 +64,9 @@ public class EvaluacionService {
         ev.setNota(dto.getNota());
         ev.setPonderacion(dto.getPonderacion());
         ev.setFecha(dto.getFecha());
+        ev.setTipoEvento(dto.getTipoEvento() == null ? "evaluacion" : dto.getTipoEvento());
+        ev.setHora(dto.getHora());
+        ev.setRecordatorioMinutos(dto.getRecordatorioMinutos() == null ? 0 : dto.getRecordatorioMinutos());
         ev.setRamo(ramo);
 
         Evaluacion guardada = evaluacionRepository.save(ev);
@@ -81,6 +87,9 @@ public class EvaluacionService {
         ev.setNota(dto.getNota());
         ev.setPonderacion(dto.getPonderacion());
         ev.setFecha(dto.getFecha());
+        ev.setTipoEvento(dto.getTipoEvento() == null ? "evaluacion" : dto.getTipoEvento());
+        ev.setHora(dto.getHora());
+        ev.setRecordatorioMinutos(dto.getRecordatorioMinutos() == null ? 0 : dto.getRecordatorioMinutos());
 
         Evaluacion guardada = evaluacionRepository.save(ev);
         recalcularPromedioRamo(ev.getRamo().getId());
