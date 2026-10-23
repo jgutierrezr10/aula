@@ -146,6 +146,12 @@ body {
   color: var(--text-main);
 }
 
+@media (max-width: 1024px) {
+  body:has(app-navbar) {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* ══════════════════════════════════════
    UTILITIES (Glassmorphism & Gradients)
    ══════════════════════════════════════ */

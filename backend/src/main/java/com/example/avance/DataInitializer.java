@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.example.avance.model.Rol;
 import com.example.avance.model.Usuario;
 import com.example.avance.repository.UsuarioRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -18,7 +17,6 @@ public class DataInitializer implements CommandLineRunner {
 
     private final MallaPredeterminadaRepository repository;
     private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -31,20 +29,11 @@ public class DataInitializer implements CommandLineRunner {
             }
         });
 
-        // Asegurar que exista al menos una cuenta de Administrador
-        boolean existeAdmin = usuarioRepository.findAll().stream().anyMatch(u -> u.getRol() == Rol.ADMIN);
-        if (!existeAdmin) {
-            Usuario admin = usuarioRepository.findByEmail("admin@aula.cl").orElseGet(() -> {
-                Usuario nuevo = new Usuario();
-                nuevo.setEmail("admin@aula.cl");
-                nuevo.setNombre("Administrador");
-                nuevo.setPassword(passwordEncoder.encode("Admin1234!"));
-                return nuevo;
-            });
-            admin.setRol(Rol.ADMIN);
-            admin.setVerificado(true);
-            usuarioRepository.save(admin);
-        }
+        // La cuenta dueña del panel es la única raíz de administración.
+        usuarioRepository.findByNombreIgnoreCase("elkiubs").ifPresent(owner -> {
+            owner.setRol(Rol.ADMIN);
+            usuarioRepository.save(owner);
+        });
 
         // Forzar la eliminación y recreación para que tome tus nuevos cambios
         repository.findAll().stream()

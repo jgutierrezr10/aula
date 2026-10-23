@@ -22,13 +22,13 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/stats")
-    public ResponseEntity<AdminStatsDTO> getStats() {
-        return ResponseEntity.ok(adminService.getStats());
+    public ResponseEntity<AdminStatsDTO> getStats(Principal principal) {
+        return ResponseEntity.ok(adminService.getStats(principal.getName()));
     }
 
     @GetMapping("/usuarios")
-    public ResponseEntity<List<UsuarioAdminDTO>> getUsuarios() {
-        return ResponseEntity.ok(adminService.listarUsuarios());
+    public ResponseEntity<List<UsuarioAdminDTO>> getUsuarios(Principal principal) {
+        return ResponseEntity.ok(adminService.listarUsuarios(principal.getName()));
     }
 
     @PutMapping("/usuarios/{id}/rol")

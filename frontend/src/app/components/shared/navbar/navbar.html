@@ -6,23 +6,23 @@
     </a>
     
     <div class="nav-links">
-      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
-        <i class="bi bi-house-door"></i> Dashboard
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" aria-label="Dashboard" title="Dashboard">
+        <i class="bi bi-house-door"></i><span>Dashboard</span>
       </a>
-      <a routerLink="/malla" routerLinkActive="active" class="nav-link">
-        <i class="bi bi-grid-3x3"></i> Malla
+      <a routerLink="/malla" routerLinkActive="active" class="nav-link" aria-label="Malla" title="Malla">
+        <i class="bi bi-grid-3x3"></i><span>Malla</span>
       </a>
-      <a routerLink="/horario" routerLinkActive="active" class="nav-link">
-        <i class="bi bi-calendar3"></i> Horario
+      <a routerLink="/horario" routerLinkActive="active" class="nav-link" aria-label="Horario" title="Horario">
+        <i class="bi bi-calendar3"></i><span>Horario</span>
       </a>
-      <a routerLink="/notas" routerLinkActive="active" class="nav-link">
-        <i class="bi bi-check2-square"></i> Notas
+      <a routerLink="/notas" routerLinkActive="active" class="nav-link" aria-label="Notas" title="Notas">
+        <i class="bi bi-check2-square"></i><span>Notas</span>
       </a>
-      <a routerLink="/calendario" routerLinkActive="active" class="nav-link">
-        <i class="bi bi-calendar-event"></i> Calendario
+      <a routerLink="/calendario" routerLinkActive="active" class="nav-link" aria-label="Calendario" title="Calendario">
+        <i class="bi bi-calendar-event"></i><span>Calendario</span>
       </a>
-      <a *ngIf="authService.isAdmin()" routerLink="/admin" routerLinkActive="active" class="nav-link nav-link-admin">
-        <i class="bi bi-shield-lock-fill"></i> Admin
+      <a *ngIf="authService.isOwnerAdmin()" routerLink="/admin" routerLinkActive="active" class="nav-link nav-link-admin" aria-label="Administración" title="Administración">
+        <i class="bi bi-shield-lock-fill"></i><span>Admin</span>
       </a>
     </div>
 
@@ -45,7 +45,7 @@
 
         <!-- Dropdown Menu -->
         <div class="profile-dropdown" *ngIf="mostrarDropdown">
-          <button class="dropdown-item" *ngIf="authService.isAdmin()" routerLink="/admin" (click)="mostrarDropdown = false">
+          <button class="dropdown-item" *ngIf="authService.isOwnerAdmin()" routerLink="/admin" (click)="mostrarDropdown = false">
             <i class="bi bi-shield-lock-fill text-purple"></i> Panel Administrador
           </button>
           <button class="dropdown-item" (click)="abrirMiCuenta()">

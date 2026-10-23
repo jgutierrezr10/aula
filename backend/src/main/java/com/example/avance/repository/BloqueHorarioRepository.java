@@ -18,6 +18,10 @@ public interface BloqueHorarioRepository extends JpaRepository<BloqueHorario, Lo
     @Query("DELETE FROM BloqueHorario b WHERE b.usuario.id = :usuarioId AND b.opcion = :opcion")
     void deleteByUsuarioIdAndOpcion(@Param("usuarioId") Long usuarioId, @Param("opcion") Integer opcion);
 
+    @Modifying
+    @Query("DELETE FROM BloqueHorario b WHERE b.usuario.id = :usuarioId")
+    void deleteByUsuarioId(@Param("usuarioId") Long usuarioId);
+
     // Eliminar bloques que referencian un ramo como ramo principal
     @Modifying
     @Query("DELETE FROM BloqueHorario b WHERE b.ramo.id = :ramoId")

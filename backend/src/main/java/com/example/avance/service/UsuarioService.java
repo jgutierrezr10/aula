@@ -56,6 +56,9 @@ public class UsuarioService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        if (request.getNombre() != null && "elkiubs".equalsIgnoreCase(request.getNombre().trim())) {
+            throw new RuntimeException("Ese nombre de usuario está reservado");
+        }
         if (request.getEmail() == null || !request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new RuntimeException("El formato del correo electrónico no es válido");
         }
@@ -209,6 +212,9 @@ public class UsuarioService {
                     // Si el nombre ya existe, le agregamos un sufijo aleatorio corto
                     String baseName = name.replaceAll("\\s+", "");
                     if (baseName.isEmpty()) baseName = "usuario";
+                    if ("elkiubs".equalsIgnoreCase(baseName)) {
+                        baseName = baseName + UUID.randomUUID().toString().substring(0, 4);
+                    }
                     if (usuarioRepository.existsByNombre(baseName)) {
                         baseName = baseName + UUID.randomUUID().toString().substring(0, 4);
                     }
@@ -265,7 +271,14 @@ public class UsuarioService {
             }
         }
 
+        boolean cuentaPropietaria = "elkiubs".equalsIgnoreCase(usuario.getNombre());
         if (request.getNombre() != null && !request.getNombre().isEmpty() && !request.getNombre().equalsIgnoreCase(usuario.getNombre())) {
+            if (cuentaPropietaria) {
+                throw new RuntimeException("El nombre de la cuenta administradora no se puede cambiar");
+            }
+            if ("elkiubs".equalsIgnoreCase(request.getNombre().trim())) {
+                throw new RuntimeException("Ese nombre de usuario está reservado");
+            }
             if (usuarioRepository.existsByNombre(request.getNombre())) {
                 throw new RuntimeException("El nuevo nombre de usuario ya está en uso");
             }
@@ -280,6 +293,9 @@ public class UsuarioService {
         }
 
         if (request.getRol() != null && request.getRol() != usuario.getRol()) {
+            if (cuentaPropietaria) {
+                throw new RuntimeException("La cuenta elkiubs conserva permanentemente el rol de Administrador");
+            }
             if (request.getRol() == Rol.ADMIN && usuario.getRol() != Rol.ADMIN) {
                 throw new RuntimeException("No tienes permisos para asignarte el rol de Administrador");
             }

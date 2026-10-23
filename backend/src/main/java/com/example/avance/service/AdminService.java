@@ -7,9 +7,14 @@ import com.example.avance.model.Usuario;
 import com.example.avance.repository.MallaPredeterminadaRepository;
 import com.example.avance.repository.RamoRepository;
 import com.example.avance.repository.UsuarioRepository;
+import com.example.avance.repository.EvaluacionRepository;
+import com.example.avance.repository.BloqueHorarioRepository;
+import com.example.avance.repository.VerificationTokenRepository;
+import com.example.avance.repository.PasswordResetTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,9 +26,14 @@ public class AdminService {
     private final UsuarioRepository usuarioRepository;
     private final RamoRepository ramoRepository;
     private final MallaPredeterminadaRepository mallaPredeterminadaRepository;
+    private final EvaluacionRepository evaluacionRepository;
+    private final BloqueHorarioRepository bloqueHorarioRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Transactional(readOnly = true)
-    public AdminStatsDTO getStats() {
+    public AdminStatsDTO getStats(String actorEmail) {
+        exigirCuentaPropietaria(actorEmail);
         List<Usuario> usuarios = usuarioRepository.findAll();
         long totalUsuarios = usuarios.size();
         long totalAdmins = usuarios.stream().filter(u -> u.getRol() == Rol.ADMIN).count();
@@ -45,7 +55,8 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<UsuarioAdminDTO> listarUsuarios() {
+    public List<UsuarioAdminDTO> listarUsuarios(String actorEmail) {
+        exigirCuentaPropietaria(actorEmail);
         return usuarioRepository.findAll().stream().map(u -> UsuarioAdminDTO.builder()
                 .id(u.getId())
                 .nombre(u.getNombre())
@@ -59,6 +70,7 @@ public class AdminService {
 
     @Transactional
     public UsuarioAdminDTO cambiarRol(Long usuarioId, Rol nuevoRol, String adminEmail) {
+        exigirCuentaPropietaria(adminEmail);
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
 
@@ -66,14 +78,8 @@ public class AdminService {
             throw new RuntimeException("El nuevo rol no puede ser nulo");
         }
 
-        // Si el admin se está cambiando el rol a sí mismo a algo que no sea ADMIN, verificar que no sea el único ADMIN
-        if (usuario.getEmail().equalsIgnoreCase(adminEmail) && nuevoRol != Rol.ADMIN) {
-            long adminsRestantes = usuarioRepository.findAll().stream()
-                    .filter(u -> u.getRol() == Rol.ADMIN && !u.getId().equals(usuarioId))
-                    .count();
-            if (adminsRestantes == 0) {
-                throw new RuntimeException("No puedes quitarte el rol de Administrador porque eres el único administrador en el sistema.");
-            }
+        if ("elkiubs".equalsIgnoreCase(usuario.getNombre()) && nuevoRol != Rol.ADMIN) {
+            throw new RuntimeException("La cuenta elkiubs conserva permanentemente el rol de Administrador.");
         }
 
         usuario.setRol(nuevoRol);
@@ -95,6 +101,7 @@ public class AdminService {
 
     @Transactional
     public void eliminarUsuario(Long usuarioId, String adminEmail) {
+        exigirCuentaPropietaria(adminEmail);
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
 
@@ -102,6 +109,28 @@ public class AdminService {
             throw new RuntimeException("No puedes eliminar tu propia cuenta de Administrador.");
         }
 
+        if ("elkiubs".equalsIgnoreCase(usuario.getNombre())) {
+            throw new RuntimeException("La cuenta administradora elkiubs no se puede eliminar.");
+        }
+
+        // Limpiar primero los datos que referencian a los ramos del usuario.
+        if (usuario.getRamos() != null) usuario.getRamos().forEach(ramo -> {
+            evaluacionRepository.deleteByRamoId(ramo.getId());
+            bloqueHorarioRepository.nullifyRamo2ByRamoId(ramo.getId());
+            bloqueHorarioRepository.deleteByRamoId(ramo.getId());
+        });
+        bloqueHorarioRepository.deleteByUsuarioId(usuario.getId());
+        verificationTokenRepository.deleteByUsuario(usuario);
+        passwordResetTokenRepository.deleteByUsuario(usuario);
+
         usuarioRepository.delete(usuario);
+    }
+
+    private void exigirCuentaPropietaria(String email) {
+        Usuario actor = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario administrador no encontrado"));
+        if (!"elkiubs".equalsIgnoreCase(actor.getNombre())) {
+            throw new AccessDeniedException("Solo la cuenta elkiubs puede gestionar usuarios y roles.");
+        }
     }
 }

@@ -95,6 +95,10 @@ export class AuthService {
     return this.getRol() === 'ADMIN';
   }
 
+  isOwnerAdmin(): boolean {
+    return this.isAdmin() && this.usuarioSubject.value?.nombre?.toLowerCase() === 'elkiubs';
+  }
+
   isEstudianteBasica(): boolean {
     return this.getRol() === 'ESTUDIANTE_BASICA';
   }
