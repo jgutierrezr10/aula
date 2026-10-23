@@ -521,6 +521,9 @@
     padding: 0.5rem 0.85rem;
     border-radius: 20px;
     gap: 0.5rem;
+    /* Evita crear un containing block que ancle la barra fija al navbar superior. */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
   .nav-brand {
     font-size: 1.1rem;
@@ -538,6 +541,7 @@
     position: fixed;
     z-index: 1000;
     left: 50%;
+    top: auto;
     bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
     width: min(720px, calc(100vw - 24px));
