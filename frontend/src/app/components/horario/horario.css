@@ -592,9 +592,7 @@
     padding: 0.5rem 0.2rem;
     white-space: nowrap;
   }
-  .mobile-scroll-hint {
-    display: flex;
-  }
+  .mobile-scroll-hint { display: none; }
   .horario-stats {
     justify-content: center;
   }
@@ -606,15 +604,20 @@
     border-radius: 12px;
     margin-bottom: 0.75rem;
   }
-  .mobile-day-view { display: block; padding: 0.75rem; background: var(--bg-card, #fff); border-radius: 12px; }
+  .mobile-day-view { display: none; padding: 0.75rem; background: var(--bg-card, #fff); border-radius: 12px; }
   .mobile-view-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin: 0.25rem 0 0.65rem; padding: 0.25rem; background: var(--bg-card, #fff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; }
   .mobile-view-toggle button { min-height: 42px; border: 0; border-radius: 9px; background: transparent; color: var(--text-muted, #64748b); font: inherit; font-size: 0.78rem; font-weight: 700; }
   .mobile-view-toggle button.active { background: #6c63ff; color: #fff; }
   .mobile-empty-day { padding: 0.85rem; text-align: center; color: var(--text-muted, #64748b); font-size: 0.82rem; }
   .horario-table { display: none; }
-  .horario-page.mobile-view-full .mobile-day-view { display: none; }
-  .horario-page.mobile-view-full .horario-table { display: table; min-width: 850px; }
-  .horario-page.mobile-view-full .grid-container { overflow-x: auto; }
+  .horario-page.mobile-view-full .horario-table {
+    display: table;
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+  .horario-page.mobile-view-compact .mobile-day-view { display: block; }
+  .horario-page .grid-container { overflow: hidden; }
   .mobile-day-view > label { display: block; font-weight: 700; margin-bottom: 0.35rem; }
   .mobile-day-select, .mobile-slot select, .mobile-slot input { width: 100%; min-height: 44px; padding: 0.55rem; border: 1px solid var(--border-color, #cbd5e1); border-radius: 8px; background: var(--bg-card, #fff); color: var(--text-main, #1e293b); }
   .mobile-time-card { margin-top: 0.65rem; padding: 0.75rem; border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; }
@@ -626,36 +629,49 @@
     font-size: 0.75rem;
   }
   .horario-table td {
-    min-width: 130px;
-    height: auto;
-    min-height: 65px;
-    padding: 2px;
+    min-width: 0 !important;
+    height: 54px;
+    padding: 1px;
+  }
+  .horario-table th:not(.time-header) {
+    min-width: 0 !important;
+    width: auto;
+    padding: 1px 0;
+    font-size: 0.58rem;
+    letter-spacing: 0;
   }
   .time-header, .time-cell {
-    position: sticky;
-    left: 0;
-    z-index: 25;
+    position: static;
+    min-width: 52px !important;
+    width: 52px !important;
+    max-width: 52px;
+    padding: 1px;
+    font-size: 0.58rem;
+    line-height: 1.1;
     background: var(--bg-card, #ffffff) !important;
-    min-width: 80px !important;
-    width: 80px !important;
-    font-size: 0.75rem;
-    box-shadow: 3px 0 8px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
   }
   [data-theme="dark"] .time-header,
   [data-theme="dark"] .time-cell {
     background: #1e293b !important;
   }
   .ramo-slot {
-    padding: 0.2rem;
+    min-width: 0;
+    padding: 0.05rem;
     border-radius: 5px;
   }
   .ramo-select-visible {
-    font-size: 0.72rem;
-    padding: 0.15rem 0.05rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: clamp(0.32rem, 1.75vw, 0.55rem);
+    padding: 0.05rem 0;
   }
   .detalle-input {
-    font-size: 0.68rem;
-    padding: 0.15rem 0.05rem;
+    min-width: 0;
+    font-size: clamp(0.3rem, 1.5vw, 0.48rem);
+    padding: 0.05rem 0;
   }
   .slot-2 .ramo-select-visible.empty-select {
     font-size: 0.65rem;

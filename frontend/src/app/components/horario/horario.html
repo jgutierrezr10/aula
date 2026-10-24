@@ -69,7 +69,7 @@
         <thead>
           <tr>
             <th class="time-header"><i class="bi bi-clock-history"></i> Hora</th>
-            <th *ngFor="let dia of dias">{{ dia }}</th>
+            <th *ngFor="let dia of dias" [attr.aria-label]="dia" [title]="dia">{{ dia.substring(0, 3) }}</th>
           </tr>
         </thead>
         <tbody>
@@ -167,8 +167,9 @@
           {{ ramo.nombre }}
         </div>
       </div>
+    </div>
 
-      <section class="mobile-day-view" *ngIf="!cargandoHorario && !errorHorarioCarga" aria-label="Vista diaria del horario">
+    <section class="mobile-day-view" *ngIf="!cargandoHorario && !errorHorarioCarga" aria-label="Vista diaria del horario">
         <label for="mobile-day-select">Ver día</label>
         <select id="mobile-day-select" [(ngModel)]="diaMovil" class="mobile-day-select">
           <option *ngFor="let dia of dias" [value]="dia">{{ dia }}</option>
@@ -196,6 +197,5 @@
           No hay clases este día. Cambia a otro día o agrega un bloque.
         </p>
       </section>
-    </div>
   </div>
 </div>
