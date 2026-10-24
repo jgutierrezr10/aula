@@ -1,6 +1,6 @@
 .admin-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: transparent;
   display: flex;
   flex-direction: column;
 }
