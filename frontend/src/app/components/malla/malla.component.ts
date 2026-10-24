@@ -86,21 +86,6 @@ export class MallaComponent implements OnInit {
     this.vistaService.setModo(compacta ? 'compacto' : 'completo');
   }
 
-  get escalaMallaMovil(): number {
-    if (typeof window === 'undefined' || window.innerWidth > 768 || this.vistaMallaCompacta || this.semestres.length === 0) {
-      return 1;
-    }
-
-    const columnas = this.semestres.length + 1; // incluye la columna para agregar un semestre
-    const anchoNatural = columnas * 154;
-    return Math.min(1, Math.max(0.12, (window.innerWidth - 28) / anchoNatural));
-  }
-
-  @HostListener('window:resize')
-  actualizarEscalaMalla() {
-    this.cdr.detectChanges();
-  }
-
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['tutorial'] === 'true') {

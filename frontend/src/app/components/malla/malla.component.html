@@ -162,16 +162,8 @@
   </div>
 
   <!-- Malla: Diagrama de flujo por semestres -->
-  <div class="mobile-view-toggle malla-view-toggle" *ngIf="ramos.length > 0" role="group" aria-label="Vista de la malla">
-    <button type="button" [class.active]="!vistaMallaCompacta" [attr.aria-pressed]="!vistaMallaCompacta" (click)="vistaMallaCompacta = false">
-      <i class="bi bi-card-list"></i> Completa
-    </button>
-    <button type="button" [class.active]="vistaMallaCompacta" [attr.aria-pressed]="vistaMallaCompacta" (click)="vistaMallaCompacta = true">
-      <i class="bi bi-grid"></i> Compacta
-    </button>
-  </div>
   <div class="malla-scroll" *ngIf="ramos.length > 0">
-    <div class="malla-grid" [class.malla-grid-compact]="vistaMallaCompacta" [style.zoom]="escalaMallaMovil">
+    <div class="malla-grid" [class.malla-grid-compact]="vistaMallaCompacta">
 
       <div class="semestre-col" *ngFor="let sem of semestres">
 
