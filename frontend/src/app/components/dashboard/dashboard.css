@@ -563,7 +563,7 @@
   font-size: 0.85rem;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 900px) {
   .section-top { grid-template-columns: 1fr; }
   .section-modules { grid-template-columns: repeat(2, 1fr); }
   .section-bottom { grid-template-columns: 1fr; }
@@ -575,6 +575,7 @@
     padding: 0.75rem 0.75rem 2rem 0.75rem;
   }
   .section-modules { grid-template-columns: 1fr; gap: 1rem; }
+  .section-top { gap: 0.75rem; }
   .welcome-card { 
     padding: 1.5rem 1.25rem; 
     flex-direction: column; 
@@ -592,15 +593,17 @@
     gap: 0.5rem;
   }
   .stat-badge { 
-    width: 100%; 
+    width: auto;
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 130px;
   }
   .next-class-card {
-    padding: 1.5rem 1.25rem;
-    border-radius: 20px;
+    padding: 1rem;
+    border-radius: 16px;
   }
   .dash-module-card {
-    padding: 1.25rem 1rem;
-    border-radius: 18px;
+    padding: 1rem 0.85rem;
+    border-radius: 16px;
   }
   .events-card {
     padding: 1.5rem 1.15rem;
@@ -640,3 +643,5 @@
 .dashboard-load-errors p { margin: 0; }
 .dashboard-load-errors button { border: 0; background: #7f1d1d; color: #fff; border-radius: 8px; padding: 0.5rem 0.85rem; font-weight: 700; cursor: pointer; }
 .average-help { display: block; margin-top: 0.5rem; color: #475569; line-height: 1.45; }
+.average-empty { margin: 0.35rem 0 0; max-width: 24rem; color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; }
+.stat-empty { color: var(--text-muted); font-size: 0.76rem; line-height: 1.2; }

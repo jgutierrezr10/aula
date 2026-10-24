@@ -62,6 +62,7 @@ export class MallaComponent implements OnInit {
   tutorialActivo = false;
   tutorialPaso = 1;
   tutorialCargando = false;
+  vistaMallaCompacta = true;
 
   // Dropdowns (Agregar / Importar)
   dropdownActivo: string = '';

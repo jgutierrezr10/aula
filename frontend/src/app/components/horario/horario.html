@@ -1,4 +1,4 @@
-<div class="horario-page">
+<div class="horario-page" [class.mobile-view-compact]="vistaMovilCompacta" [class.mobile-view-full]="!vistaMovilCompacta">
   <app-navbar></app-navbar>
   <div class="top-bar">
     <a routerLink="/dashboard" class="btn-back">
@@ -37,6 +37,15 @@
         <i class="bi" [ngClass]="ramosEnHorario === ramosCursando.length ? 'bi-check-circle-fill' : 'bi-pie-chart-fill'"></i>
         Ramos asignados: <strong>{{ ramosEnHorario }} / {{ ramosCursando.length }}</strong>
       </div>
+    </div>
+
+    <div class="mobile-view-toggle" role="group" aria-label="Vista del horario">
+      <button type="button" [class.active]="!vistaMovilCompacta" [attr.aria-pressed]="!vistaMovilCompacta" (click)="vistaMovilCompacta = false">
+        <i class="bi bi-calendar-week"></i> Semana completa
+      </button>
+      <button type="button" [class.active]="vistaMovilCompacta" [attr.aria-pressed]="vistaMovilCompacta" (click)="vistaMovilCompacta = true">
+        <i class="bi bi-calendar-day"></i> Día compacto
+      </button>
     </div>
 
     <div class="mobile-scroll-hint desktop-table-hint" *ngIf="!cargandoHorario && !errorHorarioCarga">
@@ -164,7 +173,7 @@
         <select id="mobile-day-select" [(ngModel)]="diaMovil" class="mobile-day-select">
           <option *ngFor="let dia of dias" [value]="dia">{{ dia }}</option>
         </select>
-        <article class="mobile-time-card" *ngFor="let bloqueKey of bloquesKeys">
+        <article class="mobile-time-card" *ngFor="let bloqueKey of bloquesKeys" [hidden]="vistaMovilCompacta && !getBloque(diaMovil, bloqueKey).ramoId && !getBloque(diaMovil, bloqueKey).ramo2Id">
           <h3>{{ etiquetasHora[bloqueKey] }}</h3>
           <div class="mobile-slot">
             <label [for]="'mobile-'+diaMovil+'-'+bloqueKey">Ramo</label>
@@ -183,6 +192,9 @@
             <input *ngIf="getBloque(diaMovil, bloqueKey).ramo2Id" type="text" [(ngModel)]="getBloque(diaMovil, bloqueKey).detalle2" (blur)="actualizarDetalle(getBloque(diaMovil, bloqueKey))" placeholder="Sala o sección (opcional)" [attr.aria-label]="'Sala o sección de '+getRamoNombre(getBloque(diaMovil, bloqueKey).ramo2Id ?? null)" />
           </div>
         </article>
+        <p class="mobile-empty-day" *ngIf="vistaMovilCompacta && !tieneClasesEnDia(diaMovil)">
+          No hay clases este día. Cambia a otro día o agrega un bloque.
+        </p>
       </section>
     </div>
   </div>

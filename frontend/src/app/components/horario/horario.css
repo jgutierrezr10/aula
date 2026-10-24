@@ -6,6 +6,7 @@
 }
 
 .mobile-day-view { display: none; }
+.mobile-view-toggle { display: none; }
 .load-error-banner { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 .load-error-banner button { margin-left: 0.5rem; padding: 0.4rem 0.65rem; background: #7f1d1d; border: 0; border-radius: 6px; color: #fff; font-weight: 700; cursor: pointer; }
 
@@ -606,7 +607,14 @@
     margin-bottom: 0.75rem;
   }
   .mobile-day-view { display: block; padding: 0.75rem; background: var(--bg-card, #fff); border-radius: 12px; }
+  .mobile-view-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin: 0.25rem 0 0.65rem; padding: 0.25rem; background: var(--bg-card, #fff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; }
+  .mobile-view-toggle button { min-height: 42px; border: 0; border-radius: 9px; background: transparent; color: var(--text-muted, #64748b); font: inherit; font-size: 0.78rem; font-weight: 700; }
+  .mobile-view-toggle button.active { background: #6c63ff; color: #fff; }
+  .mobile-empty-day { padding: 0.85rem; text-align: center; color: var(--text-muted, #64748b); font-size: 0.82rem; }
   .horario-table { display: none; }
+  .horario-page.mobile-view-full .mobile-day-view { display: none; }
+  .horario-page.mobile-view-full .horario-table { display: table; min-width: 850px; }
+  .horario-page.mobile-view-full .grid-container { overflow-x: auto; }
   .mobile-day-view > label { display: block; font-weight: 700; margin-bottom: 0.35rem; }
   .mobile-day-select, .mobile-slot select, .mobile-slot input { width: 100%; min-height: 44px; padding: 0.55rem; border: 1px solid var(--border-color, #cbd5e1); border-radius: 8px; background: var(--bg-card, #fff); color: var(--text-main, #1e293b); }
   .mobile-time-card { margin-top: 0.65rem; padding: 0.75rem; border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; }

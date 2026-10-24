@@ -40,7 +40,8 @@
             <div class="stat-badge">
               <div class="stat-icon icon-yellow"><i class="bi bi-star"></i></div>
               <div class="stat-info">
-                <span class="stat-value">{{ promedioGeneralConEvaluaciones ? estadisticas.promedioGeneral : '--' }}</span>
+                <span class="stat-value" *ngIf="promedioGeneralConEvaluaciones">{{ estadisticas.promedioGeneral }}</span>
+                <span class="stat-empty" *ngIf="!promedioGeneralConEvaluaciones">Sin notas aún</span>
                 <span class="stat-label">Promedio<br>semestre</span>
               </div>
             </div>
@@ -127,10 +128,11 @@
           <p>Registra tus calificaciones, calcula promedios y analiza tu rendimiento.</p>
           <div class="module-widget">
             <span class="widget-label">Promedio actual</span>
-            <div class="grade-display">
-              <span class="grade-highlight text-yellow">{{ promedioActual.split(' / ')[0] }}</span> 
+            <div class="grade-display" *ngIf="promedioGeneralConEvaluaciones">
+              <span class="grade-highlight text-yellow">{{ promedioActual.split(' / ')[0] }}</span>
               <span class="grade-total">/ {{ promedioActual.split(' / ')[1] }}</span>
             </div>
+            <p class="average-empty" *ngIf="!promedioGeneralConEvaluaciones">Agrega tus primeras notas para calcular tu promedio.</p>
           </div>
           
             <div class="top-ramos" *ngIf="mejoresRamos.length > 0">

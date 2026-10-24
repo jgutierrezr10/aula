@@ -65,6 +65,14 @@ export class Horario implements OnInit {
 
   dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   diaMovil = 'Lunes';
+  vistaMovilCompacta = true;
+
+  tieneClasesEnDia(dia: string): boolean {
+    return this.bloquesKeys.some(key => {
+      const bloque = this.getBloque(dia, key);
+      return !!(bloque.ramoId || bloque.ramo2Id);
+    });
+  }
 
   // Nombres internos (llaves de base de datos)
   bloquesKeys = [
