@@ -1881,27 +1881,7 @@
   .stat-item { min-width: 0; }
   .leyenda { gap: 0.6rem; padding: 0.75rem; }
   .leyenda-tip { text-align: center; }
-  .malla-scroll { overflow-x: hidden; overflow-y: visible; padding: 0.75rem 0.75rem 16rem; }
-  .malla-view-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin: 0 0.75rem; padding: 0.25rem; background: var(--bg-card, #fff); border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; }
-  .malla-view-toggle button { min-height: 42px; border: 0; border-radius: 9px; background: transparent; color: var(--text-muted, #64748b); font: inherit; font-size: 0.8rem; font-weight: 700; }
-  .malla-view-toggle button.active { background: #6c63ff; color: #fff; }
-  .malla-grid { width: 100%; min-width: 0; margin: 0 auto; flex-direction: column; align-items: stretch; gap: 0.75rem; }
-  .semestre-col { width: 100%; align-items: stretch; }
-  .semestre-header { width: 100%; min-height: 48px; margin-bottom: 0.45rem; }
-  .ramos-lista { align-items: stretch; padding: 0; gap: 0.45rem; }
-  .ramo-card { width: 100%; min-height: 52px; flex-direction: row; justify-content: flex-start; align-items: center; gap: 0.65rem; padding: 0.55rem 0.7rem; text-align: left; }
-  .ramo-top { width: auto; flex: 0 0 auto; align-items: center; margin: 0; gap: 0.45rem; }
-  .estado-icon { font-size: 1rem; }
-  .ramo-nombre { flex: 1; min-width: 0; font-size: 0.88rem; text-align: left; }
-  .ramo-btns { opacity: 1; gap: 0.25rem; }
-  .ramo-btns button { min-width: 36px; min-height: 36px; font-size: 0.9rem; }
-  .ramo-nota { margin-left: auto; white-space: nowrap; }
-  .malla-grid-compact .ramos-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
-  .malla-grid-compact .ramo-card { min-width: 0; min-height: 48px; gap: 0.35rem; padding: 0.4rem 0.45rem; }
-  .malla-grid-compact .ramo-top { flex: 0 0 auto; }
-  .malla-grid-compact .ramo-btns { display: none; }
-  .malla-grid-compact .ramo-nombre { font-size: 0.75rem; line-height: 1.2; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
-  .malla-grid-compact .ramo-nota { display: none; }
+  .malla-scroll { padding-bottom: 16rem; }
   .sem-footer { padding: 0.55rem; font-size: 0.75rem; }
   .nuevo-sem { align-items: stretch; min-height: auto; }
   .btn-nuevo-sem { width: 100%; min-height: 48px; }
