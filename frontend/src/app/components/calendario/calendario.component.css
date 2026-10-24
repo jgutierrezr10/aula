@@ -637,6 +637,25 @@
   .modal-event-item { gap: 0.5rem; }
   .agenda-upcoming li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
 }
+
+@media (max-width: 600px) {
+  .cal-container { padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)); }
+  .page-header { margin-bottom: 0.75rem; }
+  .header-left h1 { font-size: 1.4rem; }
+  .header-left p { font-size: 0.78rem; line-height: 1.4; }
+  .calendar-filters { width: 100%; max-width: none; margin-bottom: 0.65rem; }
+  .calendar-filters select { width: 100%; min-height: 42px; }
+  .reminder-permission { margin-bottom: 0.7rem; font-size: 0.76rem; }
+  .reminder-permission button { width: 100%; min-height: 42px; }
+  .calendar-card { box-shadow: 0 5px 20px rgba(15, 23, 42, 0.06); }
+  .day-cell { min-height: 58px; }
+  .event-pills { flex-direction: row; align-items: center; gap: 3px; }
+  .event-pill { width: 8px; height: 5px; flex: 0 0 8px; padding: 0; border-radius: 999px; font-size: 0; }
+  .more-pill { width: auto; height: auto; flex: 0 0 auto; padding: 0 2px; background: transparent; font-size: 0.48rem; }
+  .agenda-upcoming { margin-top: 0.8rem; }
+  .agenda-upcoming h2 { margin-top: 0.1rem; font-size: 1rem; }
+  .agenda-upcoming li { padding: 0.65rem 0; font-size: 0.8rem; }
+}
 .btn-add-course {
   margin-top: 0.5rem;
   border: 0;

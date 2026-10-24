@@ -546,7 +546,7 @@
 
 @media (max-width: 768px) {
   .horario-container { 
-    padding: 0.5rem 0.5rem 2rem 0.5rem; 
+    padding: 0.5rem 0.5rem calc(6rem + env(safe-area-inset-bottom, 0px));
   }
   .top-bar { 
     flex-direction: column; 
@@ -692,6 +692,13 @@
   .skeleton-cell::after {
     height: 60px;
   }
+}
+
+@media (max-width: 380px) {
+  .horario-container { padding-right: 0.35rem; padding-left: 0.35rem; }
+  .time-header, .time-cell { min-width: 46px !important; width: 46px !important; max-width: 46px; }
+  .horario-table td { height: 50px; }
+  .ramo-select-visible { font-size: 0.32rem; }
 }
 .btn-add-course {
   border: 0;
