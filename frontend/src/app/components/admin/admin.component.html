@@ -162,7 +162,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let u of usuariosFiltrados" class="user-row">
-              <td data-label="Usuario">
+              <td>
                 <div class="user-info-cell">
                   <div class="user-avatar" [ngClass]="authService.getRolBadgeClass(u.rol)">
                     {{ u.nombre ? u.nombre.charAt(0).toUpperCase() : 'U' }}
@@ -174,27 +174,27 @@
                 </div>
               </td>
 
-              <td data-label="Rol actual">
+              <td>
                 <span class="role-badge" [ngClass]="authService.getRolBadgeClass(u.rol)">
                   <i class="bi" [ngClass]="authService.getRolIcon(u.rol)"></i>
                   {{ authService.getRolLabel(u.rol) }}
                 </span>
               </td>
 
-              <td data-label="Estado">
+              <td>
                 <span class="status-badge" [class.verified]="u.verificado" [class.pending]="!u.verificado">
                   <i class="bi" [ngClass]="u.verificado ? 'bi-check-circle-fill' : 'bi-clock-fill'"></i>
                   {{ u.verificado ? 'Verificado' : 'Pendiente' }}
                 </span>
               </td>
 
-              <td data-label="Ramos">
+              <td>
                 <span class="ramos-pill">
                   <i class="bi bi-book"></i> {{ u.totalRamos }} ramo(s)
                 </span>
               </td>
 
-              <td data-label="Asignar rol">
+              <td>
                 <div class="role-selector-wrapper">
                   <select
                     class="role-select"
@@ -209,7 +209,7 @@
                 </div>
               </td>
 
-              <td class="text-right" data-label="Acciones">
+              <td class="text-right">
                 <button
                   class="btn-delete-user"
                   (click)="eliminarUsuario(u)"
