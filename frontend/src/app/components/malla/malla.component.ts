@@ -13,6 +13,7 @@ import { Navbar } from '../shared/navbar/navbar';
 import { EvaluacionService } from '../../services/evaluacion.service';
 import { HorarioService, BloqueHorarioDTO } from '../../services/horario.service';
 import { Evaluacion } from '../../models/evaluacion.model';
+import { VistaService } from '../../services/vista.service';
 
 @Component({
   selector: 'app-malla',
@@ -62,7 +63,6 @@ export class MallaComponent implements OnInit {
   tutorialActivo = false;
   tutorialPaso = 1;
   tutorialCargando = false;
-  vistaMallaCompacta = true;
 
   // Dropdowns (Agregar / Importar)
   dropdownActivo: string = '';
@@ -74,8 +74,17 @@ export class MallaComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private evaluacionService: EvaluacionService,
-    private horarioService: HorarioService
+    private horarioService: HorarioService,
+    public vistaService: VistaService
   ) {}
+
+  get vistaMallaCompacta(): boolean {
+    return this.vistaService.esCompacto;
+  }
+
+  set vistaMallaCompacta(compacta: boolean) {
+    this.vistaService.setModo(compacta ? 'compacto' : 'completo');
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {

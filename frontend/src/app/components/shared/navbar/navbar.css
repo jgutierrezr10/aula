@@ -245,6 +245,14 @@
   margin: 0.5rem 0;
 }
 
+.density-options { padding: 0.35rem; }
+.density-options > span { display: block; padding: 0.35rem 0.6rem 0.5rem; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; }
+.density-options button { display: flex; align-items: center; gap: 0.55rem; width: 100%; padding: 0.65rem 0.7rem; border: 0; border-radius: 8px; background: transparent; color: var(--text-main); text-align: left; font: inherit; font-size: 0.86rem; cursor: pointer; }
+.density-options button i { width: 1.1rem; color: var(--text-muted); }
+.density-options button:hover, .density-options button.active { background: rgba(108, 99, 255, 0.1); color: var(--primary-color); }
+.density-options button.active { font-weight: 700; }
+.density-options button.active i { color: var(--primary-color); }
+
 /* Modal styles (Mantenemos la estructura pero mejoramos UI) */
 .overlay {
   position: fixed;

@@ -55,6 +55,16 @@
             <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión para guardar
           </a>
           <div class="dropdown-divider"></div>
+          <div class="density-options" role="group" aria-label="Modo de visualización">
+            <span>Vista en todas las secciones</span>
+            <button type="button" [class.active]="vistaService.modoActual === 'completo'" [attr.aria-pressed]="vistaService.modoActual === 'completo'" (click)="vistaService.setModo('completo')">
+              <i class="bi bi-arrows-fullscreen"></i> Modo completo
+            </button>
+            <button type="button" [class.active]="vistaService.modoActual === 'compacto'" [attr.aria-pressed]="vistaService.modoActual === 'compacto'" (click)="vistaService.setModo('compacto')">
+              <i class="bi bi-arrows-angle-contract"></i> Modo compacto
+            </button>
+          </div>
+          <div class="dropdown-divider"></div>
           <button class="dropdown-item text-danger" (click)="logout()">
             <i class="bi bi-box-arrow-right"></i> {{ authService.isGuest() ? 'Salir del modo invitado' : 'Cerrar Sesión' }}
           </button>

@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../../services/auth.service';
 import { UpdateUserRequest, Rol } from '../../../models/usuario.model';
+import { VistaService } from '../../../services/vista.service';
 
 @Component({
   selector: 'app-navbar',
@@ -29,7 +30,7 @@ export class Navbar implements OnInit {
   successMsg: string = '';
   guardando: boolean = false;
 
-  constructor(public authService: AuthService, private router: Router, private eRef: ElementRef) {}
+  constructor(public authService: AuthService, public vistaService: VistaService, private router: Router, private eRef: ElementRef) {}
 
   @HostListener('document:click', ['$event'])
   clickout(event: Event) {

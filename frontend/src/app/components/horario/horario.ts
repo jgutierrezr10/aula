@@ -10,6 +10,7 @@ import { Ramo } from '../../models/ramo.model';
 import { Navbar } from '../shared/navbar/navbar';
 import { AuthService } from '../../services/auth.service';
 import { GuestDataService } from '../../services/guest-data.service';
+import { VistaService } from '../../services/vista.service';
 
 @Component({
   selector: 'app-horario',
@@ -65,7 +66,6 @@ export class Horario implements OnInit {
 
   dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   diaMovil = 'Lunes';
-  vistaMovilCompacta = true;
 
   tieneClasesEnDia(dia: string): boolean {
     return this.bloquesKeys.some(key => {
@@ -102,8 +102,17 @@ export class Horario implements OnInit {
     private horarioService: HorarioService,
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
-    private guestData: GuestDataService
+    private guestData: GuestDataService,
+    public vistaService: VistaService
   ) { }
+
+  get vistaMovilCompacta(): boolean {
+    return this.vistaService.esCompacto;
+  }
+
+  set vistaMovilCompacta(compacta: boolean) {
+    this.vistaService.setModo(compacta ? 'compacto' : 'completo');
+  }
 
   ngOnInit() {
     this.cargarEtiquetasGuardadas();
